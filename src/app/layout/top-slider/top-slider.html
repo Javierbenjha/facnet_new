@@ -1,0 +1,27 @@
+<div class="flex items-center h-full animate-marquee min-w-max">
+  @for (set of [0, 1]; track set) {
+    <div class="flex items-center gap-x-12 px-8">
+      @for (item of items; track item.name) {
+        <div class="flex items-center gap-x-3">
+          <span class="px-1.5 py-0.5 text-[10px] font-semibold text-cyan-700 bg-white/90 rounded whitespace-nowrap">
+            Beta 0.1
+          </span>
+          <div class="flex items-center gap-2 text-[12px] text-white font-medium whitespace-nowrap">
+            @if (item.logo) {
+              <img [src]="item.logo" alt="Logo" class="h-4 w-auto drop-shadow-sm" />
+            } @else {
+              <span>·</span>
+            }
+            <span>{{ item.name }}</span>
+          </div>
+          @if (item.url) {
+            <a [href]="item.url"
+               class="bg-white/20 hover:bg-white/30 transition-colors px-2 py-0.5 rounded-full text-[11px] text-white whitespace-nowrap">
+              Ver más
+            </a>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

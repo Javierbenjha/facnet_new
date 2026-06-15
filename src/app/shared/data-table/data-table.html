@@ -1,0 +1,45 @@
+<p-table [value]="data()"
+         [loading]="loading()"
+         [dataKey]="trackByKey()"
+         styleClass="p-datatable-sm">
+
+  <ng-template pTemplate="header">
+    <tr>
+      @for (col of columns(); track col.key) {
+        <th [class]="col.class ?? ''">{{ col.label }}</th>
+      }
+      @if (actionTemplate()) {
+        <th class="w-24 text-right">Acciones</th>
+      }
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-row>
+    <tr>
+      @for (col of columns(); track col.key) {
+        <td [class]="col.class ?? ''">
+          @if (col.cellTemplate) {
+            <ng-container *ngTemplateOutlet="col.cellTemplate; context: { $implicit: row }"></ng-container>
+          } @else {
+            {{ row[col.key] ?? '—' }}
+          }
+        </td>
+      }
+      @if (actionTemplate()) {
+        <td class="text-right">
+          <ng-container *ngTemplateOutlet="actionTemplate()!; context: { $implicit: row }"></ng-container>
+        </td>
+      }
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td [attr.colspan]="columns().length + (actionTemplate() ? 1 : 0)"
+          class="text-center py-10 text-stone-400">
+        {{ emptyMessage() }}
+      </td>
+    </tr>
+  </ng-template>
+
+</p-table>

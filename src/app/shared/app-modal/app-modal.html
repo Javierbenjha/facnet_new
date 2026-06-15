@@ -1,0 +1,18 @@
+<p-dialog
+  [(visible)]="visible"
+  [header]="title()"
+  [modal]="true"
+  [closable]="closable()"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: width() }"
+  styleClass="!rounded-2xl"
+  (onHide)="onHide()">
+
+  <ng-content />
+
+  <ng-template pTemplate="footer">
+    <ng-content select="[modal-footer]" />
+  </ng-template>
+
+</p-dialog>

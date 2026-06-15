@@ -1,0 +1,20 @@
+/* Importamos theme y utilities SIN preflight para no pisar los estilos de PrimeNG */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@keyframes marquee {
+  from { transform: translateX(0%); }
+  to   { transform: translateX(-50%); }
+}
+
+@theme {
+  --animate-marquee: marquee 30s linear infinite;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Reset mínimo que sí necesitamos */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+}

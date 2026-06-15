@@ -1,0 +1,60 @@
+<!-- Brand -->
+<div class="flex items-center justify-center px-4 py-3 shrink-0">
+  @if (layout.isSidebarCollapsed()) {
+    <img src="assets/images/logoHS_1.png" alt="Logo" class="h-8 w-auto object-contain" />
+  } @else {
+    <img src="assets/images/logo.png" alt="HardSystem" class="h-9 w-auto object-contain" />
+  }
+</div>
+
+<!-- Nav sections -->
+<nav class="flex-1 overflow-y-auto px-2 pb-2">
+  @for (section of sections; track section.label) {
+
+    @if (!layout.isSidebarCollapsed()) {
+      <div class="px-2 pt-3 pb-1 text-[10.5px] font-semibold text-stone-400 uppercase tracking-widest">
+        {{ section.label }}
+      </div>
+    } @else {
+      <div class="my-2 border-t border-stone-100"></div>
+    }
+
+    @for (item of section.items; track item.route) {
+      <a [routerLink]="item.route"
+         routerLinkActive="active-link"
+         [routerLinkActiveOptions]="{ exact: false }"
+         [pTooltip]="layout.isSidebarCollapsed() ? item.label : ''"
+         tooltipPosition="right"
+         class="nav-item flex items-center gap-2.5 w-full px-2.5 py-1.5 rounded-lg text-[13.5px] font-medium text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100 transition-colors duration-100 no-underline"
+         [class.justify-center]="layout.isSidebarCollapsed()">
+        <i [class]="'pi ' + item.icon + ' nav-icon shrink-0 text-[15px]'"></i>
+        @if (!layout.isSidebarCollapsed()) {
+          <span class="flex-1 truncate">{{ item.label }}</span>
+          @if (item.badge) {
+            <span class="nav-badge ml-auto text-[10.5px] font-semibold px-1.5 py-0.5 rounded-full bg-stone-200 text-stone-500">
+              {{ item.badge }}
+            </span>
+          }
+        }
+      </a>
+    }
+  }
+</nav>
+
+<!-- User footer -->
+<div class="shrink-0 border-t border-stone-200 p-3">
+  <div class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer transition-colors"
+       [class.justify-center]="layout.isSidebarCollapsed()">
+    <div class="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-white text-[11px] font-semibold"
+         style="background: linear-gradient(135deg, oklch(0.65 0.15 40), oklch(0.55 0.18 300))">
+      MR
+    </div>
+    @if (!layout.isSidebarCollapsed()) {
+      <div class="flex-1 min-w-0">
+        <div class="text-[13px] font-medium text-stone-900 dark:text-stone-100 truncate">Mauricio Rivas</div>
+        <div class="text-[11px] text-stone-400 dark:text-stone-500 truncate">Admin · Plan Growth</div>
+      </div>
+      <i class="pi pi-chevron-right text-stone-400 text-[12px]"></i>
+    }
+  </div>
+</div>

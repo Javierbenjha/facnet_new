@@ -4,7 +4,8 @@ import { RouterOutlet } from '@angular/router';
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
+  imports: [RouterOutlet]
 })
 export class App {
   protected readonly title = signal('facnet_new');

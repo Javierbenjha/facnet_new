@@ -1,0 +1,6 @@
+<p-paginator
+  [first]="first()"
+  [rows]="pageSize()"
+  [totalRecords]="totalItems()"
+  [rowsPerPageOptions]="pageSizeOptions()"
+  (onPageChange)="onPageChange($event)" />

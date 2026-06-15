@@ -1,0 +1,13 @@
+<div class="h-screen flex flex-col overflow-hidden bg-gray-50 dark:bg-gray-950">
+  <!-- Header at the top -->
+  <app-header (toggleSidebar)="toggleSidebar()"></app-header>
+
+  <!-- Main body combining Sidebar and Router Outlet -->
+  <div class="flex flex-row flex-grow overflow-hidden">
+    <app-sidebar></app-sidebar>
+
+    <main class="flex-grow p-6 overflow-y-auto">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
