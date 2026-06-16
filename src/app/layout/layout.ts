@@ -1,7 +1,7 @@
-import { Injectable, signal } from '@angular/core';
+import { Service, signal } from '@angular/core';
 
-@Injectable({ providedIn: 'root' })
-export class LayoutService {
+@Service()
+export class Layout {
   readonly isSidebarCollapsed = signal(false);
   readonly isDark = signal(false);
 

@@ -3,7 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { Header } from '../header/header';
 import { Sidebar } from '../sidebar/sidebar';
 import { TopSlider } from '../top-slider/top-slider';
-import { LayoutService } from '../layout.service';
+import { Layout } from '../layout';
 
 @Component({
   selector: 'app-main-layout',
@@ -12,7 +12,7 @@ import { LayoutService } from '../layout.service';
   imports: [RouterOutlet, Header, Sidebar, TopSlider]
 })
 export class MainLayout {
-  protected readonly layout = inject(LayoutService);
+  protected readonly layout = inject(Layout);
 
   protected toggleSidebar(): void {
     this.layout.toggle();

@@ -7,7 +7,7 @@ import { InputText } from 'primeng/inputtext';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { NAV_SECTIONS, NavItem } from '../nav.config';
-import { LayoutService } from '../layout.service';
+import { Layout } from '../layout';
 
 @Component({
   selector: 'app-header',
@@ -17,7 +17,7 @@ import { LayoutService } from '../layout.service';
 })
 export class Header {
   private readonly router  = inject(Router);
-  private readonly layout  = inject(LayoutService);
+  private readonly layout  = inject(Layout);
 
   readonly toggleSidebar = output<void>();
 
