@@ -1,14 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { User, USERS } from './users.models';
+import { Button } from "primeng/button";
+import { UsersTable } from "./users-table/users-table";
+import { UsersForm } from "./users-form/users-form";
 
 @Component({
   selector: 'app-users',
-  imports: [],
+  imports: [Button, UsersTable, UsersForm],
   templateUrl: './users.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './users.scss',
 })
-
 export class Users {
   readonly users = signal<User[]>(USERS);
   readonly editing = signal<User | 'new' | null>(null);
@@ -22,7 +24,7 @@ export class Users {
       inactivos: us.filter((u) => u.estado === 'INACTIVO').length
     };
   });
-  
+
   openNew() {
     this.editing.set('new');
   }
