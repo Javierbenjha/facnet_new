@@ -1,45 +1,21 @@
 <div class="p-6 flex flex-col gap-5">
 
   <!-- Encabezado -->
-  <div class="flex items-center justify-between gap-4">
-    <div>
-      <h1 class="text-xl font-semibold text-stone-900 dark:text-stone-100 tracking-tight">Productos</h1>
-      <p class="text-sm text-stone-500 mt-0.5">{{ products().length }} productos · Inventario por sucursal · Andina Retail</p>
-    </div>
-    <div class="flex items-center gap-2">
-      <p-button label="Exportar"       icon="pi pi-download" severity="secondary" [outlined]="true" size="small" />
-      <p-button label="Importar"       icon="pi pi-upload"   severity="secondary" [outlined]="true" size="small" />
-      <p-button label="Nuevo producto" icon="pi pi-plus"     size="small" (onClick)="openNew()" />
-    </div>
-  </div>
+  <app-page-header title="Productos" subtitle="{{ products().length }} productos · Inventario por sucursal · Andina Retail">
+    <p-button label="Exportar" icon="pi pi-download" severity="secondary" [outlined]="true" size="small"
+              (onClick)="exportExcel()" />
+    <p-button label="Herramientas" icon="pi pi-cog" severity="secondary" [outlined]="true" size="small"
+              (onClick)="toolMenu.toggle($event)" />
+    <p-menu #toolMenu [model]="toolItems" [popup]="true" appendTo="body" />
+    <p-button label="Nuevo producto" icon="pi pi-plus" size="small" (onClick)="openNew()" />
+  </app-page-header>
 
   <!-- KPIs -->
   <div class="grid grid-cols-4 gap-3.5">
-
-    <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl p-4 flex flex-col gap-1.5">
-      <span class="text-xs font-medium text-stone-400 uppercase tracking-wide">Total SKUs</span>
-      <span class="text-3xl font-semibold text-stone-900 dark:text-stone-100 tabular-nums">{{ kpis().total }}</span>
-      <span class="text-xs text-stone-400">en catálogo</span>
-    </div>
-
-    <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl p-4 flex flex-col gap-1.5">
-      <span class="text-xs font-medium text-stone-400 uppercase tracking-wide">Valor inventario</span>
-      <span class="text-2xl font-semibold text-stone-900 dark:text-stone-100 tabular-nums font-mono">{{ fmtCurrency(kpis().valorInventario) }}</span>
-      <span class="text-xs text-stone-400">costo valorizado</span>
-    </div>
-
-    <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl p-4 flex flex-col gap-1.5">
-      <span class="text-xs font-medium text-stone-400 uppercase tracking-wide">Stock bajo</span>
-      <span class="text-3xl font-semibold tabular-nums" style="color:oklch(0.6 0.2 25)">{{ kpis().stockBajo }}</span>
-      <span class="text-xs text-stone-400">requieren atención</span>
-    </div>
-
-    <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl p-4 flex flex-col gap-1.5">
-      <span class="text-xs font-medium text-stone-400 uppercase tracking-wide">Margen promedio</span>
-      <span class="text-3xl font-semibold text-stone-900 dark:text-stone-100 tabular-nums">{{ kpis().margen }}</span>
-      <span class="text-xs text-stone-400">sobre costo</span>
-    </div>
-
+    <app-kpi-card label="Total Productos"  [value]="kpis().total.toString()"          subtitle="en catálogo"      icon="pi-box"         />
+    <app-kpi-card label="Valor Inventario" [value]="fmtCurrency(kpis().valorInventario)" subtitle="costo valorizado" icon="pi-wallet"      />
+    <app-kpi-card label="Activos"          [value]="kpis().activos.toString()"         subtitle="habilitados"      icon="pi-check-circle" variant="success" />
+    <app-kpi-card label="Inactivos"        [value]="kpis().inactivos.toString()"       subtitle="deshabilitados"   icon="pi-times-circle" variant="danger"  />
   </div>
 
   <!-- Tabla -->

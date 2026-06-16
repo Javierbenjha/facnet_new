@@ -4,16 +4,11 @@
   [class.w-60]="!layout.isSidebarCollapsed()">
 
   <!-- Brand -->
-  <div class="flex items-center gap-2.5 px-4 py-[18px] shrink-0"
-       [class.justify-center]="layout.isSidebarCollapsed()">
-    <div class="w-7 h-7 rounded-lg bg-stone-900 dark:bg-stone-100 flex items-center justify-center text-white dark:text-stone-900 text-xs font-bold shrink-0 select-none">
-      HS
-    </div>
-    @if (!layout.isSidebarCollapsed()) {
-      <div class="min-w-0">
-        <div class="text-sm font-semibold text-stone-900 dark:text-stone-100 tracking-tight leading-tight">HardSystem</div>
-        <div class="text-[11px] text-stone-400 leading-tight">Multiempresa · SaaS</div>
-      </div>
+  <div class="flex items-center justify-center px-4 py-[18px] shrink-0">
+    @if (layout.isSidebarCollapsed()) {
+      <img src="assets/images/logoHS_1.png" alt="Logo" class="h-8 w-auto object-contain" />
+    } @else {
+      <img src="assets/images/logo.png" alt="Logo" class="h-9 w-auto object-contain" />
     }
   </div>
 

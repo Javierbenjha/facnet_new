@@ -9,7 +9,7 @@ interface SliderItem {
 @Component({
   selector: 'app-top-slider',
   templateUrl: './top-slider.html',
-  host: { 'class': 'flex w-full h-8 bg-cyan-600 dark:bg-stone-950 overflow-hidden shrink-0' },
+  host: { 'class': 'flex w-full h-8 bg-primary dark:bg-stone-950 overflow-hidden shrink-0' },
 })
 export class TopSlider {
   readonly items: SliderItem[] = [

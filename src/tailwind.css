@@ -9,6 +9,10 @@
 
 @theme {
   --animate-marquee: marquee 30s linear infinite;
+
+  --color-primary:       #0862a1;
+  --color-primary-hover: #0971B8;
+  --color-primary-light: #c5e3f5;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));

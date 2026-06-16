@@ -28,7 +28,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Operations',
     items: [
       { label: 'Products',              icon: 'pi-box',           route: '/products' },
-      { label: 'Sales Point',           icon: 'pi-shopping-cart', route: '/sales' },
+      { label: 'Punto de Venta',         icon: 'pi-shopping-cart', route: '/pos' },
       { label: 'Sales History',         icon: 'pi-history',       route: '/sale-list' },
       { label: 'Purchases',             icon: 'pi-tag',           route: '/purchases' },
       { label: 'Quotations',            icon: 'pi-file',          route: '/quotations', badge: 2 },
