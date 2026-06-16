@@ -30,7 +30,7 @@ export class ProductForm {
   readonly modalTitle = computed(() => {
     const e = this.editing();
     if (!e) return '';
-    return e === 'new' ? 'Nuevo producto' : `Editar · ${(e as Producto).name}`;
+    return e === 'new' ? 'Nuevo producto' : `Editar · ${(e as Producto).descripcion}`;
   });
 
   readonly categories = CATEGORIES.slice(1).map(c => ({ label: c, value: c }));
@@ -49,15 +49,15 @@ export class ProductForm {
   ];
 
   readonly form = this.fb.nonNullable.group({
-    name:        [''],
-    sku:         [''],
-    cat:         [''],
-    description: [''],
-    price:       [0],
-    cost:        [0],
-    unit:        ['und'],
-    igv:         ['18'],
-    stockMin:    [30],
+    descripcion:    [''],
+    sku:            [''],
+    categoria:      [''],
+    description:    [''],
+    precio_publico: [0],
+    costo:          [0],
+    unidad:         ['und'],
+    igv:            ['18'],
+    stock_min:      [30],
   });
 
   constructor() {
@@ -65,9 +65,9 @@ export class ProductForm {
       const e = this.editing();
       if (!e) return;
       if (e === 'new') {
-        this.form.reset({ name: '', sku: '', cat: 'Café', description: '', price: 0, cost: 0, unit: 'und', igv: '18', stockMin: 30 });
+        this.form.reset({ descripcion: '', sku: '', categoria: 'Café', description: '', precio_publico: 0, costo: 0, unidad: 'und', igv: '18', stock_min: 30 });
       } else {
-        this.form.patchValue({ name: e.name, sku: e.sku, cat: e.cat, description: '', price: e.price, cost: e.cost, unit: e.unit, igv: '18', stockMin: 30 });
+        this.form.patchValue({ descripcion: e.descripcion, sku: e.sku, categoria: e.categoria, description: '', precio_publico: e.precio_publico, costo: e.costo, unidad: e.unidad, igv: '18', stock_min: e.stock_min });
       }
     });
   }

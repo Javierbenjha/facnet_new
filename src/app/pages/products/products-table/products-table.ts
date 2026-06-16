@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { Button } from 'primeng/button';
@@ -9,6 +9,7 @@ import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { Tag } from 'primeng/tag';
 import { Menu } from 'primeng/menu';
+import { Paginator, PaginatorState } from 'primeng/paginator';
 import { CATEGORIES, Producto } from '../products.models';
 
 const THUMB_COLORS = [
@@ -25,7 +26,7 @@ const THUMB_COLORS = [
   templateUrl: './products-table.html',
   styleUrl: './products-table.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TableModule, Button, Select, SelectButton, InputText, IconField, InputIcon, Tag, Menu],
+  imports: [FormsModule, TableModule, Button, Select, SelectButton, InputText, IconField, InputIcon, Tag, Menu, Paginator],
 })
 export class ProductsTable {
   products    = input<Producto[]>([]);
@@ -33,16 +34,28 @@ export class ProductsTable {
 
   readonly query  = signal('');
   readonly cat    = signal('Todas');
-  readonly status = signal<'todos' | 'ok' | 'bajo'>('todos');
+  readonly status = signal<'todos' | 'activos' | 'inactivos'>('todos');
+  readonly view      = signal<'table' | 'grid'>('table');
+  readonly gridFirst = signal(0);
+  readonly gridRows  = signal(8);
 
-  selectedProducts: Producto[] = [];
+  readonly pagedGridProducts = computed(() =>
+    this.filteredProducts().slice(this.gridFirst(), this.gridFirst() + this.gridRows())
+  );
+
+  constructor() {
+    effect(() => {
+      this.filteredProducts();
+      this.gridFirst.set(0);
+    }, { allowSignalWrites: true });
+  }
 
   readonly categories = CATEGORIES.map(c => ({ label: c, value: c }));
 
   readonly statusOptions = [
-    { label: 'Todos',      value: 'todos' },
-    { label: 'En stock',   value: 'ok'    },
-    { label: 'Stock bajo', value: 'bajo'  },
+    { label: 'Todos',     value: 'todos'     },
+    { label: 'Activos',   value: 'activos'   },
+    { label: 'Inactivos', value: 'inactivos' },
   ];
 
   readonly filteredProducts = computed(() => {
@@ -50,35 +63,39 @@ export class ProductsTable {
     const c = this.cat();
     const s = this.status();
     return this.products().filter(p =>
-      (c === 'Todas' || p.cat === c) &&
-      (!q || p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)) &&
+      (c === 'Todas' || p.categoria === c) &&
+      (!q || p.descripcion.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)) &&
       (s === 'todos' ||
-       (s === 'bajo' && p.stock < 30 && p.stock !== 999) ||
-       (s === 'ok'   && (p.stock >= 30 || p.stock === 999)))
+       (s === 'activos'   && p.estado === 'ACTIVO') ||
+       (s === 'inactivos' && p.estado === 'INACTIVO'))
     );
   });
 
   thumb(i: number)       { return THUMB_COLORS[i % THUMB_COLORS.length]; }
   skuPrefix(sku: string) { return sku.split('-')[0]; }
-  margin(p: Producto)    { return (p.price - p.cost) / p.price * 100; }
 
   stockSeverity(p: Producto): 'success' | 'warn' | 'danger' | 'secondary' {
-    if (p.stock === 999) return 'secondary';
-    if (p.stock < 15)    return 'danger';
-    if (p.stock < 30)    return 'warn';
+    if (p.stock === 999)        return 'secondary';
+    if (p.stock <= 0)           return 'danger';
+    if (p.stock < p.stock_min)  return 'warn';
     return 'success';
   }
 
   getMenuItems(p: Producto) {
+    const isActive = p.st_producto === 1;
     return [
-      { label: 'Editar',           icon: 'pi pi-pencil',  command: () => this.editProduct.emit(p) },
-      { label: 'Ver por sucursal', icon: 'pi pi-building' },
+      { label: 'Editar',                icon: 'pi pi-pencil',       command: () => this.editProduct.emit(p) },
+      { label: isActive ? 'Inactivar' : 'Activar', icon: isActive ? 'pi pi-times-circle' : 'pi pi-check-circle' },
       { separator: true },
-      { label: 'Eliminar',         icon: 'pi pi-trash',   styleClass: 'text-red-500' },
+      { label: 'Gestionar por Sucursal', icon: 'pi pi-building'    },
+      { label: 'Ver movimientos',        icon: 'pi pi-chart-bar'   },
+      { label: 'Historial de compras',   icon: 'pi pi-history'     },
     ];
   }
 
-  onQueryChange(v: string)                    { this.query.set(v);  }
-  onCatChange(v: string)                      { this.cat.set(v);    }
-  onStatusChange(v: 'todos' | 'ok' | 'bajo') { this.status.set(v); }
+  onQueryChange(v: string)                              { this.query.set(v);  }
+  onCatChange(v: string)                                { this.cat.set(v);    }
+  onStatusChange(v: 'todos' | 'activos' | 'inactivos') { this.status.set(v); }
+  onViewChange(v: 'table' | 'grid')                    { this.view.set(v);   }
+  onGridPageChange(e: PaginatorState) { this.gridFirst.set(e.first ?? 0); this.gridRows.set(e.rows ?? 8); }
 }

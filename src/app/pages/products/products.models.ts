@@ -1,12 +1,18 @@
 export interface Producto {
-  id:    string;
-  sku:   string;
-  name:  string;
-  cat:   string;
-  price: number;
-  cost:  number;
-  stock: number;
-  unit:  string;
+  id:             string;
+  sku:            string;
+  descripcion:    string;
+  categoria:      string;
+  precio_publico: number;
+  precio_mayor:   number;
+  costo:          number;
+  marca:          string;
+  unidad:         string;
+  estado:         'ACTIVO' | 'INACTIVO';
+  st_producto:    0 | 1;
+  stock:          number;
+  stock_min:      number;
+  sigla:          string;
 }
 
 export const CATEGORIES = ['Todas', 'Bebidas', 'Panadería', 'Snacks', 'Lácteos', 'Café', 'Accesorios'];
@@ -18,20 +24,20 @@ export const BRANCHES = [
 ];
 
 export const PRODUCTS: Producto[] = [
-  { id: 'p01', sku: 'BEB-001', name: 'Agua mineral 500ml',      cat: 'Bebidas',    price: 4.50,  cost: 2.10,  stock: 184, unit: 'und' },
-  { id: 'p02', sku: 'BEB-007', name: 'Jugo natural de naranja', cat: 'Bebidas',    price: 12.00, cost: 6.20,  stock: 42,  unit: 'und' },
-  { id: 'p03', sku: 'CAF-012', name: 'Espresso doble',          cat: 'Café',       price: 9.50,  cost: 2.80,  stock: 999, unit: 'und' },
-  { id: 'p04', sku: 'CAF-014', name: 'Latte vainilla',          cat: 'Café',       price: 14.00, cost: 4.30,  stock: 999, unit: 'und' },
-  { id: 'p05', sku: 'CAF-016', name: 'Cold brew 12oz',          cat: 'Café',       price: 16.50, cost: 5.10,  stock: 999, unit: 'und' },
-  { id: 'p06', sku: 'PAN-003', name: 'Croissant mantequilla',   cat: 'Panadería',  price: 7.50,  cost: 2.20,  stock: 38,  unit: 'und' },
-  { id: 'p07', sku: 'PAN-009', name: 'Pan de chocolate',        cat: 'Panadería',  price: 8.00,  cost: 2.60,  stock: 24,  unit: 'und' },
-  { id: 'p08', sku: 'PAN-011', name: 'Sandwich pavo',           cat: 'Panadería',  price: 18.00, cost: 7.40,  stock: 16,  unit: 'und' },
-  { id: 'p09', sku: 'SNK-021', name: 'Barra granola artesanal', cat: 'Snacks',     price: 6.00,  cost: 2.00,  stock: 74,  unit: 'und' },
-  { id: 'p10', sku: 'SNK-028', name: 'Mix frutos secos',        cat: 'Snacks',     price: 11.00, cost: 4.50,  stock: 52,  unit: 'und' },
-  { id: 'p11', sku: 'LAC-004', name: 'Yogurt griego',           cat: 'Lácteos',    price: 9.00,  cost: 3.80,  stock: 28,  unit: 'und' },
-  { id: 'p12', sku: 'LAC-006', name: 'Leche de almendras',      cat: 'Lácteos',    price: 13.50, cost: 5.60,  stock: 9,   unit: 'und' },
-  { id: 'p13', sku: 'ACC-002', name: 'Taza cerámica branded',   cat: 'Accesorios', price: 29.00, cost: 11.00, stock: 33,  unit: 'und' },
-  { id: 'p14', sku: 'ACC-005', name: 'Termo 500ml',             cat: 'Accesorios', price: 49.00, cost: 22.00, stock: 18,  unit: 'und' },
-  { id: 'p15', sku: 'CAF-021', name: 'Bolsa café grano 250g',   cat: 'Café',       price: 38.00, cost: 14.00, stock: 62,  unit: 'und' },
-  { id: 'p16', sku: 'BEB-015', name: 'Limonada de maracuyá',    cat: 'Bebidas',    price: 10.50, cost: 3.70,  stock: 40,  unit: 'und' },
+  { id: 'p01', sku: 'BEB-001', descripcion: 'Agua mineral 500ml',      categoria: 'Bebidas',    precio_publico:  4.50, precio_mayor:  3.80, costo:  2.10, marca: 'San Luis',   unidad: 'und', estado: 'ACTIVO',   st_producto: 1, stock: 184, stock_min: 20, sigla: 'S/' },
+  { id: 'p02', sku: 'BEB-007', descripcion: 'Jugo natural de naranja', categoria: 'Bebidas',    precio_publico: 12.00, precio_mayor: 10.00, costo:  6.20, marca: 'Laive',      unidad: 'und', estado: 'ACTIVO',   st_producto: 1, stock:  42, stock_min: 10, sigla: 'S/' },
+  { id: 'p03', sku: 'CAF-012', descripcion: 'Espresso doble',          categoria: 'Café',       precio_publico:  9.50, precio_mayor:  8.00, costo:  2.80, marca: 'Illy',       unidad: 'und', estado: 'ACTIVO',   st_producto: 1, stock: 999, stock_min:  0, sigla: 'S/' },
+  { id: 'p04', sku: 'CAF-014', descripcion: 'Latte vainilla',          categoria: 'Café',       precio_publico: 14.00, precio_mayor: 11.50, costo:  4.30, marca: 'Starbucks',  unidad: 'und', estado: 'ACTIVO',   st_producto: 1, stock: 999, stock_min:  0, sigla: 'S/' },
+  { id: 'p05', sku: 'CAF-016', descripcion: 'Cold brew 12oz',          categoria: 'Café',       precio_publico: 16.50, precio_mayor: 13.00, costo:  5.10, marca: 'Starbucks',  unidad: 'und', estado: 'INACTIVO', st_producto: 0, stock: 999, stock_min:  0, sigla: 'S/' },
+  { id: 'p06', sku: 'PAN-003', descripcion: 'Croissant mantequilla',   categoria: 'Panadería',  precio_publico:  7.50, precio_mayor:  6.00, costo:  2.20, marca: 'Laritza',    unidad: 'und', estado: 'ACTIVO',   st_producto: 1, stock:  38, stock_min: 15, sigla: 'S/' },
+  { id: 'p07', sku: 'PAN-009', descripcion: 'Pan de chocolate',        categoria: 'Panadería',  precio_publico:  8.00, precio_mayor:  6.50, costo:  2.60, marca: 'Laritza',    unidad: 'und', estado: 'ACTIVO',   st_producto: 1, stock:  24, stock_min: 15, sigla: 'S/' },
+  { id: 'p08', sku: 'PAN-011', descripcion: 'Sandwich pavo',           categoria: 'Panadería',  precio_publico: 18.00, precio_mayor: 15.00, costo:  7.40, marca: 'Pronto',     unidad: 'und', estado: 'ACTIVO',   st_producto: 1, stock:  16, stock_min: 10, sigla: 'S/' },
+  { id: 'p09', sku: 'SNK-021', descripcion: 'Barra granola artesanal', categoria: 'Snacks',     precio_publico:  6.00, precio_mayor:  5.00, costo:  2.00, marca: 'Naturelab',  unidad: 'und', estado: 'ACTIVO',   st_producto: 1, stock:  74, stock_min: 20, sigla: 'S/' },
+  { id: 'p10', sku: 'SNK-028', descripcion: 'Mix frutos secos',        categoria: 'Snacks',     precio_publico: 11.00, precio_mayor:  9.00, costo:  4.50, marca: 'Naturelab',  unidad: 'und', estado: 'ACTIVO',   st_producto: 1, stock:  52, stock_min: 20, sigla: 'S/' },
+  { id: 'p11', sku: 'LAC-004', descripcion: 'Yogurt griego',           categoria: 'Lácteos',    precio_publico:  9.00, precio_mayor:  7.50, costo:  3.80, marca: 'Gloria',     unidad: 'und', estado: 'ACTIVO',   st_producto: 1, stock:  28, stock_min: 15, sigla: 'S/' },
+  { id: 'p12', sku: 'LAC-006', descripcion: 'Leche de almendras',      categoria: 'Lácteos',    precio_publico: 13.50, precio_mayor: 11.00, costo:  5.60, marca: 'Silk',       unidad: 'und', estado: 'INACTIVO', st_producto: 0, stock:   9, stock_min: 15, sigla: 'S/' },
+  { id: 'p13', sku: 'ACC-002', descripcion: 'Taza cerámica branded',   categoria: 'Accesorios', precio_publico: 29.00, precio_mayor: 24.00, costo: 11.00, marca: 'FacNet',     unidad: 'und', estado: 'ACTIVO',   st_producto: 1, stock:  33, stock_min: 10, sigla: 'S/' },
+  { id: 'p14', sku: 'ACC-005', descripcion: 'Termo 500ml',             categoria: 'Accesorios', precio_publico: 49.00, precio_mayor: 42.00, costo: 22.00, marca: 'Klean K.',   unidad: 'und', estado: 'ACTIVO',   st_producto: 1, stock:  18, stock_min: 10, sigla: 'S/' },
+  { id: 'p15', sku: 'CAF-021', descripcion: 'Bolsa café grano 250g',   categoria: 'Café',       precio_publico: 38.00, precio_mayor: 32.00, costo: 14.00, marca: 'Altomayo',   unidad: 'und', estado: 'ACTIVO',   st_producto: 1, stock:  62, stock_min: 10, sigla: 'S/' },
+  { id: 'p16', sku: 'BEB-015', descripcion: 'Limonada de maracuyá',    categoria: 'Bebidas',    precio_publico: 10.50, precio_mayor:  8.50, costo:  3.70, marca: 'Cassinelli', unidad: 'und', estado: 'ACTIVO',   st_producto: 1, stock:  40, stock_min: 10, sigla: 'S/' },
 ];

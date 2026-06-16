@@ -18,8 +18,8 @@ export class Products {
     const ps = this.products();
     return {
       total:           ps.length,
-      valorInventario: ps.reduce((s, p) => s + p.cost * (p.stock === 999 ? 50 : p.stock), 0),
-      stockBajo:       ps.filter(p => p.stock < 30 && p.stock !== 999).length,
+      valorInventario: ps.reduce((s, p) => s + p.costo * (p.stock === 999 ? 50 : p.stock), 0),
+      stockBajo:       ps.filter(p => p.stock < p.stock_min && p.stock !== 999).length,
       margen:          '62.4%',
     };
   });

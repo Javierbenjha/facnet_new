@@ -27,6 +27,6 @@ describe('Products', () => {
   it('should filter products by query', () => {
     component.query.set('Agua');
     const filtered = component.filteredProducts();
-    expect(filtered.every(p => p.name.toLowerCase().includes('agua') || p.sku.toLowerCase().includes('agua'))).toBe(true);
+    expect(filtered.every(p => p.descripcion.toLowerCase().includes('agua') || p.sku.toLowerCase().includes('agua'))).toBe(true);
   });
 });

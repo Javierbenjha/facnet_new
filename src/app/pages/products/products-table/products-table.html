@@ -31,96 +31,178 @@
 
     <span class="ml-auto text-xs text-stone-400">{{ filteredProducts().length }} resultados</span>
 
-    @if (selectedProducts.length > 0) {
-      <span class="text-xs text-stone-500">{{ selectedProducts.length }} seleccionados</span>
-      <p-button label="Editar"   icon="pi pi-pencil" severity="secondary" size="small" [outlined]="true" />
-      <p-button label="Eliminar" icon="pi pi-trash"  severity="danger"    size="small" [outlined]="true" />
-    }
+    <!-- Toggle vista -->
+    <div class="flex gap-0.5 border border-stone-200 dark:border-stone-700 rounded-lg p-0.5">
+      <p-button icon="pi pi-list"
+                [text]="true"
+                size="small"
+                [severity]="view() === 'table' ? 'primary' : 'secondary'"
+                (onClick)="onViewChange('table')"
+                title="Vista tabla" />
+      <p-button icon="pi pi-th-large"
+                [text]="true"
+                size="small"
+                [severity]="view() === 'grid' ? 'primary' : 'secondary'"
+                (onClick)="onViewChange('grid')"
+                title="Vista grilla" />
+    </div>
 
   </div>
 
-  <!-- Tabla -->
-  <p-table
-    [value]="filteredProducts()"
-    [paginator]="true"
-    [rows]="8"
-    [rowsPerPageOptions]="[8, 16, 32]"
-    [rowHover]="true"
-    [(selection)]="selectedProducts"
-    dataKey="id"
-    styleClass="p-datatable-sm">
+  <!-- Vista tabla -->
+  @if (view() === 'table') {
+    <p-table
+      [value]="filteredProducts()"
+      [paginator]="true"
+      [rows]="8"
+      [rowsPerPageOptions]="[8, 16, 32]"
+      [rowHover]="true"
+      styleClass="p-datatable-sm"
+      [scrollable]="true">
 
-    <ng-template pTemplate="header">
-      <tr>
-        <th style="width:3rem"><p-tableHeaderCheckbox /></th>
-        <th>Producto</th>
-        <th>SKU</th>
-        <th>Categoría</th>
-        <th class="text-right">Costo</th>
-        <th class="text-right">Precio</th>
-        <th class="text-right">Margen</th>
-        <th>Stock</th>
-        <th style="width:4rem"></th>
-      </tr>
-    </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Producto</th>
+          <th>SKU</th>
+          <th>Categoría</th>
+          <th>Marca</th>
+          <th>Unidad</th>
+          <th class="text-right">Costo</th>
+          <th class="text-right">P. Público</th>
+          <th class="text-right">P. Mayor</th>
+          <th>Estado</th>
+          <th>Stock</th>
+          <th class="text-right">Stock Mín.</th>
+          <th style="width:4rem"></th>
+        </tr>
+      </ng-template>
 
-    <ng-template pTemplate="body" let-p let-i="rowIndex">
-      <tr class="cursor-pointer" (click)="editProduct.emit(p)">
+      <ng-template pTemplate="body" let-p let-i="rowIndex">
+        <tr class="cursor-pointer" (click)="editProduct.emit(p)">
 
-        <td (click)="$event.stopPropagation()">
-          <p-tableCheckbox [value]="p" />
-        </td>
-
-        <td>
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-lg flex items-center justify-center text-[9px] font-bold font-mono shrink-0"
-                 [style.background]="thumb(i).bg"
-                 [style.color]="thumb(i).fg">
-              {{ skuPrefix(p.sku) }}
+          <td>
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center text-[9px] font-bold font-mono shrink-0"
+                   [style.background]="thumb(i).bg"
+                   [style.color]="thumb(i).fg">
+                {{ skuPrefix(p.sku) }}
+              </div>
+              <span class="font-medium text-sm">{{ p.descripcion }}</span>
             </div>
-            <span class="font-medium text-sm">{{ p.name }}</span>
+          </td>
+
+          <td class="font-mono text-xs text-stone-500 dark:text-stone-400">{{ p.sku }}</td>
+
+          <td><p-tag [value]="p.categoria" severity="secondary" /></td>
+
+          <td class="text-sm text-stone-500 dark:text-stone-400">{{ p.marca }}</td>
+
+          <td class="font-mono text-xs text-stone-500 dark:text-stone-400">{{ p.unidad }}</td>
+
+          <td class="text-right font-mono text-sm text-stone-400">{{ p.sigla }}{{ p.costo.toFixed(2) }}</td>
+
+          <td class="text-right font-mono text-sm font-medium">{{ p.sigla }}{{ p.precio_publico.toFixed(2) }}</td>
+
+          <td class="text-right font-mono text-sm text-stone-400">{{ p.sigla }}{{ p.precio_mayor.toFixed(2) }}</td>
+
+          <td>
+            <p-tag [value]="p.estado" [severity]="p.estado === 'ACTIVO' ? 'success' : 'danger'" />
+          </td>
+
+          <td>
+            @if (p.stock === 999) {
+              <p-tag value="∞ ilimitado" severity="secondary" />
+            } @else {
+              <p-tag [value]="p.stock + ' ' + p.unidad" [severity]="stockSeverity(p)" />
+            }
+          </td>
+
+          <td class="text-right font-mono text-sm text-stone-400">{{ p.stock_min }}</td>
+
+          <td (click)="$event.stopPropagation()">
+            <p-button icon="pi pi-ellipsis-v" [text]="true" severity="secondary" size="small"
+                      (onClick)="rowMenu.toggle($event)" />
+            <p-menu #rowMenu [popup]="true" [model]="getMenuItems(p)" appendTo="body" />
+          </td>
+
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="12" class="text-center py-10 text-stone-400 text-sm">
+            Sin productos que coincidan con los filtros
+          </td>
+        </tr>
+      </ng-template>
+
+    </p-table>
+  }
+
+  <!-- Vista grilla -->
+  @if (view() === 'grid') {
+    <div class="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+
+      @for (p of pagedGridProducts(); track p.id; let i = $index) {
+        <div class="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+             (click)="editProduct.emit(p)">
+
+          <!-- Thumbnail -->
+          <div class="h-32 flex items-center justify-center text-2xl font-bold font-mono relative"
+               [style.background]="thumb(i).bg"
+               [style.color]="thumb(i).fg">
+            {{ skuPrefix(p.sku) }}
+            <!-- Estado badge -->
+            <span class="absolute top-2 right-2">
+              <p-tag [value]="p.estado" [severity]="p.estado === 'ACTIVO' ? 'success' : 'danger'" />
+            </span>
+            <!-- Menú -->
+            <span class="absolute top-2 left-2" (click)="$event.stopPropagation()">
+              <p-button icon="pi pi-ellipsis-v" [text]="true" severity="secondary" size="small"
+                        styleClass="!bg-white/80 hover:!bg-white"
+                        (onClick)="gridMenu.toggle($event)" />
+              <p-menu #gridMenu [popup]="true" [model]="getMenuItems(p)" appendTo="body" />
+            </span>
           </div>
-        </td>
 
-        <td class="font-mono text-xs text-stone-500 dark:text-stone-400">{{ p.sku }}</td>
+          <!-- Info -->
+          <div class="p-3.5 flex flex-col gap-2">
+            <div>
+              <p class="text-[11px] text-stone-400 uppercase tracking-wide">{{ p.categoria }}</p>
+              <p class="text-sm font-medium text-stone-900 dark:text-stone-100 mt-0.5 leading-tight">{{ p.descripcion }}</p>
+              <p class="text-xs font-mono text-stone-400 mt-0.5">{{ p.sku }}</p>
+            </div>
+            <div class="flex items-center justify-between pt-1 border-t border-stone-100 dark:border-stone-700">
+              <span class="text-sm font-mono font-semibold text-stone-800 dark:text-stone-200">
+                {{ p.sigla }}{{ p.precio_publico.toFixed(2) }}
+              </span>
+              @if (p.stock === 999) {
+                <p-tag value="∞ ilimitado" severity="secondary" />
+              } @else {
+                <p-tag [value]="'Stock: ' + p.stock" [severity]="stockSeverity(p)" />
+              }
+            </div>
+          </div>
 
-        <td><p-tag [value]="p.cat" severity="secondary" /></td>
+        </div>
+      }
 
-        <td class="text-right font-mono text-sm text-stone-400">{{ p.cost.toFixed(2) }}</td>
-
-        <td class="text-right font-mono text-sm font-medium">{{ p.price.toFixed(2) }}</td>
-
-        <td class="text-right font-mono text-sm"
-            [class.text-green-600]="margin(p) > 50"
-            [class.text-stone-400]="margin(p) <= 50">
-          {{ margin(p).toFixed(0) }}%
-        </td>
-
-        <td>
-          @if (p.stock === 999) {
-            <p-tag value="∞ ilimitado" severity="secondary" />
-          } @else {
-            <p-tag [value]="p.stock + ' ' + p.unit" [severity]="stockSeverity(p)" />
-          }
-        </td>
-
-        <td (click)="$event.stopPropagation()">
-          <p-button icon="pi pi-ellipsis-v" [text]="true" severity="secondary" size="small"
-                    (onClick)="rowMenu.toggle($event)" />
-          <p-menu #rowMenu [popup]="true" [model]="getMenuItems(p)" appendTo="body" />
-        </td>
-
-      </tr>
-    </ng-template>
-
-    <ng-template pTemplate="emptymessage">
-      <tr>
-        <td colspan="9" class="text-center py-10 text-stone-400 text-sm">
+      @empty {
+        <div class="col-span-full py-16 text-center text-stone-400 text-sm">
           Sin productos que coincidan con los filtros
-        </td>
-      </tr>
-    </ng-template>
+        </div>
+      }
 
-  </p-table>
+    </div>
+
+    <div class="border-t border-stone-200 dark:border-stone-700">
+      <p-paginator
+        [first]="gridFirst()"
+        [rows]="gridRows()"
+        [totalRecords]="filteredProducts().length"
+        [rowsPerPageOptions]="[8, 16, 32]"
+        (onPageChange)="onGridPageChange($event)" />
+    </div>
+  }
 
 </div>
