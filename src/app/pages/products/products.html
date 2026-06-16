@@ -12,51 +12,10 @@
 
   <!-- KPIs -->
   <div class="grid grid-cols-4 gap-3.5">
-
-    <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl p-4 flex items-center justify-between gap-3">
-      <div class="flex flex-col gap-1">
-        <span class="text-xs font-medium text-stone-400 uppercase tracking-wide">Total Productos</span>
-        <span class="text-3xl font-semibold text-stone-900 dark:text-stone-100 tabular-nums">{{ kpis().total }}</span>
-        <span class="text-xs text-stone-400">en catálogo</span>
-      </div>
-      <div class="w-11 h-11 rounded-full bg-primary-light flex items-center justify-center shrink-0">
-        <i class="pi pi-box text-primary text-lg"></i>
-      </div>
-    </div>
-
-    <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl p-4 flex items-center justify-between gap-3">
-      <div class="flex flex-col gap-1">
-        <span class="text-xs font-medium text-stone-400 uppercase tracking-wide">Valor Inventario</span>
-        <span class="text-2xl font-semibold text-stone-900 dark:text-stone-100 tabular-nums font-mono">{{ fmtCurrency(kpis().valorInventario) }}</span>
-        <span class="text-xs text-stone-400">costo valorizado</span>
-      </div>
-      <div class="w-11 h-11 rounded-full bg-primary-light flex items-center justify-center shrink-0">
-        <i class="pi pi-wallet text-primary text-lg"></i>
-      </div>
-    </div>
-
-    <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl p-4 flex items-center justify-between gap-3">
-      <div class="flex flex-col gap-1">
-        <span class="text-xs font-medium text-stone-400 uppercase tracking-wide">Productos Activos</span>
-        <span class="text-3xl font-semibold tabular-nums text-emerald-600">{{ kpis().activos }}</span>
-        <span class="text-xs text-stone-400">habilitados</span>
-      </div>
-      <div class="w-11 h-11 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-        <i class="pi pi-check-circle text-emerald-600 text-lg"></i>
-      </div>
-    </div>
-
-    <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl p-4 flex items-center justify-between gap-3">
-      <div class="flex flex-col gap-1">
-        <span class="text-xs font-medium text-stone-400 uppercase tracking-wide">Productos Inactivos</span>
-        <span class="text-3xl font-semibold tabular-nums text-red-500">{{ kpis().inactivos }}</span>
-        <span class="text-xs text-stone-400">deshabilitados</span>
-      </div>
-      <div class="w-11 h-11 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-        <i class="pi pi-times-circle text-red-500 text-lg"></i>
-      </div>
-    </div>
-
+    <app-kpi-card label="Total Productos"  [value]="kpis().total.toString()"          subtitle="en catálogo"      icon="pi-box"         />
+    <app-kpi-card label="Valor Inventario" [value]="fmtCurrency(kpis().valorInventario)" subtitle="costo valorizado" icon="pi-wallet"      />
+    <app-kpi-card label="Activos"          [value]="kpis().activos.toString()"         subtitle="habilitados"      icon="pi-check-circle" variant="success" />
+    <app-kpi-card label="Inactivos"        [value]="kpis().inactivos.toString()"       subtitle="deshabilitados"   icon="pi-times-circle" variant="danger"  />
   </div>
 
   <!-- Tabla -->

@@ -6,12 +6,13 @@ import { PRODUCTS, Producto } from './products.models';
 import { ProductsTable } from './products-table/products-table';
 import { ProductForm } from './product-form/product-form';
 import { PageHeader } from '../../shared/page-header/page-header';
+import { KpiCard } from '../../shared/kpi-card/kpi-card';
 
 @Component({
   selector: 'app-products',
   templateUrl: './products.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Button, Menu, ProductsTable, ProductForm, PageHeader],
+  imports: [Button, Menu, ProductsTable, ProductForm, PageHeader, KpiCard],
 })
 export class Products {
   readonly products = signal<Producto[]>(PRODUCTS);
