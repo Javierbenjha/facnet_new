@@ -1,0 +1,39 @@
+﻿<div class="max-w-4xl mx-auto">
+  <div class="mb-8 flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">Alerts Inbox</h1>
+      <p class="text-gray-500 dark:text-gray-400 mt-1">Review critical system alerts, inventory warnings, and invoice logs.</p>
+    </div>
+    <span class="px-3 py-1 bg-amber-500/10 text-amber-500 text-xs font-semibold rounded-full border border-amber-500/20">
+      {{ alerts.length }} Pending
+    </span>
+  </div>
+
+  <div class="border border-gray-100 dark:border-gray-800 rounded-2xl bg-white dark:bg-gray-900 shadow-md divide-y divide-gray-100 dark:divide-gray-800 overflow-hidden">
+    @for (item of alerts; track item.id) {
+      <div class="flex items-start gap-4 p-5 hover:bg-gray-50 dark:hover:bg-gray-800/20 transition-colors">
+        <div class="p-2.5 rounded-xl"
+             [class.bg-amber-50]="item.type === 'warning'"
+             [class.text-amber-600]="item.type === 'warning'"
+             [class.bg-blue-50]="item.type === 'info'"
+             [class.text-blue-600]="item.type === 'info'"
+             [class.bg-red-50]="item.type === 'error'"
+             [class.text-red-600]="item.type === 'error'"
+             [class.dark:bg-amber-950/30]="item.type === 'warning'"
+             [class.dark:bg-blue-950/30]="item.type === 'info'"
+             [class.dark:bg-red-950/30]="item.type === 'error'">
+          @if (item.type === 'warning') { <i class="pi pi-exclamation-triangle" style="font-size: 1.25rem"></i> }
+          @if (item.type === 'info') { <i class="pi pi-info" style="font-size: 1.25rem"></i> }
+          @if (item.type === 'error') { <i class="pi pi-times-circle" style="font-size: 1.25rem"></i> }
+        </div>
+        <div class="flex-grow">
+          <div class="flex justify-between items-baseline mb-1">
+            <h3 class="font-bold text-gray-800 dark:text-gray-100 text-base">{{ item.title }}</h3>
+            <span class="text-xs text-gray-400 font-medium">{{ item.timestamp }}</span>
+          </div>
+          <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{{ item.message }}</p>
+        </div>
+      </div>
+    }
+  </div>
+</div>

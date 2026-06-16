@@ -1,13 +1,21 @@
-<div class="h-screen flex flex-col overflow-hidden bg-gray-50 dark:bg-gray-950">
-  <!-- Header at the top -->
-  <app-header (toggleSidebar)="toggleSidebar()"></app-header>
+<div class="h-screen flex flex-col overflow-hidden">
 
-  <!-- Main body combining Sidebar and Router Outlet -->
-  <div class="flex flex-row flex-grow overflow-hidden">
+  <!-- Slider superior — ancho completo -->
+  <app-top-slider></app-top-slider>
+
+  <!-- Debajo del slider: sidebar izquierda + (header/contenido) derecha -->
+  <div class="flex flex-row flex-1 overflow-hidden">
+
     <app-sidebar></app-sidebar>
 
-    <main class="flex-grow p-6 overflow-y-auto">
-      <router-outlet></router-outlet>
-    </main>
+    <div class="flex flex-col flex-1 overflow-hidden">
+      <app-header (toggleSidebar)="toggleSidebar()"></app-header>
+
+      <main class="flex-1 overflow-y-auto">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+
   </div>
+
 </div>

@@ -30,6 +30,9 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideAnimationsAsync(),
-    providePrimeNG({ theme: { preset: AppTheme, options: { darkModeSelector: '.dark' } } }),
+    providePrimeNG({
+      theme: { preset: AppTheme, options: { darkModeSelector: '.dark' } },
+      overlayOptions: { appendTo: 'body' },
+    }),
   ]
 };

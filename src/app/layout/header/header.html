@@ -1,31 +1,85 @@
-<header class="h-16 flex justify-between items-center bg-cyan-600 dark:bg-cyan-800 text-white shadow-md px-4 select-none z-10">
-  <div class="flex items-center gap-3">
-    <!-- Botón de colapso usando PrimeNG y PrimeIcons -->
-    <p-button
-      icon="pi pi-bars"
-      [text]="true"
-      [plain]="true"
-      styleClass="text-white hover:bg-cyan-700/50 p-2 rounded-lg"
-      (click)="toggleSidebar.emit()"
-      aria-label="Toggle sidebar">
-    </p-button>
-    <span class="text-xl font-bold tracking-wide">HardSystem</span>
+<header class="flex items-center h-14 px-4 gap-3 bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-700 shrink-0">
+
+  <!-- Toggle sidebar -->
+  <p-button
+    icon="pi pi-bars"
+    [text]="true"
+    severity="secondary"
+    (onClick)="toggleSidebar.emit()"
+    aria-label="Toggle sidebar" />
+
+  <!-- Tenant switcher -->
+  <p-select
+    [options]="empresas()"
+    [ngModel]="selectedEmpresaId()"
+    (ngModelChange)="selectedEmpresaId.set($event)"
+    optionLabel="nombre"
+    optionValue="id" />
+
+  <p-select
+    [options]="sucursales()"
+    [ngModel]="selectedSucursalId()"
+    (ngModelChange)="selectedSucursalId.set($event)"
+    optionLabel="nombre"
+    optionValue="id" />
+
+  <!-- Búsqueda -->
+  <div class="relative flex-1 max-w-md">
+    <p-iconfield>
+      <p-inputicon>
+        <i class="pi pi-search"></i>
+      </p-inputicon>
+      <input
+        pInputText
+        type="text"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearchInput($event)"
+        (blur)="closeSearch()"
+        placeholder="Buscar producto, venta, cliente…"
+        class="w-full text-sm" />
+    </p-iconfield>
+
+    @if (showSearchDropdown() && filteredModules().length > 0) {
+      <div class="absolute top-full left-0 right-0 mt-1.5 z-50 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl shadow-lg overflow-hidden">
+        @for (mod of filteredModules(); track mod.route) {
+          <button
+            class="flex items-center gap-2.5 w-full px-3 py-2.5 text-sm text-left text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+            (click)="selectModule(mod)">
+            <i [class]="'pi ' + mod.icon" style="font-size:13px"></i>
+            {{ mod.label }}
+          </button>
+        }
+      </div>
+    }
   </div>
 
-  <div class="flex items-center gap-2">
+  <!-- Acciones derechas -->
+  <div class="ml-auto flex items-center gap-1">
+
+    <p-button
+      label="Nueva venta"
+      icon="pi pi-bolt"
+      size="small"
+      severity="secondary"
+      [outlined]="true" />
+
+    <p-button
+      [icon]="darkMode() ? 'pi pi-sun' : 'pi pi-moon'"
+      [text]="true"
+      severity="secondary"
+      (onClick)="toggleDarkMode()"
+      title="Cambiar tema" />
+
     <p-button
       icon="pi pi-bell"
       [text]="true"
-      [plain]="true"
-      styleClass="text-white hover:bg-cyan-700/50 p-2 rounded-lg"
-      aria-label="Notificaciones">
-    </p-button>
+      severity="secondary" />
+
     <p-button
       icon="pi pi-user"
       [text]="true"
-      [plain]="true"
-      styleClass="text-white hover:bg-cyan-700/50 p-2 rounded-lg"
-      aria-label="Perfil de usuario">
-    </p-button>
+      severity="secondary" />
+
   </div>
+
 </header>

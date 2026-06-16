@@ -1,0 +1,116 @@
+<app-modal
+  [visible]="visible()"
+  (visibleChange)="$event || close()"
+  (closed)="close()"
+  [title]="modalTitle()"
+  size="lg">
+
+  <div class="grid grid-cols-2 gap-5 pt-1">
+
+    <!-- Columna izquierda -->
+    <div class="flex flex-col gap-3.5">
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-medium text-stone-500">Nombre del producto</label>
+        <input pInputText [formControl]="form.controls.name" placeholder="Ej: Latte vainilla 12oz" class="w-full" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-stone-500">SKU</label>
+          <input pInputText [formControl]="form.controls.sku" placeholder="CAF-001" class="w-full font-mono" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-stone-500">Categoría</label>
+          <p-select [options]="categories" optionLabel="label" optionValue="value"
+                    [formControl]="form.controls.cat" styleClass="w-full" />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-medium text-stone-500">Descripción</label>
+        <textarea pTextarea [formControl]="form.controls.description" rows="3"
+                  placeholder="Notas, ingredientes, presentación…" class="w-full resize-none"></textarea>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-stone-500">Precio de venta (S/)</label>
+          <p-inputnumber [formControl]="form.controls.price" mode="decimal"
+                         [minFractionDigits]="2" [maxFractionDigits]="2" styleClass="w-full" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-stone-500">Costo (S/)</label>
+          <p-inputnumber [formControl]="form.controls.cost" mode="decimal"
+                         [minFractionDigits]="2" [maxFractionDigits]="2" styleClass="w-full" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-stone-500">Unidad</label>
+          <p-select [options]="unitOptions" optionLabel="label" optionValue="value"
+                    [formControl]="form.controls.unit" styleClass="w-full" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-stone-500">IGV</label>
+          <p-select [options]="igvOptions" optionLabel="label" optionValue="value"
+                    [formControl]="form.controls.igv" styleClass="w-full" />
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Columna derecha -->
+    <div class="flex flex-col gap-3.5">
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-medium text-stone-500">Imagen</label>
+        <div class="h-28 border-2 border-dashed border-stone-200 dark:border-stone-700 rounded-xl flex items-center justify-center text-stone-400 text-sm cursor-pointer hover:border-stone-400 transition-colors">
+          <div class="text-center">
+            <i class="pi pi-image text-2xl mb-1 block"></i>
+            Arrastá o subí una imagen
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-medium text-stone-500">Inventario por sucursal</label>
+        <div class="border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
+          @for (b of branches; track b.id; let bi = $index) {
+            <div class="flex items-center justify-between px-3 py-2.5"
+                 [class.border-b]="bi < branches.length - 1"
+                 [class.border-stone-200]="bi < branches.length - 1">
+              <div>
+                <div class="text-[12.5px] font-medium text-stone-800 dark:text-stone-200">{{ b.name }}</div>
+                <div class="text-[10.5px] text-stone-400">{{ b.city }}</div>
+              </div>
+              <div class="flex items-center gap-2">
+                <p-inputnumber [ngModel]="branchStock(editingProduct(), bi)"
+                               styleClass="w-20" [showButtons]="false" />
+                <span class="text-xs text-stone-400">und</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-medium text-stone-500">Stock mínimo (alerta)</label>
+        <p-inputnumber [formControl]="form.controls.stockMin" styleClass="w-full" />
+      </div>
+
+    </div>
+  </div>
+
+  <div modal-footer class="flex justify-end gap-2 pt-1">
+    <p-button label="Cancelar" severity="secondary" [outlined]="true" (onClick)="close()" />
+    @if (editing() !== 'new') {
+      <p-button label="Eliminar" icon="pi pi-trash" severity="danger" [outlined]="true" />
+    }
+    <p-button
+      [label]="editing() === 'new' ? 'Crear producto' : 'Guardar cambios'"
+      icon="pi pi-check" />
+  </div>
+
+</app-modal>

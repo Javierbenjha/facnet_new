@@ -23,6 +23,6 @@ describe('Sidebar', () => {
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     const items = compiled.querySelectorAll('a');
-    expect(items.length).toBe(5);
+    expect(items.length).toBe(12);
   });
 });
