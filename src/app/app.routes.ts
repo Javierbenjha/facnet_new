@@ -78,7 +78,7 @@ export const routes: Routes = [
         loadComponent: () => import('./features/sales/sales').then(m => m.Sales)
       },
       {
-        path: 'sales/new',
+        path: 'pos',
         loadComponent: () => import('./pages/sale/sale').then(m => m.Sale)
       },
       {

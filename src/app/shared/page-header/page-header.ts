@@ -1,0 +1,23 @@
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+
+@Component({
+  selector: 'app-page-header',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div class="flex items-center justify-between gap-4">
+      <div>
+        <h1 class="text-xl font-semibold text-stone-900 dark:text-stone-100 tracking-tight">{{ title() }}</h1>
+        @if (subtitle()) {
+          <p class="text-sm text-stone-500 mt-0.5">{{ subtitle() }}</p>
+        }
+      </div>
+      <div class="flex items-center gap-2">
+        <ng-content />
+      </div>
+    </div>
+  `,
+})
+export class PageHeader {
+  readonly title    = input.required<string>();
+  readonly subtitle = input<string>();
+}
