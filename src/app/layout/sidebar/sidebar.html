@@ -57,8 +57,8 @@
       </div>
       @if (!layout.isSidebarCollapsed()) {
         <div class="flex-1 min-w-0">
-          <div class="text-[13px] font-medium text-stone-900 dark:text-stone-100 truncate">Mauricio Rivas</div>
-          <div class="text-[11px] text-stone-400 dark:text-stone-500 truncate">Admin · Plan Growth</div>
+          <div class="text-[13px] font-medium text-stone-900 dark:text-stone-100 truncate">{{ currentUser()?.nombre }}</div>
+          <div class="text-[11px] text-stone-400 dark:text-stone-500 truncate">{{ currentUser()?.email }}</div>
         </div>
         <i class="pi pi-chevron-right text-stone-400 text-[12px]"></i>
       }
