@@ -1,6 +1,6 @@
 ﻿import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Checkbox } from 'primeng/checkbox';
@@ -17,6 +17,7 @@ export class Login {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(Auth);
   private readonly router = inject(Router); 
+  private readonly route = inject(ActivatedRoute);
 
 
   readonly form = this.fb.nonNullable.group({
@@ -28,7 +29,11 @@ export class Login {
     if(this.form.invalid) return;
 
     this.auth.login(this.form.getRawValue()).subscribe({
-      next: () => this.router.navigate(['./sales']),
+      //next: () => this.router.navigate(['./sales']),
+      next: () => {
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/sales';
+        this.router.navigateByUrl(returnUrl);
+      },
       error: (err) => console.error('Login failed', err),
     })
 
