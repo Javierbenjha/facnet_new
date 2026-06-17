@@ -7,6 +7,7 @@ import { Checkbox } from 'primeng/checkbox';
 import { Auth } from '../../../core/services/auth';
 import { Password } from 'primeng/password';
 import { finalize } from 'rxjs';
+import { Toaster } from '../../../core/services/toast';
 
 @Component({
   selector: 'app-login',
@@ -21,6 +22,7 @@ export class Login {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   readonly loading = signal(false);
+  private readonly toast = inject(Toaster);
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -39,7 +41,7 @@ export class Login {
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/sales';
         this.router.navigateByUrl(returnUrl);
       },
-      error: (err) => console.error('Login failed', err),
+      error: (err) => this.toast.error('Error al iniciar sesión', err.error?.message ),
     });
   }
 }
