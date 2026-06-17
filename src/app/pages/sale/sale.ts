@@ -1,17 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
-import { IconField } from 'primeng/iconfield';
-import { InputIcon } from 'primeng/inputicon';
-import { InputText } from 'primeng/inputtext';
 import { InputNumber } from 'primeng/inputnumber';
-import { Select } from 'primeng/select';
-import { DatePickerModule } from 'primeng/datepicker';
-import { Popover } from 'primeng/popover';
+import { AppModal } from '../../shared/app-modal/app-modal';
+import { SaleHeader } from './sale-header/sale-header';
+import { SaleInfo } from './sale-info/sale-info';
+import { SaleProducts } from './sale-products/sale-products';
+import { SaleCart } from './sale-cart/sale-cart';
 import {
-  CartItem, DetraccionConcepto, DETRACCION_CONCEPTOS, FormaPago,
+  CartItem, CartTotals, DetraccionConcepto, DETRACCION_CONCEPTOS, FormaPago,
   METODOS_PAGO, MetodoPago, Moneda, POS_PRODUCTOS, PosProducto,
-  RETENCION_PORCENTAJE, TIPOS_DOC, TipoDoc,
+  RETENCION_PORCENTAJE, SaleInfoSummary, TIPOS_DOC, TipoDoc,
 } from './sale.models';
 
 @Component({
@@ -19,7 +18,7 @@ import {
   templateUrl: './sale.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { 'class': 'w-full h-full flex overflow-hidden' },
-  imports: [Button, IconField, InputIcon, InputText, InputNumber, Select, DatePickerModule, Popover, FormsModule],
+  imports: [Button, InputNumber, AppModal, FormsModule, SaleHeader, SaleInfo, SaleProducts, SaleCart],
 })
 export class Sale {
   readonly metodosPago          = METODOS_PAGO;
@@ -48,12 +47,24 @@ export class Sale {
   readonly cart      = signal<CartItem[]>([]);
   readonly ticketNum = signal(1);
 
+  // ── Price warn modal ───────────────────────────────────────────────────────
+  readonly showPriceWarn = signal(false);
+  readonly priceWarn = signal<{
+    type: 'bonificacion' | 'costo' | 'min';
+    id: string;
+    precio: number;
+    previo: number;
+    costo: number;
+    min: number;
+    nombre: string;
+  } | null>(null);
+
   // ── Modal state ────────────────────────────────────────────────────────────
   readonly showPago   = signal(false);
   readonly showTicket = signal(false);
   readonly metodoPago = signal<MetodoPago>('efectivo');
   readonly efectivo   = signal(0);
-  readonly lastSale   = signal<{ subtotal: number; descuento: number; igv: number; total: number } | null>(null);
+  readonly lastSale   = signal<{ subtotal: number; inafecto: number; gratuito: number; descuento: number; igv: number; total: number } | null>(null);
 
   // ── Computed ───────────────────────────────────────────────────────────────
   readonly categorias = computed(() => [
@@ -77,18 +88,61 @@ export class Sale {
 
   readonly sigla = computed(() => this.moneda() === 'PEN' ? 'S/' : '$');
 
-  readonly bruto = computed(() =>
-    this.cart().reduce((s, i) => s + i.precio_venta * i.cantidad, 0)
+  readonly brutoGravado  = computed(() =>
+    this.cart().filter(i => i.producto.st_afecto === 1 && i.precio_venta > 0)
+               .reduce((s, i) => s + i.precio_venta * i.cantidad, 0)
   );
-  readonly descuentoMonto = computed(() => this.bruto() * (this.descuento() / 100));
-  readonly subtotal       = computed(() => this.bruto() - this.descuentoMonto());
-  readonly igv            = computed(() => this.subtotal() * 0.18);
-  readonly total          = computed(() => this.subtotal() + this.igv());
-  readonly vuelto         = computed(() => Math.max(0, this.efectivo() - this.total()));
+  readonly brutoInafecto = computed(() =>
+    this.cart().filter(i => i.producto.st_afecto === 0 && i.precio_venta > 0)
+               .reduce((s, i) => s + i.precio_venta * i.cantidad, 0)
+  );
+  readonly gratuito      = computed(() =>
+    this.cart().filter(i => i.precio_venta === 0)
+               .reduce((s, i) => s + i.producto.precio_publico * i.cantidad, 0)
+  );
+
+  readonly descuentoMonto = computed(() =>
+    (this.brutoGravado() + this.brutoInafecto()) * (this.descuento() / 100)
+  );
+  readonly subtotal = computed(() => this.brutoGravado() * (1 - this.descuento() / 100));
+  readonly inafecto = computed(() => this.brutoInafecto() * (1 - this.descuento() / 100));
+  readonly igv      = computed(() => this.subtotal() * 0.18);
+  readonly total    = computed(() => this.subtotal() + this.igv() + this.inafecto());
+  readonly vuelto   = computed(() => Math.max(0, this.efectivo() - this.total()));
   readonly cobrarLabel    = computed(() => 'Cobrar  ' + this.sigla() + ' ' + this.total().toFixed(2));
   readonly fechaLabel     = computed(() => this.fechaEmision().toLocaleDateString('es-PE'));
+  readonly priceWarnTitle = computed(() => {
+    switch (this.priceWarn()?.type) {
+      case 'bonificacion': return 'Confirmar Bonificación';
+      case 'costo':        return 'Precio menor al costo';
+      case 'min':          return 'Precio menor al mínimo';
+      default:             return '';
+    }
+  });
   readonly detracMonto    = computed(() => this.total() * ((this.detracConcepto()?.porcentaje ?? 0) / 100));
   readonly retencionMonto = computed(() => this.total() * (this.retencionPct() / 100));
+
+  readonly saleInfoSummary = computed((): SaleInfoSummary => ({
+    tipoDocLabel: TIPOS_DOC.find(t => t.value === this.tipoDoc())?.label ?? '',
+    serie:        this.serie(),
+    fechaLabel:   this.fechaLabel(),
+    cliente:      this.cliente(),
+    moneda:       this.moneda(),
+    formaPago:    this.formaPago(),
+    descuento:    this.descuento(),
+    cartLength:   this.cart().length,
+  }));
+
+  readonly cartTotals = computed((): CartTotals => ({
+    subtotal:       this.subtotal(),
+    brutoGravado:   this.brutoGravado(),
+    inafecto:       this.inafecto(),
+    igv:            this.igv(),
+    total:          this.total(),
+    gratuito:       this.gratuito(),
+    descuentoMonto: this.descuentoMonto(),
+    descuento:      this.descuento(),
+  }));
 
   // ── Cart operations ────────────────────────────────────────────────────────
   addToCart(p: PosProducto) {
@@ -120,11 +174,51 @@ export class Sale {
   }
 
   updatePrecio(id: string, precio: number) {
+    const item = this.cart().find(i => i.producto.id === id);
+    if (!item) return;
+
+    const p      = item.producto;
+    const previo = item.precio_venta;
+
+    if (precio === 0) {
+      this.priceWarn.set({ type: 'bonificacion', id, precio, previo, costo: p.precio_costo, min: p.precio_min, nombre: p.descripcion });
+      this.showPriceWarn.set(true);
+      return;
+    }
+    if (precio < p.precio_costo) {
+      this.priceWarn.set({ type: 'costo', id, precio, previo, costo: p.precio_costo, min: p.precio_min, nombre: p.descripcion });
+      this.showPriceWarn.set(true);
+      return;
+    }
+    if (precio < p.precio_min) {
+      this.priceWarn.set({ type: 'min', id, precio, previo, costo: p.precio_costo, min: p.precio_min, nombre: p.descripcion });
+      this.showPriceWarn.set(true);
+      return;
+    }
+
+    this.applyPrecio(id, precio);
+  }
+
+  confirmPriceWarn() {
+    const w = this.priceWarn();
+    if (w) this.applyPrecio(w.id, w.precio);
+    this.showPriceWarn.set(false);
+    this.priceWarn.set(null);
+  }
+
+  cancelPriceWarn() {
+    const w = this.priceWarn();
+    if (w) this.applyPrecio(w.id, w.previo);
+    this.showPriceWarn.set(false);
+    this.priceWarn.set(null);
+  }
+
+  private applyPrecio(id: string, precio: number) {
     this.cart.update(items => {
       const idx = items.findIndex(i => i.producto.id === id);
       if (idx < 0) return items;
       const updated = [...items];
-      updated[idx] = { ...updated[idx], precio_venta: precio || 0 };
+      updated[idx] = { ...updated[idx], precio_venta: precio };
       return updated;
     });
   }
@@ -150,10 +244,12 @@ export class Sale {
 
   confirmarPago() {
     this.lastSale.set({
-      subtotal:   this.subtotal(),
-      descuento:  this.descuentoMonto(),
-      igv:        this.igv(),
-      total:      this.total(),
+      subtotal:  this.subtotal(),
+      inafecto:  this.inafecto(),
+      gratuito:  this.gratuito(),
+      descuento: this.descuentoMonto(),
+      igv:       this.igv(),
+      total:     this.total(),
     });
     this.ticketNum.update(n => n + 1);
     this.cart.set([]);

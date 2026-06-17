@@ -110,7 +110,8 @@
     }
     <p-button
       [label]="editing() === 'new' ? 'Crear producto' : 'Guardar cambios'"
-      icon="pi pi-check" />
+      icon="pi pi-check"
+      (onClick)="save()" />
   </div>
 
 </app-modal>

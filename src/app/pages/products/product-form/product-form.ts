@@ -19,6 +19,7 @@ export class ProductForm {
 
   editing = input<Producto | 'new' | null>(null);
   closed  = output<void>();
+  saved   = output<{ id: string; descripcion: string; sku: string; unidad: string; precio_costo: number }>();
 
   readonly visible = computed(() => this.editing() !== null);
 
@@ -75,6 +76,20 @@ export class ProductForm {
   branchStock(p: Producto | null, i: number): number {
     if (!p) return 0;
     return Math.max(0, (p.stock === 999 ? 50 : p.stock) - i * 5);
+  }
+
+  save() {
+    const v = this.form.getRawValue();
+    if (this.editing() === 'new') {
+      this.saved.emit({
+        id:           crypto.randomUUID(),
+        descripcion:  v.descripcion,
+        sku:          v.sku,
+        unidad:       v.unidad,
+        precio_costo: v.costo,
+      });
+    }
+    this.closed.emit();
   }
 
   close() { this.closed.emit(); }

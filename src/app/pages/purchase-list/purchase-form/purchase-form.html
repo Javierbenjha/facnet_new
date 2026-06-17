@@ -1,0 +1,299 @@
+<app-modal [visible]="visible()" [title]="modalTitle()" size="xl" (closed)="close()">
+
+  <div class="flex gap-5 min-h-0">
+
+    <!-- ── LEFT: campos + productos ── -->
+    <div class="flex-1 flex flex-col gap-4 min-w-0">
+
+      <!-- Fila 1: Proveedor -->
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Proveedor</label>
+        <p-select
+          [options]="proveedores()"
+          [ngModel]="proveedorSeleccionado()"
+          (ngModelChange)="proveedorSeleccionado.set($event)"
+          optionLabel="label"
+          [filter]="true"
+          filterPlaceholder="Buscar proveedor..."
+          (onFilter)="onProveedorFilter($event)"
+          appendTo="body"
+          placeholder="Seleccioná proveedor"
+          styleClass="w-full">
+          <ng-template #footer>
+            @if (proveedorFilterText().trim()) {
+              <div class="p-2 border-t border-stone-200 dark:border-stone-700">
+                <p-button
+                  [label]="'Añadir &quot;' + proveedorFilterText().trim() + '&quot;'"
+                  icon="pi pi-plus"
+                  [text]="true"
+                  severity="secondary"
+                  size="small"
+                  styleClass="w-full justify-start"
+                  (onClick)="addProveedor()" />
+              </div>
+            }
+          </ng-template>
+        </p-select>
+      </div>
+
+      <!-- Fila 2: Tipo doc / Serie / Correlativo / Forma Pago -->
+      <div class="grid grid-cols-4 gap-3">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Tipo Doc.</label>
+          <p-select
+            [options]="tiposDoc"
+            [ngModel]="tipoDoc()"
+            (ngModelChange)="tipoDoc.set($event)"
+            optionLabel="label"
+            appendTo="body"
+            styleClass="w-full" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Serie</label>
+          <input pInputText [value]="serie()" [disabled]="true" class="w-full bg-stone-50 dark:bg-stone-800 text-stone-400" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Correlativo</label>
+          <input pInputText
+            [value]="correlativo()"
+            (input)="correlativo.set($any($event.target).value)"
+            [disabled]="!tipoDoc().requiresSerie"
+            placeholder="000001"
+            class="w-full" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Forma de Pago</label>
+          <p-select
+            [options]="pagoOpts"
+            [ngModel]="formaPago()"
+            (ngModelChange)="formaPago.set($event)"
+            optionLabel="label"
+            optionValue="value"
+            appendTo="body"
+            styleClass="w-full" />
+        </div>
+      </div>
+
+      <!-- Fila 3: Fechas / Moneda / IGV toggle -->
+      <div class="grid grid-cols-4 gap-3 items-end">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Fecha Compra</label>
+          <p-datepicker
+            [ngModel]="fechaCompra()"
+            (ngModelChange)="fechaCompra.set($event)"
+            dateFormat="dd/mm/yy"
+            appendTo="body"
+            styleClass="w-full" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Vencimiento</label>
+          <p-datepicker
+            [ngModel]="fechaVenc()"
+            (ngModelChange)="fechaVenc.set($event)"
+            dateFormat="dd/mm/yy"
+            appendTo="body"
+            styleClass="w-full" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Moneda</label>
+          <p-select
+            [options]="monedaOpts"
+            [ngModel]="moneda()"
+            (ngModelChange)="moneda.set($event)"
+            optionLabel="label"
+            optionValue="value"
+            appendTo="body"
+            styleClass="w-full" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Precios c/ IGV</label>
+          <div class="flex items-center gap-2 h-[2.375rem]">
+            <p-toggleswitch
+              [ngModel]="igvIncluido()"
+              (ngModelChange)="igvIncluido.set($event)" />
+            <span class="text-sm text-stone-500">{{ igvIncluido() ? 'Sí' : 'No' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Buscar producto -->
+      <div class="flex flex-col gap-2">
+        <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Agregar Producto</label>
+        <p-autocomplete
+          [(ngModel)]="selectedProducto"
+          [suggestions]="productoSuggestions()"
+          (completeMethod)="onProductSearch($event)"
+          (onSelect)="onProductSelect($event.value)"
+          optionLabel="descripcion"
+          [forceSelection]="true"
+          appendTo="body"
+          placeholder="Buscar por nombre o SKU..."
+          styleClass="w-full"
+          inputStyleClass="w-full">
+
+          <ng-template #item let-p>
+            <div class="flex items-center justify-between w-full gap-4">
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-stone-800 dark:text-stone-100 truncate">{{ p.descripcion }}</p>
+                <p class="text-xs text-stone-400 font-mono">{{ p.sku }}</p>
+              </div>
+              <span class="text-xs font-semibold text-stone-500 tabular-nums shrink-0">{{ fmt(p.precio_costo) }}</span>
+            </div>
+          </ng-template>
+
+          <ng-template #footer>
+            <div class="border-t border-stone-200 dark:border-stone-700 p-1">
+              <p-button
+                label="Crear nuevo producto"
+                icon="pi pi-plus-circle"
+                [text]="true"
+                severity="secondary"
+                size="small"
+                styleClass="w-full justify-start"
+                (onClick)="showProductForm.set(true); selectedProducto = null" />
+            </div>
+          </ng-template>
+
+        </p-autocomplete>
+      </div>
+
+      <!-- Tabla de ítems -->
+      <div class="border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-stone-50 dark:bg-stone-800 text-xs font-semibold text-stone-500 uppercase tracking-wide">
+            <tr>
+              <th class="px-4 py-2.5 text-left">Producto</th>
+              <th class="px-4 py-2.5 text-center w-16">Unid.</th>
+              <th class="px-4 py-2.5 text-right w-28">Precio</th>
+              <th class="px-4 py-2.5 text-right w-24">Cantidad</th>
+              <th class="px-4 py-2.5 text-right w-28">Neto</th>
+              <th class="px-4 py-2.5 w-12"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
+            @for (item of items(); track item.id) {
+              <tr class="hover:bg-stone-50 dark:hover:bg-stone-800/50">
+                <td class="px-4 py-2">
+                  <p class="font-medium text-stone-800 dark:text-stone-100">{{ item.nombre }}</p>
+                  <p class="text-[11px] text-stone-400 font-mono">{{ item.sku }}</p>
+                </td>
+                <td class="px-4 py-2 text-center text-stone-500">{{ item.unidad }}</td>
+                <td class="px-4 py-2">
+                  <p-inputnumber
+                    [ngModel]="item.precio"
+                    (ngModelChange)="updatePrecio(item.id, $event ?? 0)"
+                    mode="decimal"
+                    [minFractionDigits]="2"
+                    [maxFractionDigits]="2"
+                    [min]="0"
+                    styleClass="w-full"
+                    inputStyleClass="text-right text-sm w-full" />
+                </td>
+                <td class="px-4 py-2">
+                  <p-inputnumber
+                    [ngModel]="item.cantidad"
+                    (ngModelChange)="updateCantidad(item.id, $event ?? 1)"
+                    mode="decimal"
+                    [minFractionDigits]="0"
+                    [maxFractionDigits]="4"
+                    [min]="0.0001"
+                    styleClass="w-full"
+                    inputStyleClass="text-right text-sm w-full" />
+                </td>
+                <td class="px-4 py-2 text-right tabular-nums font-semibold text-stone-800 dark:text-stone-100">
+                  {{ fmt(item.cantidad * item.precio) }}
+                </td>
+                <td class="px-4 py-2 text-center">
+                  <p-button icon="pi pi-times" [text]="true" severity="danger" size="small"
+                    (onClick)="removeItem(item.id)" />
+                </td>
+              </tr>
+            }
+            @empty {
+              <tr>
+                <td colspan="6" class="py-10 text-center text-stone-400 text-sm">
+                  <i class="pi pi-box text-3xl text-stone-200 block mb-2"></i>
+                  Buscá un producto para agregarlo
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- ── RIGHT: resumen ── -->
+    <div class="w-56 shrink-0 flex flex-col gap-3">
+
+      <h4 class="text-xs font-semibold text-stone-400 uppercase tracking-wide">Resumen</h4>
+
+      <div class="bg-stone-50 dark:bg-stone-800 rounded-xl p-4 flex flex-col gap-2.5 text-sm">
+        <div class="flex justify-between text-stone-500">
+          <span>Bruto</span>
+          <span class="tabular-nums">{{ fmt(bruto()) }}</span>
+        </div>
+        @if (igvIncluido()) {
+          <div class="flex justify-between text-stone-400 text-xs">
+            <span>Subtotal (sin IGV)</span>
+            <span class="tabular-nums">{{ fmt(subtotal()) }}</span>
+          </div>
+        }
+        <div class="flex justify-between text-stone-500">
+          <span>IGV 18%</span>
+          <span class="tabular-nums">{{ fmt(igvMonto()) }}</span>
+        </div>
+
+        <!-- Descuento -->
+        <div class="border-t border-stone-200 dark:border-stone-700 pt-2 flex flex-col gap-1.5">
+          <label class="text-xs text-stone-400">Descuento (%)</label>
+          <p-inputnumber
+            [ngModel]="descuentoPct()"
+            (ngModelChange)="descuentoPct.set($event ?? 0)"
+            mode="decimal"
+            [min]="0"
+            [max]="100"
+            [minFractionDigits]="0"
+            [maxFractionDigits]="2"
+            suffix="%"
+            styleClass="w-full"
+            inputStyleClass="text-right text-sm w-full" />
+          @if (descuentoPct() > 0) {
+            <div class="flex justify-between text-red-500 text-xs">
+              <span>-{{ descuentoPct() }}%</span>
+              <span class="tabular-nums">-{{ fmt(descuentoMonto()) }}</span>
+            </div>
+          }
+        </div>
+
+        <div class="border-t border-stone-200 dark:border-stone-700 pt-2 flex justify-between font-bold text-stone-900 dark:text-stone-100">
+          <span>Total</span>
+          <span class="text-base tabular-nums">{{ fmt(total()) }}</span>
+        </div>
+      </div>
+
+      <p-button
+        label="Registrar Compra"
+        icon="pi pi-check"
+        styleClass="w-full justify-center font-semibold"
+        [disabled]="items().length === 0"
+        (onClick)="procesar()" />
+
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [outlined]="true"
+        styleClass="w-full justify-center"
+        (onClick)="close()" />
+
+    </div>
+
+  </div>
+
+</app-modal>
+
+<!-- Modal anidado: crear producto -->
+<app-product-form
+  [editing]="showProductForm() ? 'new' : null"
+  (saved)="onProductSaved($event)"
+  (closed)="showProductForm.set(false)" />

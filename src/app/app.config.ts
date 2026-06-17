@@ -6,6 +6,7 @@ import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import { definePreset } from '@primeng/themes';
 
+import { MessageService } from 'primeng/api';
 import { routes } from './app.routes';
 import { credentialsInterceptor } from './core/interceptors/credentials.interceptor';
 
@@ -33,6 +34,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withInterceptors([credentialsInterceptor])),
     provideAnimationsAsync(),
+    MessageService,
     providePrimeNG({
       theme: { preset: AppTheme, options: { darkModeSelector: '.dark' } },
       overlayOptions: { appendTo: 'body' },
