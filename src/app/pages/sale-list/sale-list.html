@@ -1,4 +1,322 @@
-﻿<div class="p-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm">
-  <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Sale List</h2>
-  <p class="text-gray-500 dark:text-gray-400 mt-1">View of the Sale List module.</p>
+<div class="p-6 flex flex-col gap-5">
+
+  <!-- ── Page Header ── -->
+  <app-page-header
+    title="Historial de Ventas"
+    subtitle="Gestioná tus comprobantes y conocé el detalle de cada venta">
+    <p-button label="Exportar"      icon="pi pi-download"  severity="secondary" [outlined]="true" size="small" />
+    <p-button label="Cobranzas"     icon="pi pi-clipboard" severity="secondary" [outlined]="true" size="small" />
+    <p-button label="Arqueo de Caja" icon="pi pi-wallet"   size="small" />
+  </app-page-header>
+
+  <!-- ── KPI Cards ── -->
+  <div class="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
+    <app-kpi-card label="Total Registros" [value]="metrics().totalVentas.toString()"          icon="pi-receipt"    />
+    <app-kpi-card label="Ingresos S/"     [value]="'S/ ' + fmtNum(metrics().ingresosSoles)"   icon="pi-chart-bar"  variant="success" />
+    <app-kpi-card label="Ingresos $"      [value]="'$ '  + fmtNum(metrics().ingresosDolares)" icon="pi-chart-bar"  variant="info" />
+    <app-kpi-card label="Promedio S/"     [value]="'S/ ' + fmtNum(metrics().promedioSoles)"   icon="pi-chart-line" />
+    <app-kpi-card label="Promedio $"      [value]="'$ '  + fmtNum(metrics().promedioDolares)" icon="pi-chart-line" variant="info" />
+  </div>
+
+  <!-- ── Table Card ── -->
+  <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
+
+    <!-- Filtros -->
+    <div class="flex items-center gap-2 p-3.5 border-b border-stone-200 dark:border-stone-700 flex-wrap">
+
+      <p-iconfield>
+        <p-inputicon><i class="pi pi-search"></i></p-inputicon>
+        <input pInputText type="text"
+          [ngModel]="searchText()"
+          (ngModelChange)="searchText.set($event)"
+          placeholder="Nº doc, cliente, RUC..."
+          class="w-56 text-sm" />
+      </p-iconfield>
+
+      <p-datepicker
+        [ngModel]="startDate()"
+        (ngModelChange)="startDate.set($event)"
+        dateFormat="dd/mm/yy"
+        placeholder="Desde"
+        appendTo="body"
+        styleClass="w-36 text-sm" />
+
+      <p-datepicker
+        [ngModel]="endDate()"
+        (ngModelChange)="endDate.set($event)"
+        dateFormat="dd/mm/yy"
+        placeholder="Hasta"
+        appendTo="body"
+        styleClass="w-36 text-sm" />
+
+      <p-select
+        [options]="tipoDocOpciones"
+        [ngModel]="tipoDocFiltro()"
+        (ngModelChange)="tipoDocFiltro.set($event)"
+        optionLabel="label"
+        optionValue="value"
+        appendTo="body"
+        styleClass="w-44 text-sm" />
+
+      <span class="ml-auto text-xs text-stone-400">{{ filteredVentas().length }} resultados</span>
+
+      <p-button icon="pi pi-refresh" [text]="true" severity="secondary" size="small"
+        pTooltip="Limpiar filtros" (onClick)="clearFilters()" />
+    </div>
+
+    <!-- Tabla -->
+    <p-table
+      [value]="filteredVentas()"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [rowHover]="true"
+      styleClass="p-datatable-sm"
+      [scrollable]="true">
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="sigla_documento">Comprobante <p-sortIcon field="sigla_documento" /></th>
+          <th pSortableColumn="fecha_emision">Fecha <p-sortIcon field="fecha_emision" /></th>
+          <th>Cliente</th>
+          <th>F. Pago</th>
+          <th pSortableColumn="subtotal" class="text-right">Subtotal <p-sortIcon field="subtotal" /></th>
+          <th class="text-right">IGV</th>
+          <th pSortableColumn="total" class="text-right">Total <p-sortIcon field="total" /></th>
+          <th class="text-right">Saldo</th>
+          <th class="text-center">Estado</th>
+          <th class="text-center">Pago</th>
+          <th class="text-center">SUNAT</th>
+          <th style="width: 3.5rem"></th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-v>
+        <tr [class.opacity-50]="v.estado === 'ANULADO'">
+
+          <td class="whitespace-nowrap">
+            <p class="text-sm font-semibold text-stone-800 dark:text-stone-100">
+              {{ v.sigla_documento }} {{ v.serie }}-{{ v.correlativo }}
+            </p>
+            <p class="text-[11px] text-stone-400">{{ v.moneda }}</p>
+          </td>
+
+          <td class="whitespace-nowrap text-sm text-stone-600 dark:text-stone-300">
+            {{ fmtDate(v.fecha_emision) }}
+          </td>
+
+          <td>
+            <p class="text-sm font-medium text-stone-800 dark:text-stone-100 max-w-[160px] truncate">{{ v.cliente }}</p>
+            <p class="text-[11px] text-stone-400">{{ v.ruc_dni || '—' }}</p>
+          </td>
+
+          <td>
+            <p-tag [value]="v.forma_pago" severity="secondary" />
+          </td>
+
+          <td class="text-right text-sm tabular-nums whitespace-nowrap"
+            [class.text-red-500]="v.tip_doc === 7"
+            [class.text-stone-500]="v.tip_doc !== 7">
+            {{ v.sigla }} {{ fmtNum(signedAmt(v, v.subtotal)) }}
+          </td>
+
+          <td class="text-right text-sm tabular-nums whitespace-nowrap"
+            [class.text-red-500]="v.tip_doc === 7"
+            [class.text-stone-400]="v.tip_doc !== 7">
+            {{ v.sigla }} {{ fmtNum(signedAmt(v, v.igv)) }}
+          </td>
+
+          <td class="text-right text-sm font-semibold tabular-nums whitespace-nowrap"
+            [class.text-red-500]="v.tip_doc === 7"
+            [class.text-stone-900]="v.tip_doc !== 7">
+            {{ v.sigla }} {{ fmtNum(signedAmt(v, v.total)) }}
+          </td>
+
+          <td class="text-right text-sm tabular-nums whitespace-nowrap"
+            [class.text-amber-600]="v.saldo > 0"
+            [class.text-stone-400]="v.saldo === 0">
+            {{ v.sigla }} {{ fmtNum(v.saldo) }}
+          </td>
+
+          <td class="text-center">
+            <p-tag [value]="v.estado" [severity]="estadoSev(v.estado)" />
+          </td>
+
+          <td class="text-center">
+            <p-tag [value]="v.estado_pago" [severity]="pagoSev(v.estado_pago)" />
+          </td>
+
+          <td class="text-center">
+            <p-tag [value]="v.estado_sunat" [severity]="sunatSev(v.estado_sunat)" />
+          </td>
+
+          <td (click)="$event.stopPropagation()">
+            <p-button icon="pi pi-ellipsis-v" [text]="true" severity="secondary" size="small"
+              (onClick)="rowMenu.toggle($event)" />
+            <p-menu #rowMenu [popup]="true" [model]="getMenuItems(v)" appendTo="body" />
+          </td>
+
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="12" class="text-center py-12 text-stone-400 text-sm">
+            <i class="pi pi-receipt text-4xl text-stone-200 block mb-2"></i>
+            No se encontraron ventas
+          </td>
+        </tr>
+      </ng-template>
+
+    </p-table>
+
+  </div>
+
+</div>
+
+<!-- ══ Slide-in Detail Drawer ══ -->
+<div class="fixed inset-y-0 right-0 w-full max-w-lg bg-white dark:bg-stone-900 shadow-2xl z-[9999] flex flex-col
+            transition-transform duration-300 ease-in-out overflow-hidden"
+  [class.translate-x-0]="showDetail()"
+  [class.translate-x-full]="!showDetail()">
+
+  @if (selectedVenta(); as v) {
+
+    <div class="flex items-center justify-between px-6 py-4 border-b border-stone-200 dark:border-stone-700 shrink-0">
+      <div>
+        <h3 class="text-lg font-semibold text-stone-900 dark:text-stone-100">Detalles de la Venta</h3>
+        <p class="text-xs text-stone-400 mt-0.5">
+          {{ v.sigla_documento }} {{ v.serie }}-{{ v.correlativo }} · {{ fmtDate(v.fecha_emision) }}
+        </p>
+      </div>
+      <p-button icon="pi pi-times" [text]="true" severity="secondary" (onClick)="closeDetail()" />
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-6">
+
+      <section>
+        <h4 class="text-xs font-semibold text-stone-400 uppercase tracking-wide mb-3">Información General</h4>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div>
+            <p class="text-stone-400 text-xs">Comprobante</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ v.sigla_documento }} {{ v.serie }}-{{ v.correlativo }}</p>
+          </div>
+          <div>
+            <p class="text-stone-400 text-xs">Fecha Emisión</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ fmtDate(v.fecha_emision) }}</p>
+          </div>
+          <div>
+            <p class="text-stone-400 text-xs">Vencimiento</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ fmtDate(v.fecha_vencimiento) }}</p>
+          </div>
+          <div>
+            <p class="text-stone-400 text-xs">Forma de Pago</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ v.forma_pago }}</p>
+          </div>
+          <div class="col-span-2">
+            <p class="text-stone-400 text-xs">Cliente</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ v.cliente }}</p>
+            @if (v.ruc_dni) {
+              <p class="text-xs text-stone-400">{{ v.ruc_dni }}</p>
+            }
+          </div>
+          <div>
+            <p class="text-stone-400 text-xs">Moneda</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ v.moneda }}</p>
+          </div>
+          <div>
+            <p class="text-stone-400 text-xs">Saldo pendiente</p>
+            <p class="mt-0.5 font-medium"
+              [class.text-amber-600]="v.saldo > 0"
+              [class.text-emerald-600]="v.saldo === 0">
+              {{ v.sigla }} {{ fmtNum(v.saldo) }}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h4 class="text-xs font-semibold text-stone-400 uppercase tracking-wide mb-3">Productos</h4>
+        @if (v.detalles && v.detalles.length > 0) {
+          <div class="border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
+            <table class="w-full text-sm">
+              <thead class="bg-stone-50 dark:bg-stone-800">
+                <tr>
+                  <th class="px-4 py-2.5 text-left text-xs font-semibold text-stone-500 uppercase tracking-wide">Producto</th>
+                  <th class="px-4 py-2.5 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide w-14">Cant.</th>
+                  <th class="px-4 py-2.5 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide w-20">P. Unit.</th>
+                  <th class="px-4 py-2.5 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide w-24">Total</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
+                @for (d of v.detalles; track $index) {
+                  <tr class="hover:bg-stone-50 dark:hover:bg-stone-800/50">
+                    <td class="px-4 py-2.5 text-stone-700 dark:text-stone-300">{{ d.producto_nombre }}</td>
+                    <td class="px-4 py-2.5 text-right tabular-nums text-stone-500">{{ d.cantidad }}</td>
+                    <td class="px-4 py-2.5 text-right tabular-nums text-stone-500">{{ v.sigla }}{{ fmtNum(d.precio_venta) }}</td>
+                    <td class="px-4 py-2.5 text-right tabular-nums font-medium text-stone-800 dark:text-stone-100">{{ v.sigla }}{{ fmtNum(itemTotal(d)) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="py-8 flex flex-col items-center gap-2 text-stone-300">
+            <i class="pi pi-box text-3xl"></i>
+            <p class="text-sm">Sin detalles disponibles</p>
+          </div>
+        }
+      </section>
+
+      <section class="bg-stone-50 dark:bg-stone-800 rounded-xl px-5 py-4 flex flex-col gap-2">
+        @if (v.subtotal > 0) {
+          <div class="flex justify-between text-sm text-stone-500">
+            <span>Op. Gravadas</span><span class="tabular-nums">{{ v.sigla }} {{ fmtNum(v.subtotal) }}</span>
+          </div>
+        }
+        @if (v.total_inafecto > 0) {
+          <div class="flex justify-between text-sm text-stone-500">
+            <span>Op. Inafectas</span><span class="tabular-nums">{{ v.sigla }} {{ fmtNum(v.total_inafecto) }}</span>
+          </div>
+        }
+        @if (v.descuento > 0) {
+          <div class="flex justify-between text-sm text-red-500">
+            <span>Descuento</span><span class="tabular-nums">-{{ v.sigla }} {{ fmtNum(v.descuento) }}</span>
+          </div>
+        }
+        @if (v.igv > 0) {
+          <div class="flex justify-between text-sm text-stone-500">
+            <span>IGV 18%</span><span class="tabular-nums">{{ v.sigla }} {{ fmtNum(v.igv) }}</span>
+          </div>
+        }
+        @if (v.total_gratuito > 0) {
+          <div class="flex justify-between text-sm text-violet-500">
+            <span>Gratuito</span><span class="tabular-nums">{{ v.sigla }} {{ fmtNum(v.total_gratuito) }}</span>
+          </div>
+        }
+        <div class="border-t border-stone-200 dark:border-stone-700 pt-2 flex justify-between font-bold text-stone-900 dark:text-stone-100">
+          <span>Total</span>
+          <span class="text-base tabular-nums" [class.text-red-500]="v.tip_doc === 7">
+            {{ v.sigla }} {{ fmtNum(signedAmt(v, v.total)) }}
+          </span>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="shrink-0 px-6 py-4 border-t border-stone-200 dark:border-stone-700 flex gap-2">
+      <p-button label="Descargar"  icon="pi pi-download" severity="secondary" [outlined]="true" styleClass="flex-1 justify-center" />
+      <p-button label="Reimprimir" icon="pi pi-print"    severity="secondary" [outlined]="true" styleClass="flex-1 justify-center" />
+      <p-button label="Cerrar"     icon="pi pi-times"    styleClass="flex-1 justify-center" (onClick)="closeDetail()" />
+    </div>
+
+  }
+</div>
+
+<!-- Overlay detrás del drawer -->
+<div class="fixed inset-0 bg-black/50 z-[9998] transition-opacity duration-300"
+  [class.opacity-100]="showDetail()"
+  [class.opacity-0]="!showDetail()"
+  [class.pointer-events-none]="!showDetail()"
+  (click)="closeDetail()">
 </div>

@@ -1,4 +1,159 @@
-<div class="p-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm">
-  <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Purchase List</h2>
-  <p class="text-gray-500 dark:text-gray-400 mt-1">View of the Purchase List module.</p>
+<div class="p-6 flex flex-col gap-5">
+
+  <!-- ── Page Header ── -->
+  <app-page-header
+    title="Historial de Compras"
+    subtitle="Registrá y gestioná todas tus compras a proveedores">
+    <p-button label="Exportar"      icon="pi pi-download" severity="secondary" [outlined]="true" size="small" />
+    <p-button label="Nueva Compra"  icon="pi pi-plus"     size="small" (onClick)="openNew()" />
+  </app-page-header>
+
+  <!-- ── KPI Cards ── -->
+  <div class="grid grid-cols-3 gap-3.5">
+    <app-kpi-card label="Total Registros" [value]="metrics().total.toString()"              icon="pi-file-invoice"  />
+    <app-kpi-card label="Gastos S/"       [value]="'S/ ' + fmtNum(metrics().gastosSoles)"  icon="pi-chart-bar"     variant="danger"  />
+    <app-kpi-card label="Gastos $"        [value]="'$ '  + fmtNum(metrics().gastosDolares)" icon="pi-chart-bar"    variant="warning" />
+  </div>
+
+  <!-- ── Table ── -->
+  <app-purchase-table
+    [compras]="compras()"
+    (editCompra)="openEdit($event)"
+    (viewDetail)="openDetail($event)" />
+
+</div>
+
+<!-- ══ Formulario Modal ══ -->
+<app-purchase-form
+  [editing]="editing()"
+  (closed)="closeForm()" />
+
+<!-- ══ Slide-in Detail Drawer ══ -->
+<div class="fixed inset-y-0 right-0 w-full max-w-lg bg-white dark:bg-stone-900 shadow-2xl z-[9999] flex flex-col
+            transition-transform duration-300 ease-in-out overflow-hidden"
+  [class.translate-x-0]="showDetail()"
+  [class.translate-x-full]="!showDetail()">
+
+  @if (selectedCompra(); as c) {
+
+    <div class="flex items-center justify-between px-6 py-4 border-b border-stone-200 dark:border-stone-700 shrink-0">
+      <div>
+        <h3 class="text-lg font-semibold text-stone-900 dark:text-stone-100">Detalle de Compra</h3>
+        <p class="text-xs text-stone-400 mt-0.5">
+          {{ c.sigla_documento }} {{ c.serie }}-{{ c.correlativo }} · {{ fmtDate(c.fecha_compra) }}
+        </p>
+      </div>
+      <p-button icon="pi pi-times" [text]="true" severity="secondary" (onClick)="closeDetail()" />
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-6">
+
+      <section>
+        <h4 class="text-xs font-semibold text-stone-400 uppercase tracking-wide mb-3">Información General</h4>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div>
+            <p class="text-stone-400 text-xs">Proveedor</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ c.proveedor }}</p>
+            <p class="text-xs text-stone-400">{{ c.ruc_proveedor }}</p>
+          </div>
+          <div>
+            <p class="text-stone-400 text-xs">Forma de Pago</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ c.forma_pago }}</p>
+          </div>
+          <div>
+            <p class="text-stone-400 text-xs">Fecha Compra</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ fmtDate(c.fecha_compra) }}</p>
+          </div>
+          <div>
+            <p class="text-stone-400 text-xs">Vencimiento</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ fmtDate(c.fecha_vencimiento) }}</p>
+          </div>
+          <div>
+            <p class="text-stone-400 text-xs">Moneda</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ c.moneda }}</p>
+          </div>
+          <div>
+            <p class="text-stone-400 text-xs">Saldo pendiente</p>
+            <p class="mt-0.5 font-medium"
+              [class.text-amber-600]="c.saldo > 0"
+              [class.text-emerald-600]="c.saldo === 0">
+              {{ c.sigla }} {{ fmtNum(c.saldo) }}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h4 class="text-xs font-semibold text-stone-400 uppercase tracking-wide mb-3">Productos</h4>
+        @if (c.detalles && c.detalles.length > 0) {
+          <div class="border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
+            <table class="w-full text-sm">
+              <thead class="bg-stone-50 dark:bg-stone-800">
+                <tr>
+                  <th class="px-4 py-2.5 text-left text-xs font-semibold text-stone-500 uppercase tracking-wide">Producto</th>
+                  <th class="px-4 py-2.5 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide w-14">Cant.</th>
+                  <th class="px-4 py-2.5 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide w-20">P. Unit.</th>
+                  <th class="px-4 py-2.5 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide w-24">Neto</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
+                @for (d of c.detalles; track $index) {
+                  <tr class="hover:bg-stone-50 dark:hover:bg-stone-800/50">
+                    <td class="px-4 py-2.5 text-stone-700 dark:text-stone-300">{{ d.producto_nombre }}</td>
+                    <td class="px-4 py-2.5 text-right tabular-nums text-stone-500">{{ d.cantidad }}</td>
+                    <td class="px-4 py-2.5 text-right tabular-nums text-stone-500">{{ c.sigla }}{{ fmtNum(d.precio_venta) }}</td>
+                    <td class="px-4 py-2.5 text-right tabular-nums font-medium text-stone-800 dark:text-stone-100">{{ c.sigla }}{{ fmtNum(itemTotal(d)) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="py-8 flex flex-col items-center gap-2 text-stone-300">
+            <i class="pi pi-box text-3xl"></i>
+            <p class="text-sm">Sin detalles disponibles</p>
+          </div>
+        }
+      </section>
+
+      <section class="bg-stone-50 dark:bg-stone-800 rounded-xl px-5 py-4 flex flex-col gap-2">
+        @if (c.subtotal > 0) {
+          <div class="flex justify-between text-sm text-stone-500">
+            <span>Subtotal</span><span class="tabular-nums">{{ c.sigla }} {{ fmtNum(c.subtotal) }}</span>
+          </div>
+        }
+        @if (c.descuento > 0) {
+          <div class="flex justify-between text-sm text-red-500">
+            <span>Descuento</span><span class="tabular-nums">-{{ c.sigla }} {{ fmtNum(c.descuento) }}</span>
+          </div>
+        }
+        @if (c.igv > 0) {
+          <div class="flex justify-between text-sm text-stone-500">
+            <span>IGV 18%</span><span class="tabular-nums">{{ c.sigla }} {{ fmtNum(c.igv) }}</span>
+          </div>
+        }
+        <div class="border-t border-stone-200 dark:border-stone-700 pt-2 flex justify-between font-bold text-stone-900 dark:text-stone-100">
+          <span>Total</span>
+          <span class="text-base tabular-nums">{{ c.sigla }} {{ fmtNum(c.total) }}</span>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="shrink-0 px-6 py-4 border-t border-stone-200 dark:border-stone-700 flex gap-2">
+      <p-button label="Descargar" icon="pi pi-download" severity="secondary" [outlined]="true" styleClass="flex-1 justify-center" />
+      <p-button label="Editar"    icon="pi pi-pencil"   severity="secondary" [outlined]="true" styleClass="flex-1 justify-center"
+        [disabled]="c.estado === 'ANULADA'" (onClick)="openEdit(c); closeDetail()" />
+      <p-button label="Cerrar"    icon="pi pi-times"    styleClass="flex-1 justify-center" (onClick)="closeDetail()" />
+    </div>
+
+  }
+</div>
+
+<!-- Overlay drawer -->
+<div class="fixed inset-0 bg-black/50 z-[9998] transition-opacity duration-300"
+  [class.opacity-100]="showDetail()"
+  [class.opacity-0]="!showDetail()"
+  [class.pointer-events-none]="!showDetail()"
+  (click)="closeDetail()">
 </div>

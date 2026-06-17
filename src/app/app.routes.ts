@@ -86,6 +86,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/sale-list/sale-list').then(m => m.SaleList)
       },
       {
+        path: 'purchase-list',
+        redirectTo: 'purchases',
+        pathMatch: 'full'
+      },
+      {
         path: 'cash-report',
         loadComponent: () => import('./pages/cash-report/cash-report').then(m => m.CashReport)
       },
@@ -145,14 +150,6 @@ export const routes: Routes = [
       // ─── Purchases Pages ───────────────────────────────────────────────────
       {
         path: 'purchases',
-        loadComponent: () => import('./features/purchases/purchases').then(m => m.Purchases)
-      },
-      {
-        path: 'purchases/new',
-        loadComponent: () => import('./pages/purchase/purchase').then(m => m.Purchase)
-      },
-      {
-        path: 'purchases/history',
         loadComponent: () => import('./pages/purchase-list/purchase-list').then(m => m.PurchaseList)
       },
 
