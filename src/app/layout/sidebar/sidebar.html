@@ -1,8 +1,8 @@
 <aside
   class="h-full flex flex-col bg-white dark:bg-stone-900 border-r border-stone-200 dark:border-stone-700 overflow-hidden shrink-0 transition-all duration-200"
   [class.w-16]="layout.isSidebarCollapsed()"
-  [class.w-60]="!layout.isSidebarCollapsed()">
-
+  [class.w-60]="!layout.isSidebarCollapsed()"
+>
   <!-- Brand -->
   <div class="flex items-center justify-center px-4 py-[18px] shrink-0">
     @if (layout.isSidebarCollapsed()) {
@@ -15,40 +15,46 @@
   <!-- Nav sections -->
   <nav class="flex-1 overflow-y-auto px-2 pb-2">
     @for (item of modules(); track item.id) {
-       <a [routerLink]="item.route"
-         routerLinkActive="active-link"
-         [routerLinkActiveOptions]="{ exact: false }"
-         [pTooltip]="layout.isSidebarCollapsed() ? item.label : ''"
-         tooltipPosition="right"
-         class="flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg text-[13.5px] font-medium text-stone-500
-  dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100
-  transition-colors no-underline mb-0.5"
-         [class.justify-center]="layout.isSidebarCollapsed()">
-        <i [class]=" item.icon + ' shrink-0 text-[15px]'"></i>
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{ exact: false }"
+        [pTooltip]="layout.isSidebarCollapsed() ? item.label : ''"
+        tooltipPosition="right"
+        class="flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg text-[13.5px] font-medium text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100 transition-colors no-underline mb-0.5"
+        [class.justify-center]="layout.isSidebarCollapsed()"
+      >
+        <i [class]="item.icon + ' shrink-0 text-[15px]'"></i>
         @if (!layout.isSidebarCollapsed()) {
           <span class="flex-1 truncate">{{ item.label }}</span>
         }
       </a>
-  
     }
   </nav>
 
   <!-- User footer -->
   <div class="shrink-0 border-t border-stone-200 dark:border-stone-700 p-3">
-    <div class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer transition-colors"
-         [class.justify-center]="layout.isSidebarCollapsed()">
-      <div class="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-white text-[11px] font-bold"
-           style="background: linear-gradient(135deg, oklch(0.65 0.15 40), oklch(0.55 0.18 300))">
+    <div
+      class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer transition-colors"
+      [class.justify-center]="layout.isSidebarCollapsed()"
+    >
+      <div
+        class="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-white text-[11px] font-bold"
+        style="background: linear-gradient(135deg, oklch(0.65 0.15 40), oklch(0.55 0.18 300))"
+      >
         MR
       </div>
       @if (!layout.isSidebarCollapsed()) {
         <div class="flex-1 min-w-0">
-          <div class="text-[13px] font-medium text-stone-900 dark:text-stone-100 truncate">{{ currentUser()?.nombre }}</div>
-          <div class="text-[11px] text-stone-400 dark:text-stone-500 truncate">{{ currentUser()?.email }}</div>
+          <div class="text-[13px] font-medium text-stone-900 dark:text-stone-100 truncate">
+            {{ currentUser()?.nombre }}
+          </div>
+          <div class="text-[11px] text-stone-400 dark:text-stone-500 truncate">
+            {{ currentUser()?.email }}
+          </div>
         </div>
         <i class="pi pi-chevron-right text-stone-400 text-[12px]"></i>
       }
     </div>
   </div>
-
 </aside>

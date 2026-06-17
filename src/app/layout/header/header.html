@@ -48,12 +48,12 @@
       <div
         class="absolute top-full left-0 right-0 mt-1.5 z-50 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl shadow-lg overflow-hidden"
       >
-        @for (mod of filteredModules(); track mod.route) {
+        @for (mod of filteredModules(); track mod.id) {
           <button
             class="flex items-center gap-2.5 w-full px-3 py-2.5 text-sm text-left text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
             (click)="selectModule(mod)"
           >
-            <i [class]="'pi ' + mod.icon" style="font-size: 13px"></i>
+            <i [class]="mod.icon" style="font-size: 13px"></i>
             {{ mod.label }}
           </button>
         }

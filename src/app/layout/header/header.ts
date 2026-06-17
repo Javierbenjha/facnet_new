@@ -6,10 +6,11 @@ import { Select } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
-import { NAV_SECTIONS, NavItem } from '../nav.config';
 import { Layout } from '../layout';
 import { ConfirmationService, MenuItem } from 'primeng/api';
 import { Auth } from '../../core/services/auth';
+import { Menu } from '../../core/services/menu';
+import { Modulo } from '../../core/models/menu.model';
 import { MenuModule } from 'primeng/menu';
 
 @Component({
@@ -27,6 +28,7 @@ export class Header {
 
   private readonly router = inject(Router);
   private readonly layout = inject(Layout);
+  private readonly menu = inject(Menu);
 
   readonly toggleSidebar = output<void>();
 
@@ -49,7 +51,7 @@ export class Header {
   readonly searchQuery = signal('');
   readonly showSearchDropdown = signal(false);
 
-  readonly modules = computed(() => NAV_SECTIONS.flatMap((s) => s.items));
+  readonly modules = computed(() => this.menu.modules());
 
   readonly filteredModules = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
@@ -66,7 +68,7 @@ export class Header {
     this.showSearchDropdown.set(value.trim().length > 0);
   }
 
-  selectModule(mod: NavItem) {
+  selectModule(mod: Modulo) {
     this.router.navigate([mod.route]);
     this.searchQuery.set('');
     this.showSearchDropdown.set(false);
