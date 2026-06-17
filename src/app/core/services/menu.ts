@@ -8,7 +8,7 @@ import { Observable, tap } from 'rxjs';
 export class Menu {
   private readonly http = inject(HttpClient);
   private readonly _modules = signal<Modulo[]>([]);
-  readonly module = this._modules.asReadonly();
+  readonly modules = this._modules.asReadonly();
 
   load(): Observable<Modulo[]> {
     return this.http

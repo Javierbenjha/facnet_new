@@ -14,36 +14,22 @@
 
   <!-- Nav sections -->
   <nav class="flex-1 overflow-y-auto px-2 pb-2">
-    @for (section of sections; track section.label) {
-
-      @if (!layout.isSidebarCollapsed()) {
-        <div class="px-2 pt-3 pb-1 text-[10.5px] font-semibold text-stone-400 uppercase tracking-widest select-none">
-          {{ section.label }}
-        </div>
-      } @else {
-        <div class="my-2 border-t border-stone-100 dark:border-stone-800"></div>
-      }
-
-      @for (item of section.items; track item.route) {
-        <a [routerLink]="item.route"
-           routerLinkActive="active-link"
-           [routerLinkActiveOptions]="{ exact: false }"
-           [pTooltip]="layout.isSidebarCollapsed() ? item.label : ''"
-           tooltipPosition="right"
-           class="flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg text-[13.5px] font-medium text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100 transition-colors no-underline mb-0.5"
-           [class.justify-center]="layout.isSidebarCollapsed()">
-          <i [class]="'pi ' + item.icon + ' shrink-0 text-[15px]'"></i>
-          @if (!layout.isSidebarCollapsed()) {
-            <span class="flex-1 truncate">{{ item.label }}</span>
-            @if (item.badge) {
-              <span class="text-[10.5px] font-semibold px-1.5 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400">
-                {{ item.badge }}
-              </span>
-            }
-          }
-        </a>
-      }
-
+    @for (item of modules(); track item.id) {
+       <a [routerLink]="item.route"
+         routerLinkActive="active-link"
+         [routerLinkActiveOptions]="{ exact: false }"
+         [pTooltip]="layout.isSidebarCollapsed() ? item.label : ''"
+         tooltipPosition="right"
+         class="flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg text-[13.5px] font-medium text-stone-500
+  dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-900 dark:hover:text-stone-100
+  transition-colors no-underline mb-0.5"
+         [class.justify-center]="layout.isSidebarCollapsed()">
+        <i [class]=" item.icon + ' shrink-0 text-[15px]'"></i>
+        @if (!layout.isSidebarCollapsed()) {
+          <span class="flex-1 truncate">{{ item.label }}</span>
+        }
+      </a>
+  
     }
   </nav>
 
