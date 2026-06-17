@@ -40,9 +40,16 @@
     }
 
     @empty {
-      <div class="col-span-full py-16 flex flex-col items-center gap-2 text-stone-300">
+      <div class="col-span-full py-16 flex flex-col items-center gap-3 text-stone-300">
         <i class="pi pi-search text-4xl"></i>
-        <p class="text-sm">Sin resultados</p>
+        <p class="text-sm">Sin resultados para "{{ query() }}"</p>
+        <p-button
+          label="Crear nuevo producto"
+          icon="pi pi-plus-circle"
+          severity="secondary"
+          [outlined]="true"
+          size="small"
+          (onClick)="createProduct.emit()" />
       </div>
     }
 

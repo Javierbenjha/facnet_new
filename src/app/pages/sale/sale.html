@@ -3,7 +3,7 @@
 
   <!-- ══════════════════════════════════════════════════════ LEFT PANEL ══ -->
   <div class="flex flex-col overflow-hidden bg-stone-50 dark:bg-stone-950">
-    <app-sale-header [saleInfo]="saleInfoSummary()" />
+    <app-sale-header [saleInfo]="saleInfoSummary()" (crearProducto)="showProductForm.set(true)" />
 
     <app-sale-info
       [cliente]="cliente()"             (clienteChange)="cliente.set($event)"
@@ -30,7 +30,8 @@
       [categorias]="categorias()"
       [productos]="filteredProductos()"
       [sigla]="sigla()"
-      (productClick)="addToCart($event)" />
+      (productClick)="addToCart($event)"
+      (createProduct)="showProductForm.set(true)" />
   </div>
 
   <!-- ══════════════════════════════════════════════════════ RIGHT PANEL ══ -->
@@ -184,3 +185,8 @@
     <p-button label="Nueva venta" icon="pi pi-plus" styleClass="w-full justify-center" (onClick)="cerrarTicket()" />
   </div>
 </app-modal>
+
+<app-product-form
+  [editing]="showProductForm() ? 'new' : null"
+  (saved)="onProductSaved($event)"
+  (closed)="showProductForm.set(false)" />

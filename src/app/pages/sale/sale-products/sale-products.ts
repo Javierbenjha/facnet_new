@@ -22,4 +22,5 @@ export class SaleProducts {
   readonly queryChange     = output<string>();
   readonly catActivaChange = output<string>();
   readonly productClick    = output<PosProducto>();
+  readonly createProduct   = output<void>();
 }

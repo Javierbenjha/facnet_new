@@ -41,6 +41,15 @@ export class Products {
 
   exportExcel() { /* TODO: implementar exportación */ }
 
+  onProductSaved(p: Producto) {
+    const list = this.products();
+    if (list.some(x => x.id === p.id)) {
+      this.products.set(list.map(x => x.id === p.id ? p : x));
+    } else {
+      this.products.set([...list, p]);
+    }
+  }
+
   openNew()             { this.editing.set('new'); }
   openEdit(p: Producto) { this.editing.set(p);    }
   closeModal()          { this.editing.set(null);  }

@@ -10,53 +10,92 @@
     <!-- Columna izquierda -->
     <div class="flex flex-col gap-3.5">
 
+      <!-- Nombre -->
       <div class="flex flex-col gap-1.5">
         <label class="text-xs font-medium text-stone-500">Nombre del producto</label>
         <input pInputText [formControl]="form.controls.descripcion" placeholder="Ej: Latte vainilla 12oz" class="w-full" />
       </div>
 
+      <!-- SKU + Moneda -->
       <div class="grid grid-cols-2 gap-3">
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-medium text-stone-500">SKU</label>
-          <input pInputText [formControl]="form.controls.sku" placeholder="CAF-001" class="w-full font-mono" />
+          <p-inputgroup>
+            <input pInputText [formControl]="form.controls.sku" placeholder="CAF-001" class="font-mono" />
+            <p-inputGroupAddon>
+              <p-button icon="pi pi-barcode" [text]="true" severity="secondary" size="small"
+                        pTooltip="Generar SKU" tooltipPosition="top"
+                        (onClick)="generarSku()" />
+            </p-inputGroupAddon>
+          </p-inputgroup>
         </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-stone-500">Moneda</label>
+          <p-select [options]="monedaOptions" optionLabel="label" optionValue="value"
+                    [formControl]="form.controls.moneda" styleClass="w-full" appendTo="body" />
+        </div>
+      </div>
+
+      <!-- Categoría + Marca -->
+      <div class="grid grid-cols-2 gap-3">
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-medium text-stone-500">Categoría</label>
           <p-select [options]="categories" optionLabel="label" optionValue="value"
-                    [formControl]="form.controls.categoria" styleClass="w-full" />
+                    [formControl]="form.controls.categoria" styleClass="w-full" appendTo="body" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-stone-500">Marca</label>
+          <input pInputText [formControl]="form.controls.marca" placeholder="Ej: Gloria, Laive…" class="w-full" />
         </div>
       </div>
 
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-medium text-stone-500">Descripción</label>
-        <textarea pTextarea [formControl]="form.controls.description" rows="3"
-                  placeholder="Notas, ingredientes, presentación…" class="w-full resize-none"></textarea>
-      </div>
-
-      <div class="grid grid-cols-2 gap-3">
+      <!-- Precios: Público + Mayor + Costo -->
+      <div class="grid grid-cols-3 gap-3">
         <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-medium text-stone-500">Precio de venta (S/)</label>
+          <label class="text-xs font-medium text-stone-500">Precio público</label>
           <p-inputnumber [formControl]="form.controls.precio_publico" mode="decimal"
                          [minFractionDigits]="2" [maxFractionDigits]="2" styleClass="w-full" />
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-medium text-stone-500">Costo (S/)</label>
+          <label class="text-xs font-medium text-stone-500">Precio mayor</label>
+          <p-inputnumber [formControl]="form.controls.precio_mayor" mode="decimal"
+                         [minFractionDigits]="2" [maxFractionDigits]="2" styleClass="w-full" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-medium text-stone-500">Costo</label>
           <p-inputnumber [formControl]="form.controls.costo" mode="decimal"
                          [minFractionDigits]="2" [maxFractionDigits]="2" styleClass="w-full" />
         </div>
       </div>
 
+      <!-- Unidad + IGV -->
       <div class="grid grid-cols-2 gap-3">
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-medium text-stone-500">Unidad</label>
           <p-select [options]="unitOptions" optionLabel="label" optionValue="value"
-                    [formControl]="form.controls.unidad" styleClass="w-full" />
+                    [formControl]="form.controls.unidad" styleClass="w-full" appendTo="body" />
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-medium text-stone-500">IGV</label>
           <p-select [options]="igvOptions" optionLabel="label" optionValue="value"
-                    [formControl]="form.controls.igv" styleClass="w-full" />
+                    [formControl]="form.controls.igv" styleClass="w-full" appendTo="body" />
         </div>
+      </div>
+
+      <!-- Es servicio -->
+      <div class="flex items-center justify-between px-3 py-2.5 rounded-lg border border-stone-200 dark:border-stone-700">
+        <div>
+          <p class="text-sm font-medium text-stone-700 dark:text-stone-200">Es servicio</p>
+          <p class="text-xs text-stone-400">No maneja stock ni inventario</p>
+        </div>
+        <p-toggleswitch [formControl]="form.controls.es_servicio" />
+      </div>
+
+      <!-- Notas -->
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-medium text-stone-500">Notas / descripción</label>
+        <textarea pTextarea [formControl]="form.controls.descripcion_larga" rows="3"
+                  placeholder="Ingredientes, presentación, observaciones…" class="w-full resize-none"></textarea>
       </div>
 
     </div>
@@ -64,6 +103,7 @@
     <!-- Columna derecha -->
     <div class="flex flex-col gap-3.5">
 
+      <!-- Imagen -->
       <div class="flex flex-col gap-1.5">
         <label class="text-xs font-medium text-stone-500">Imagen</label>
         <div class="h-28 border-2 border-dashed border-stone-200 dark:border-stone-700 rounded-xl flex items-center justify-center text-stone-400 text-sm cursor-pointer hover:border-stone-400 transition-colors">
@@ -74,6 +114,7 @@
         </div>
       </div>
 
+      <!-- Stock por sucursal -->
       <div class="flex flex-col gap-1.5">
         <label class="text-xs font-medium text-stone-500">Inventario por sucursal</label>
         <div class="border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
@@ -95,6 +136,7 @@
         </div>
       </div>
 
+      <!-- Stock mínimo -->
       <div class="flex flex-col gap-1.5">
         <label class="text-xs font-medium text-stone-500">Stock mínimo (alerta)</label>
         <p-inputnumber [formControl]="form.controls.stock_min" styleClass="w-full" />

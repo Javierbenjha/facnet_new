@@ -25,6 +25,7 @@
 
   <app-product-form
     [editing]="editing()"
-    (closed)="closeModal()" />
+    (closed)="closeModal()"
+    (saved)="onProductSaved($event)" />
 
 </div>

@@ -1,4 +1,192 @@
-﻿<div class="p-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm">
-  <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Company Branch</h2>
-  <p class="text-gray-500 dark:text-gray-400 mt-1">View of the Company Branch module.</p>
+<div class="p-6 flex flex-col gap-5">
+
+  <!-- ── Page Header ── -->
+  <app-page-header
+    title="Empresa y Sucursal"
+    subtitle="Gestioná la información de tu empresa y sus sucursales">
+    @if (tab() === 'empresa') {
+      <p-button label="Nueva Empresa" icon="pi pi-plus" size="small" (onClick)="openNewEmpresa()" />
+    } @else {
+      <p-button label="Nueva Sucursal" icon="pi pi-plus" size="small" (onClick)="openNewSucursal()" />
+    }
+  </app-page-header>
+
+  <!-- ── Tabs ── -->
+  <p-selectbutton
+    [options]="tabOptions"
+    [ngModel]="tab()"
+    (ngModelChange)="tab.set($event)"
+    optionLabel="label"
+    optionValue="value">
+    <ng-template #item let-opt>
+      <i [class]="opt.icon + ' mr-2'"></i>{{ opt.label }}
+    </ng-template>
+  </p-selectbutton>
+
+  <!-- ══════════════════════ EMPRESA TAB ══════════════════════ -->
+  @if (tab() === 'empresa') {
+
+    @if (empresas().length === 0) {
+      <div class="py-20 flex flex-col items-center gap-4 text-stone-300">
+        <i class="pi pi-building text-5xl"></i>
+        <p class="text-base">No hay empresas registradas</p>
+        <p-button label="Nueva Empresa" icon="pi pi-plus" severity="secondary" [outlined]="true"
+                  (onClick)="openNewEmpresa()" />
+      </div>
+    } @else {
+      <div class="grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(340px, 1fr))">
+        @for (e of empresas(); track e.id) {
+          <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-2xl p-5 flex flex-col gap-4 hover:shadow-md transition-shadow">
+
+            <!-- Card top -->
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <span class="text-sm font-bold text-primary">{{ initials(e.razon_social) }}</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-stone-900 dark:text-stone-100 truncate">{{ e.razon_social }}</p>
+                <p class="text-xs font-mono text-stone-400 mt-0.5">RUC {{ e.ruc }}</p>
+              </div>
+              <p-tag [value]="e.estado" [severity]="estadoSev(e.estado)" />
+            </div>
+
+            <!-- Info rows -->
+            <div class="flex flex-col gap-1.5 text-sm">
+              <div class="flex items-start gap-2 text-stone-500 dark:text-stone-400">
+                <i class="pi pi-map-marker text-xs mt-0.5 shrink-0"></i>
+                <span class="truncate">{{ e.direccion }}</span>
+              </div>
+              @if (e.usuario_sol) {
+                <div class="flex items-center gap-2 text-stone-500 dark:text-stone-400">
+                  <i class="pi pi-user text-xs shrink-0"></i>
+                  <span class="font-mono text-xs">SOL: {{ e.usuario_sol }}</span>
+                </div>
+              }
+              <div class="flex items-center gap-4 mt-1 pt-1 border-t border-stone-100 dark:border-stone-800">
+                <div class="flex items-center gap-1.5">
+                  <i class="pi text-xs"
+                     [class.pi-check-circle]="e.stdetraccion"
+                     [class.text-emerald-500]="e.stdetraccion"
+                     [class.pi-circle]="!e.stdetraccion"
+                     [class.text-stone-300]="!e.stdetraccion"></i>
+                  <span class="text-xs text-stone-400">Detracción</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <i class="pi text-xs"
+                     [class.pi-check-circle]="e.stretencion"
+                     [class.text-emerald-500]="e.stretencion"
+                     [class.pi-circle]="!e.stretencion"
+                     [class.text-stone-300]="!e.stretencion"></i>
+                  <span class="text-xs text-stone-400">Retención</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-2 pt-1 border-t border-stone-100 dark:border-stone-800">
+              <p-button label="Editar" icon="pi pi-pencil" severity="secondary" [outlined]="true"
+                        size="small" styleClass="flex-1 justify-center"
+                        (onClick)="openEditEmpresa(e)" />
+              <p-button
+                [icon]="e.estado === 'ACTIVO' ? 'pi pi-ban' : 'pi pi-check-circle'"
+                [label]="e.estado === 'ACTIVO' ? 'Desactivar' : 'Activar'"
+                [severity]="e.estado === 'ACTIVO' ? 'danger' : 'success'"
+                [outlined]="true"
+                size="small"
+                styleClass="flex-1 justify-center"
+                (onClick)="toggleEmpresaEstado(e)" />
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+
+  }
+
+  <!-- ══════════════════════ SUCURSAL TAB ══════════════════════ -->
+  @if (tab() === 'sucursal') {
+
+    @if (sucursales().length === 0) {
+      <div class="py-20 flex flex-col items-center gap-4 text-stone-300">
+        <i class="pi pi-shop text-5xl"></i>
+        <p class="text-base">No hay sucursales registradas</p>
+        <p-button label="Nueva Sucursal" icon="pi pi-plus" severity="secondary" [outlined]="true"
+                  (onClick)="openNewSucursal()" />
+      </div>
+    } @else {
+      <div class="grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr))">
+        @for (s of sucursales(); track s.id) {
+          <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-2xl p-5 flex flex-col gap-4 hover:shadow-md transition-shadow">
+
+            <!-- Card top -->
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center shrink-0">
+                <i class="pi pi-shop text-violet-500"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-stone-900 dark:text-stone-100 truncate">{{ s.descripcion }}</p>
+                <p class="text-xs text-stone-400 mt-0.5 truncate">{{ s.empresa_nombre }}</p>
+              </div>
+              <p-tag [value]="s.estado" [severity]="estadoSev(s.estado)" />
+            </div>
+
+            <!-- Info rows -->
+            <div class="flex flex-col gap-1.5 text-sm">
+              <div class="flex items-start gap-2 text-stone-500 dark:text-stone-400">
+                <i class="pi pi-map-marker text-xs mt-0.5 shrink-0"></i>
+                <span class="truncate">{{ s.direccion }}</span>
+              </div>
+              @if (s.telefono) {
+                <div class="flex items-center gap-2 text-stone-500 dark:text-stone-400">
+                  <i class="pi pi-phone text-xs shrink-0"></i>
+                  <span>{{ s.telefono }}</span>
+                </div>
+              }
+              @if (s.email) {
+                <div class="flex items-center gap-2 text-stone-500 dark:text-stone-400">
+                  <i class="pi pi-envelope text-xs shrink-0"></i>
+                  <span class="truncate">{{ s.email }}</span>
+                </div>
+              }
+              <div class="flex items-center gap-2 text-stone-500 dark:text-stone-400 mt-1 pt-1 border-t border-stone-100 dark:border-stone-800">
+                <i class="pi pi-chart-bar text-xs shrink-0"></i>
+                <span class="text-xs">Meta mensual: <span class="font-semibold text-stone-700 dark:text-stone-300">{{ fmtMeta(s.meta) }}</span></span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-2 pt-1 border-t border-stone-100 dark:border-stone-800">
+              <p-button label="Editar" icon="pi pi-pencil" severity="secondary" [outlined]="true"
+                        size="small" styleClass="flex-1 justify-center"
+                        (onClick)="openEditSucursal(s)" />
+              <p-button
+                [icon]="s.estado === 'ACTIVO' ? 'pi pi-ban' : 'pi pi-check-circle'"
+                [label]="s.estado === 'ACTIVO' ? 'Desactivar' : 'Activar'"
+                [severity]="s.estado === 'ACTIVO' ? 'danger' : 'success'"
+                [outlined]="true"
+                size="small"
+                styleClass="flex-1 justify-center"
+                (onClick)="toggleSucursalEstado(s)" />
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+
+  }
+
 </div>
+
+<!-- ══ Modals ══ -->
+<app-company-form
+  [editing]="editingEmpresa()"
+  (saved)="onEmpresaSaved($event)"
+  (closed)="closeEmpresaForm()" />
+
+<app-branch-form
+  [editing]="editingSucursal()"
+  [empresas]="empresas()"
+  (saved)="onSucursalSaved($event)"
+  (closed)="closeSucursalForm()" />

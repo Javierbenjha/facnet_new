@@ -1,0 +1,184 @@
+<app-modal
+  [visible]="visible()"
+  (visibleChange)="$event || close()"
+  (closed)="close()"
+  [title]="modalTitle()"
+  size="md">
+
+  <div class="flex flex-col gap-4 pt-1">
+
+    <!-- ── Formulario ── -->
+    <div class="flex flex-col gap-3">
+
+      <!-- Descripción con icono -->
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+          Dirección <span class="text-red-400">*</span>
+        </label>
+        <p-inputgroup>
+          <p-inputGroupAddon><i class="pi pi-map-marker"></i></p-inputGroupAddon>
+          <input pInputText
+                 [ngModel]="fDesc()"
+                 (ngModelChange)="fDesc.set($event)"
+                 placeholder="Av. Ejemplo 123, Dpto 502" />
+        </p-inputgroup>
+      </div>
+
+      <!-- Dep / Prov / Dist -->
+      <div class="grid grid-cols-3 gap-3">
+
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+            Departamento <span class="text-red-400">*</span>
+          </label>
+          <p-select
+            [options]="depOpts"
+            [ngModel]="fDep()"
+            (ngModelChange)="setDep($event)"
+            placeholder="Seleccionar"
+            [filter]="true"
+            filterPlaceholder="Buscar..."
+            appendTo="body"
+            styleClass="w-full" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+            Provincia <span class="text-red-400">*</span>
+          </label>
+          <p-select
+            [options]="provOpts()"
+            [ngModel]="fProv()"
+            (ngModelChange)="setProv($event)"
+            placeholder="Seleccionar"
+            [filter]="true"
+            filterPlaceholder="Buscar..."
+            [disabled]="!fDep()"
+            appendTo="body"
+            styleClass="w-full" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+            Distrito <span class="text-red-400">*</span>
+          </label>
+          <p-select
+            [options]="distOpts()"
+            [ngModel]="fDist()"
+            (ngModelChange)="fDist.set($event)"
+            placeholder="Seleccionar"
+            [filter]="true"
+            filterPlaceholder="Buscar..."
+            [disabled]="!fProv()"
+            appendTo="body"
+            styleClass="w-full" />
+        </div>
+
+      </div>
+
+      <!-- Checkbox + Botones en la misma fila -->
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <p-checkbox
+            [ngModel]="fPrincipal()"
+            (ngModelChange)="fPrincipal.set($event)"
+            [binary]="true"
+            inputId="cb-principal" />
+          <label for="cb-principal" class="text-sm text-stone-600 dark:text-stone-400 cursor-pointer select-none">
+            Dirección principal
+          </label>
+        </div>
+        <div class="flex items-center gap-2">
+          <p-button
+            [label]="isEditing() ? 'Guardar cambios' : 'Agregar dirección'"
+            [icon]="isEditing() ? 'pi pi-check' : 'pi pi-plus'"
+            size="small"
+            (onClick)="guardar()" />
+          @if (isEditing()) {
+            <p-button
+              label="Cancelar"
+              severity="secondary"
+              [outlined]="true"
+              size="small"
+              (onClick)="cancelEdit()" />
+          }
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Divisor ── -->
+    <p-divider>
+      <span class="text-xs text-stone-400 px-2">
+        @if (direcciones().length > 0) {
+          {{ direcciones().length }} dirección{{ direcciones().length !== 1 ? 'es' : '' }} registrada{{ direcciones().length !== 1 ? 's' : '' }}
+        } @else {
+          Sin direcciones
+        }
+      </span>
+    </p-divider>
+
+    <!-- ── Lista ── -->
+    @if (direcciones().length > 0) {
+      <div class="flex flex-col gap-1.5 max-h-56 overflow-y-auto pr-0.5">
+        @for (d of direcciones(); track d.id; let i = $index) {
+          <div class="flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors"
+               [class.border-amber-300]="d.es_principal"
+               [class.bg-amber-50]="d.es_principal"
+               [class.dark:bg-amber-900/10]="d.es_principal"
+               [class.border-stone-200]="!d.es_principal"
+               [class.dark:border-stone-700]="!d.es_principal">
+
+            <p-button
+              [icon]="d.es_principal ? 'pi pi-star-fill' : 'pi pi-star'"
+              [text]="true"
+              [severity]="d.es_principal ? 'warn' : 'secondary'"
+              size="small"
+              [pTooltip]="d.es_principal ? 'Dirección principal' : 'Marcar como principal'"
+              (onClick)="setPrincipal(i)" />
+
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <p class="text-sm font-medium text-stone-800 dark:text-stone-100 truncate">
+                  {{ d.descripcion }}
+                </p>
+                @if (d.es_principal) {
+                  <p-tag value="Principal" severity="warn" />
+                }
+              </div>
+              <p class="text-xs text-stone-400 mt-0.5">
+                {{ d.distrito }}, {{ d.provincia }}, {{ d.departamento }}
+              </p>
+            </div>
+
+            <div class="flex items-center gap-1 shrink-0">
+              <p-button
+                icon="pi pi-pencil"
+                [text]="true"
+                severity="secondary"
+                size="small"
+                pTooltip="Editar"
+                (onClick)="editar(i)" />
+              <p-button
+                icon="pi pi-trash"
+                [text]="true"
+                severity="danger"
+                size="small"
+                pTooltip="Eliminar"
+                (onClick)="eliminar(i)" />
+            </div>
+
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="flex flex-col items-center gap-2 py-4">
+        <i class="pi pi-map-marker text-3xl text-stone-200"></i>
+        <p class="text-sm text-stone-400">No hay direcciones registradas aún</p>
+      </div>
+    }
+
+  </div>
+
+
+</app-modal>

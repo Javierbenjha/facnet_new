@@ -1,4 +1,176 @@
-﻿<div class="p-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm">
-  <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Customers Suppliers</h2>
-  <p class="text-gray-500 dark:text-gray-400 mt-1">View of the Customers Suppliers module.</p>
+<div class="p-6 flex flex-col gap-5">
+
+  <!-- Encabezado -->
+  <app-page-header
+    title="Clientes y Proveedores"
+    [subtitle]="headerSubtitle()">
+    <p-button
+      label="Exportar"
+      icon="pi pi-download"
+      severity="secondary"
+      [outlined]="true"
+      size="small"
+      (onClick)="exportar()" />
+    <p-button
+      [label]="tab() === 'CLIENTE' ? 'Nuevo cliente' : 'Nuevo proveedor'"
+      icon="pi pi-plus"
+      size="small"
+      (onClick)="addNew()" />
+  </app-page-header>
+
+  <!-- KPIs -->
+  <div class="grid grid-cols-3 gap-4">
+    <app-kpi-card
+      [label]="tab() === 'CLIENTE' ? 'Total clientes' : 'Total proveedores'"
+      [value]="stats().total.toString()"
+      subtitle="en total"
+      icon="pi-users"
+      variant="info" />
+    <app-kpi-card
+      label="Activos"
+      [value]="stats().activos.toString()"
+      subtitle="habilitados"
+      icon="pi-check-circle"
+      variant="success" />
+    <app-kpi-card
+      label="Inactivos"
+      [value]="stats().inactivos.toString()"
+      subtitle="deshabilitados"
+      icon="pi-times-circle"
+      variant="danger" />
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
+
+    <!-- Barra de filtros -->
+    <div class="flex items-center gap-2 p-3.5 border-b border-stone-200 dark:border-stone-700 flex-wrap">
+
+      <p-selectbutton
+        [options]="tabOptions"
+        [ngModel]="tab()"
+        (ngModelChange)="switchTab($event)"
+        optionLabel="label"
+        optionValue="value">
+        <ng-template #item let-opt>
+          <i [class]="opt.icon + ' mr-1.5'"></i>{{ opt.label }}
+        </ng-template>
+      </p-selectbutton>
+
+      <p-iconfield>
+        <p-inputicon><i class="pi pi-search"></i></p-inputicon>
+        <input pInputText
+               class="w-56 text-sm"
+               [ngModel]="searchTerm()"
+               (ngModelChange)="searchTerm.set($event)"
+               [placeholder]="tab() === 'CLIENTE' ? 'Buscar clientes...' : 'Buscar proveedores...'" />
+      </p-iconfield>
+
+      <p-selectbutton
+        [options]="statusOptions"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="status()"
+        (ngModelChange)="status.set($event)" />
+
+      <span class="ml-auto text-xs text-stone-400">{{ tableData().length }} resultados</span>
+
+    </div>
+
+    <!-- p-table -->
+    <p-table
+      [value]="tableData()"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 20, 50]"
+      [rowHover]="true"
+      styleClass="p-datatable-sm"
+      [scrollable]="true">
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Nombre / Razón Social</th>
+          <th>Documento</th>
+          <th>Teléfono</th>
+          <th>Email</th>
+          <th>Ubicación</th>
+          <th>Estado</th>
+          <th style="width: 4rem"></th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-p>
+        <tr class="cursor-pointer" (click)="edit(p)">
+
+          <td>
+            <div class="flex items-center gap-2.5">
+              <div [class]="avatarClass(p)">
+                <span class="text-xs font-bold text-white">{{ initials(p) }}</span>
+              </div>
+              <div>
+                <p class="font-medium text-sm text-stone-800 dark:text-stone-100">{{ nombreCompleto(p) }}</p>
+                <p class="text-xs text-stone-400">{{ p.tipo_documento }}</p>
+              </div>
+            </div>
+          </td>
+
+          <td>
+            <span class="font-mono text-xs font-semibold
+                         bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300
+                         px-2.5 py-0.5 rounded-full">
+              {{ p.numero_documento }}
+            </span>
+          </td>
+
+          <td class="text-sm text-stone-500 dark:text-stone-400">{{ p.telefono || '—' }}</td>
+
+          <td class="text-sm text-stone-500 dark:text-stone-400">{{ p.email || '—' }}</td>
+
+          <td class="text-sm text-stone-500 dark:text-stone-400">
+            {{ p.distrito }}, {{ p.departamento }}
+          </td>
+
+          <td>
+            <p-tag
+              [value]="p.estado"
+              [severity]="p.estado === 'ACTIVO' ? 'success' : 'danger'" />
+          </td>
+
+          <td (click)="$event.stopPropagation()">
+            <p-button
+              icon="pi pi-ellipsis-v"
+              [text]="true"
+              severity="secondary"
+              size="small"
+              (onClick)="rowMenu.toggle($event)" />
+            <p-menu #rowMenu [popup]="true" [model]="getMenuItems(p)" appendTo="body" />
+          </td>
+
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="text-center py-10 text-stone-400 text-sm">
+            No se encontraron registros con los filtros aplicados
+          </td>
+        </tr>
+      </ng-template>
+
+    </p-table>
+
+  </div>
+
 </div>
+
+<!-- Modal dirección -->
+<app-direccion-modal
+  [persona]="editingDireccion()"
+  (closed)="closeDireccion($event)" />
+
+<!-- Modal cliente/proveedor -->
+<app-customer-form
+  [editing]="editing()"
+  [tipoPersona]="tab()"
+  (closed)="close()"
+  (saved)="onSaved($event)" />

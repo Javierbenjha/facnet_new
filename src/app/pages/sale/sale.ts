@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import { InputNumber } from 'primeng/inputnumber';
 import { AppModal } from '../../shared/app-modal/app-modal';
+import { ProductForm } from '../products/product-form/product-form';
 import { SaleHeader } from './sale-header/sale-header';
 import { SaleInfo } from './sale-info/sale-info';
 import { SaleProducts } from './sale-products/sale-products';
@@ -18,12 +19,18 @@ import {
   templateUrl: './sale.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { 'class': 'w-full h-full flex overflow-hidden' },
-  imports: [Button, InputNumber, AppModal, FormsModule, SaleHeader, SaleInfo, SaleProducts, SaleCart],
+  imports: [Button, InputNumber, AppModal, FormsModule, ProductForm, SaleHeader, SaleInfo, SaleProducts, SaleCart],
 })
 export class Sale {
   readonly metodosPago          = METODOS_PAGO;
   readonly tiposDoc             = TIPOS_DOC;
   readonly detraccionConceptos  = DETRACCION_CONCEPTOS;
+
+  // ── Product catalog (mutable so new products can be added) ────────────────
+  readonly productos = signal([...POS_PRODUCTOS]);
+
+  // ── Product form modal ─────────────────────────────────────────────────────
+  readonly showProductForm = signal(false);
 
   // ── Product search / filter ────────────────────────────────────────────────
   readonly query     = signal('');
@@ -69,13 +76,13 @@ export class Sale {
   // ── Computed ───────────────────────────────────────────────────────────────
   readonly categorias = computed(() => [
     'Todas',
-    ...new Set(POS_PRODUCTOS.map(p => p.categoria)),
+    ...new Set(this.productos().map(p => p.categoria)),
   ]);
 
   readonly filteredProductos = computed(() => {
     const q   = this.query().toLowerCase().trim();
     const cat = this.catActiva();
-    return POS_PRODUCTOS.filter(p =>
+    return this.productos().filter(p =>
       (cat === 'Todas' || p.categoria === cat) &&
       (!q || p.descripcion.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q))
     );
@@ -143,6 +150,26 @@ export class Sale {
     descuentoMonto: this.descuentoMonto(),
     descuento:      this.descuento(),
   }));
+
+  // ── Product creation ───────────────────────────────────────────────────────
+  onProductSaved(p: { id: string; descripcion: string; sku: string; unidad: string; precio_costo: number }) {
+    const nuevo: PosProducto = {
+      id:            p.id,
+      descripcion:   p.descripcion,
+      sku:           p.sku,
+      categoria:     'General',
+      precio_publico: p.precio_costo,
+      precio_costo:  p.precio_costo,
+      precio_min:    p.precio_costo,
+      stock:         0,
+      color:         'bg-stone-100 dark:bg-stone-800',
+      st_afecto:     1,
+    };
+    this.productos.update(list => [...list, nuevo]);
+    this.addToCart(nuevo);
+    this.showProductForm.set(false);
+    this.query.set('');
+  }
 
   // ── Cart operations ────────────────────────────────────────────────────────
   addToCart(p: PosProducto) {

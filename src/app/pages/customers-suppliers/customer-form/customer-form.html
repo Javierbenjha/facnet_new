@@ -1,0 +1,153 @@
+<app-modal
+  [visible]="visible()"
+  (visibleChange)="$event || close()"
+  (closed)="close()"
+  [title]="modalTitle()"
+  size="md">
+
+  <div class="flex flex-col gap-4 pt-1">
+
+    <!-- ── Identificación ── -->
+    <div class="flex flex-col gap-2">
+      <h4 class="text-base font-semibold text-stone-800 dark:text-stone-100 mb-1">Identificación</h4>
+
+      <div class="grid grid-cols-2 gap-3">
+
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+            Tipo de documento <span class="text-red-400">*</span>
+          </label>
+          <p-select
+            [options]="tipoDocOptions"
+            optionLabel="label"
+            optionValue="value"
+            [formControl]="form.controls.tipo_documento"
+            styleClass="w-full" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+            Número de documento <span class="text-red-400">*</span>
+          </label>
+          <p-inputgroup>
+            <input pInputText
+                   [formControl]="form.controls.numero_documento"
+                   [placeholder]="docPlaceholder()"
+                   class="font-mono" />
+            <p-inputGroupAddon>
+              <p-button icon="pi pi-search" severity="secondary" [text]="true"
+                        (onClick)="buscarDocumento()" />
+            </p-inputGroupAddon>
+          </p-inputgroup>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="border-t border-stone-100 dark:border-stone-800"></div>
+
+    <!-- ── Datos Personales / Empresa ── -->
+    <div class="flex flex-col gap-2">
+      <h4 class="text-base font-semibold text-stone-800 dark:text-stone-100 mb-1">
+        @if (isRuc()) { Datos de la Empresa } @else { Datos Personales }
+      </h4>
+
+      @if (isRuc()) {
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+            Razón Social
+            <span class="ml-1 text-xs font-normal text-stone-400">Auto-completado</span>
+          </label>
+          <input pInputText [formControl]="form.controls.nombre"
+                 placeholder="Se completa con el botón Buscar" class="w-full" />
+        </div>
+      } @else {
+        <div class="flex flex-col gap-3">
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+              Nombre <span class="text-red-400">*</span>
+            </label>
+            <input pInputText [formControl]="form.controls.nombre"
+                   placeholder="Nombre" class="w-full" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1">
+              <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Apellido Paterno</label>
+              <input pInputText [formControl]="form.controls.apellido_paterno"
+                     placeholder="Apellido paterno" class="w-full" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Apellido Materno</label>
+              <input pInputText [formControl]="form.controls.apellido_materno"
+                     placeholder="Apellido materno" class="w-full" />
+            </div>
+          </div>
+        </div>
+      }
+
+    </div>
+
+    <div class="border-t border-stone-100 dark:border-stone-800"></div>
+
+    <!-- ── Contacto ── -->
+    <div class="flex flex-col gap-2">
+      <h4 class="text-base font-semibold text-stone-800 dark:text-stone-100 mb-1">Contacto</h4>
+      <div class="grid grid-cols-2 gap-3">
+
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Teléfono</label>
+          <input pInputText [formControl]="form.controls.telefono"
+                 placeholder="987654321" class="w-full" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Email</label>
+          <input pInputText type="email" [formControl]="form.controls.email"
+                 placeholder="ejemplo@correo.com" class="w-full" />
+        </div>
+
+        <div class="col-span-2 flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Dirección</label>
+          <input pInputText [formControl]="form.controls.direccion"
+                 placeholder="Av. Ejemplo 123, Lima" class="w-full" />
+        </div>
+
+      </div>
+    </div>
+
+    <div class="border-t border-stone-100 dark:border-stone-800"></div>
+
+    <!-- ── Ubicación ── -->
+    <div class="flex flex-col gap-2">
+      <h4 class="text-base font-semibold text-stone-800 dark:text-stone-100 mb-1">Ubicación</h4>
+      <div class="grid grid-cols-3 gap-3">
+
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Departamento</label>
+          <input pInputText [formControl]="form.controls.departamento"
+                 placeholder="Lima" class="w-full" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Provincia</label>
+          <input pInputText [formControl]="form.controls.provincia"
+                 placeholder="Lima" class="w-full" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Distrito</label>
+          <input pInputText [formControl]="form.controls.distrito"
+                 placeholder="Miraflores" class="w-full" />
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div modal-footer class="flex gap-2 justify-end">
+    <p-button label="Cancelar" severity="secondary" [outlined]="true" (onClick)="close()" />
+    <p-button label="Guardar" icon="pi pi-check" (onClick)="save()" />
+  </div>
+
+</app-modal>

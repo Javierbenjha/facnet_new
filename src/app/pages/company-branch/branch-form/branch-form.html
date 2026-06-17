@@ -1,0 +1,113 @@
+<app-modal
+  [visible]="visible()"
+  (visibleChange)="$event || close()"
+  (closed)="close()"
+  [title]="modalTitle()"
+  size="md">
+
+  <div class="flex flex-col gap-4 pt-1">
+
+    <!-- ── Información Empresarial ── -->
+    <div class="flex flex-col gap-2">
+      <h4 class="text-base font-semibold text-stone-800 dark:text-stone-100 mb-1">Información Empresarial</h4>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+          Empresa <span class="text-red-400">*</span>
+        </label>
+        <p-select [options]="empresaOptions()" optionLabel="label" optionValue="value"
+                  [formControl]="form.controls.empresa_id" styleClass="w-full"
+                  placeholder="Seleccioná una empresa" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+            Nombre de la sucursal <span class="text-red-400">*</span>
+          </label>
+          <input pInputText [formControl]="form.controls.descripcion"
+                 placeholder="Ej: Sucursal Principal" class="w-full" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+            Meta de ventas mensual (S/) <span class="text-red-400">*</span>
+          </label>
+          <p-inputnumber [formControl]="form.controls.meta"
+                         mode="decimal" [minFractionDigits]="2" styleClass="w-full" />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+          Dirección <span class="text-red-400">*</span>
+        </label>
+        <input pInputText [formControl]="form.controls.direccion"
+               placeholder="Av. Ejemplo 123, Lima" class="w-full" />
+      </div>
+    </div>
+
+    <div class="border-t border-stone-100 dark:border-stone-800"></div>
+
+    <!-- ── Información de Contacto ── -->
+    <div class="flex flex-col gap-2">
+      <h4 class="text-base font-semibold text-stone-800 dark:text-stone-100 mb-1">Información de Contacto</h4>
+      <div class="grid grid-cols-2 gap-4">
+
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Teléfono</label>
+          <input pInputText [formControl]="form.controls.telefono"
+                 placeholder="01-0000000" class="w-full" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Email</label>
+          <input pInputText type="email" [formControl]="form.controls.email"
+                 placeholder="sucursal@empresa.pe" class="w-full" />
+        </div>
+
+      </div>
+    </div>
+
+    <div class="border-t border-stone-100 dark:border-stone-800"></div>
+
+    <!-- ── Ubicación ── -->
+    <div class="flex flex-col gap-2">
+      <h4 class="text-base font-semibold text-stone-800 dark:text-stone-100 mb-1">Ubicación</h4>
+      <div class="grid grid-cols-3 gap-4">
+
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+            Departamento <span class="text-red-400">*</span>
+          </label>
+          <input pInputText [formControl]="form.controls.departamento"
+                 placeholder="Lima" class="w-full" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+            Provincia <span class="text-red-400">*</span>
+          </label>
+          <input pInputText [formControl]="form.controls.provincia"
+                 placeholder="Lima" class="w-full" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+            Distrito <span class="text-red-400">*</span>
+          </label>
+          <input pInputText [formControl]="form.controls.distrito"
+                 placeholder="Cercado de Lima" class="w-full" />
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div modal-footer class="flex gap-2 justify-end">
+    <p-button label="Cancelar" severity="secondary" [outlined]="true" (onClick)="close()" />
+    <p-button label="Guardar Cambios" icon="pi pi-check" (onClick)="save()" />
+  </div>
+
+</app-modal>

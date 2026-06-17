@@ -12,35 +12,35 @@ export interface NavSection {
 
 export const NAV_SECTIONS: NavSection[] = [
   {
-    label: 'Main',
+    label: 'Principal',
     items: [
       { label: 'Dashboard', icon: 'pi-th-large', route: '/sales' },
     ],
   },
   {
-    label: 'Organization',
+    label: 'Organización',
     items: [
-      { label: 'Companies',   icon: 'pi-building', route: '/company-branch', badge: 3 },
-      { label: 'Users',       icon: 'pi-user-plus', route: '/user-registration', badge: 2 },
+      { label: 'Empresa y Sucursal', icon: 'pi-building',  route: '/company-branch', badge: 3 },
+      { label: 'Usuarios',           icon: 'pi-user-plus', route: '/user-registration', badge: 2 },
     ],
   },
   {
-    label: 'Operations',
+    label: 'Operaciones',
     items: [
-      { label: 'Products',              icon: 'pi-box',           route: '/products' },
-      { label: 'Punto de Venta',         icon: 'pi-shopping-cart', route: '/pos' },
-      { label: 'Sales History',         icon: 'pi-history',       route: '/sale-list' },
-      { label: 'Purchases',             icon: 'pi-tag',           route: '/purchases' },
-      { label: 'Quotations',            icon: 'pi-file',          route: '/quotations', badge: 2 },
-      { label: 'Customers & Suppliers', icon: 'pi-users',         route: '/customers-suppliers' },
-      { label: 'Units of Measure',      icon: 'pi-sliders-h',     route: '/unit-measures' },
+      { label: 'Productos',            icon: 'pi-box',           route: '/products' },
+      { label: 'Punto de Venta',       icon: 'pi-shopping-cart', route: '/pos' },
+      { label: 'Historial de Ventas',  icon: 'pi-history',       route: '/sale-list' },
+      { label: 'Compras',              icon: 'pi-tag',           route: '/purchases' },
+      { label: 'Cotizaciones',         icon: 'pi-file',          route: '/quotations', badge: 2 },
+      { label: 'Clientes y Proveedores', icon: 'pi-users',       route: '/customers-suppliers' },
+      { label: 'Unidades de Medida',   icon: 'pi-sliders-h',     route: '/unit-measures' },
     ],
   },
   {
-    label: 'Analytics',
+    label: 'Análisis',
     items: [
-      { label: 'Reports',      icon: 'pi-chart-bar', route: '/reports' },
-      { label: 'Settings',     icon: 'pi-cog',       route: '/settings' },
+      { label: 'Reportes',      icon: 'pi-chart-bar', route: '/reports' },
+      { label: 'Configuración', icon: 'pi-cog',       route: '/settings' },
     ],
   },
 ];
