@@ -1,17 +1,19 @@
-﻿<form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 flex flex-col gap-4"> 
- <input
-      type="email"
-      formControlName="email"
-      placeholder="Correo electrónico"
-      class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-transparent text-gray-800
-  dark:text-gray-100" />
+﻿<form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-6 flex flex-col gap-4">
+  <input
+    type="email"
+    formControlName="email"
+    placeholder="Correo electrónico"
+    class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-transparent text-gray-800 dark:text-gray-100"
+  />
 
   <input
-      type="password"
-      formControlName="password"
-      placeholder="Contraseña"
-      class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-transparent text-gray-800
-  dark:text-gray-100" />
+    type="password"
+    formControlName="password"
+    placeholder="Contraseña"
+    class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-transparent text-gray-800 dark:text-gray-100"
+  />
 
-
+  <button type="submit">Iniciar sesión</button>
 </form>
+
+
