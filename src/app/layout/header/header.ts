@@ -8,22 +8,31 @@ import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { NAV_SECTIONS, NavItem } from '../nav.config';
 import { Layout } from '../layout';
+import { ConfirmationService, MenuItem } from 'primeng/api';
+import { Auth } from '../../core/services/auth';
+import { MenuModule } from 'primeng/menu';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.html',
   styleUrl: './header.scss',
-  imports: [FormsModule, Button, Select, InputText, IconField, InputIcon],
+  imports: [FormsModule, Button, Select, InputText, IconField, InputIcon, MenuModule],
 })
 export class Header {
-  private readonly router  = inject(Router);
-  private readonly layout  = inject(Layout);
+  private readonly confirmationService = inject(ConfirmationService);
+  private readonly auth = inject(Auth);
+  protected readonly currentUser = this.auth.currentUser;
+
+  items: MenuItem[] | undefined;
+
+  private readonly router = inject(Router);
+  private readonly layout = inject(Layout);
 
   readonly toggleSidebar = output<void>();
 
   readonly darkMode = this.layout.isDark;
 
-  readonly selectedEmpresaId  = signal<number>(1);
+  readonly selectedEmpresaId = signal<number>(1);
   readonly selectedSucursalId = signal<number>(1);
 
   readonly empresas = signal([
@@ -37,15 +46,15 @@ export class Header {
     { id: 3, nombre: 'Arequipa Centro' },
   ]);
 
-  readonly searchQuery        = signal('');
+  readonly searchQuery = signal('');
   readonly showSearchDropdown = signal(false);
 
-  readonly modules = computed(() => NAV_SECTIONS.flatMap(s => s.items));
+  readonly modules = computed(() => NAV_SECTIONS.flatMap((s) => s.items));
 
   readonly filteredModules = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
     if (!q) return [];
-    return this.modules().filter(m => m.label.toLowerCase().includes(q));
+    return this.modules().filter((m) => m.label.toLowerCase().includes(q));
   });
 
   toggleDarkMode() {
@@ -65,5 +74,28 @@ export class Header {
 
   closeSearch() {
     setTimeout(() => this.showSearchDropdown.set(false), 150);
+  }
+
+  logout() {
+    this.confirmationService.confirm({
+      header: 'Cerrar sesión',
+      message: '¿Estás seguro que deseas cerrar sesión?',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, cerrar sesión',
+      rejectLabel: 'No, cancelar',
+      rejectButtonProps: {
+        label: 'Cancel',
+        severity: 'secondary',
+        outlined: true,
+      },
+      accept: () => this.auth.logout().subscribe(() => this.router.navigate(['/login'])),
+    });
+  }
+
+  constructor() {
+    this.items = [
+      { label: 'Perfil', icon: 'pi pi-user', command: () => this.router.navigate(['/profile']) },
+      { label: 'Cerrar sesión', icon: 'pi pi-sign-out', command: () => this.logout() },
+    ];
   }
 }

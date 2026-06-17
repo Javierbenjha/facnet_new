@@ -10,15 +10,25 @@ export interface Company {
 }
 
 export interface User {
-  id: string;
-  nombre: string;
-  email: string;
-  role: number;
-}
+    id: string;
+    nombre: string;
+    apellido_paterno?: string;
+    apellido_materno?: string;
+    email: string;
+    role: number;
+    ciaId?: string;
+    sucursalId?: string;
+  }
 
 export interface LoginResponse {
   user: User;
   activeCompany: Company;
   companies: Company[];
   sucursalId: string;
+}
+
+export interface MeResponse {
+  user: User;
+  roles: string[];
+  permissions: Record<string,string>
 }

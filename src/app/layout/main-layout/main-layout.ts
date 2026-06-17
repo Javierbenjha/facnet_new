@@ -4,12 +4,13 @@ import { Header } from '../header/header';
 import { Sidebar } from '../sidebar/sidebar';
 import { TopSlider } from '../top-slider/top-slider';
 import { Layout } from '../layout';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-main-layout',
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.scss',
-  imports: [RouterOutlet, Header, Sidebar, TopSlider]
+  imports: [RouterOutlet, Header, Sidebar, TopSlider, ConfirmDialogModule ]
 })
 export class MainLayout {
   protected readonly layout = inject(Layout);
