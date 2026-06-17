@@ -11,6 +11,7 @@ import { routes } from './app.routes';
 import { credentialsInterceptor } from './core/interceptors/credentials.interceptor';
 import { Auth } from './core/services/auth';
 import { catchError, of } from 'rxjs';
+import { authErrorInterceptor } from './core/interceptors/auth-error.interceptor';
 
 const AppTheme = definePreset(Aura, {
   semantic: {
@@ -34,7 +35,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([credentialsInterceptor])),
+    provideHttpClient(withInterceptors([credentialsInterceptor,authErrorInterceptor])),
     provideAnimationsAsync(),
     MessageService,
     ConfirmationService,

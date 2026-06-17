@@ -28,4 +28,9 @@ export class Auth {
       tap(() => this._currentUser.set(null))
     )
   }
+
+  clearSession(){
+    this._currentUser.set(null);
+  }
 }
+
