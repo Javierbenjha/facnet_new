@@ -1,13 +1,18 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Rbac } from '../../core/services/rbac';
+import { RoleListItem } from './roles.model';
 
 @Component({
   selector: 'app-roles',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="p-6">
-      <h1 class="text-2xl font-semibold text-surface-900 dark:text-surface-0">Roles</h1>
-      <p class="text-surface-500 dark:text-surface-400 mt-2">Módulo en construcción.</p>
-    </div>
-  `,
+  templateUrl: './roles.html',
 })
-export class Roles {}
+export class Roles {
+  private readonly rbac = inject(Rbac);
+
+  readonly roles = signal<RoleListItem[]>([]);
+
+  constructor() {
+    this.rbac.listRoles().subscribe((roles) => this.roles.set(roles));
+  }
+}
