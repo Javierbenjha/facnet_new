@@ -1,6 +1,6 @@
 export interface LoginRequest {
-    email: string;
-    password: string;
+  email: string;
+  password: string;
 }
 
 export interface Company {
@@ -10,15 +10,15 @@ export interface Company {
 }
 
 export interface User {
-    id: string;
-    nombre: string;
-    apellido_paterno?: string;
-    apellido_materno?: string;
-    email: string;
-    role: number;
-    ciaId?: string;
-    sucursalId?: string;
-  }
+  id: string;
+  nombre: string;
+  apellido_paterno?: string;
+  apellido_materno?: string;
+  email: string;
+  role: number;
+  ciaId?: string;
+  sucursalId?: string;
+}
 
 export interface LoginResponse {
   user: User;
@@ -30,5 +30,22 @@ export interface LoginResponse {
 export interface MeResponse {
   user: User;
   roles: string[];
-  permissions: Record<string,string>
+  permissions: Record<string, string>;
+}
+
+export interface RegisterRequest {
+  nombre: string;
+  apellido_paterno: string;
+  apellido_materno: string;
+  email: string;
+  password: string;
+  telefono: string;
+}
+
+export interface RegisterResponse {
+  message: string;
+  user: User;
+  companies: Company[];
+  activeCompany: null;
+  sucursalId: null;
 }

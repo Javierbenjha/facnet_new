@@ -54,7 +54,7 @@ export const routes: Routes = [
       },
       {
         // "Ventas Realizadas"
-        path: 'ventas/historial',
+        path: 'ventas-historial',
         loadComponent: () => import('./pages/sale-list/sale-list').then(m => m.SaleList)
       },
       {
