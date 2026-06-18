@@ -7,13 +7,14 @@ import { Auth } from '../../../core/services/auth';
 import { Password } from 'primeng/password';
 import { finalize } from 'rxjs';
 import { Toaster } from '../../../core/services/toast';
+import { AuthBranding } from '../../../shared/auth-branding/auth-branding';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.html',
   styleUrl: './login.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, ButtonModule, InputText, Password],
+  imports: [ReactiveFormsModule, RouterLink, ButtonModule, InputText, Password, AuthBranding],
 })
 export class Login {
   private readonly fb = inject(FormBuilder);
@@ -22,13 +23,6 @@ export class Login {
   private readonly route = inject(ActivatedRoute);
   readonly loading = signal(false);
   private readonly toast = inject(Toaster);
-
-  readonly year = new Date().getFullYear();
-  readonly features = [
-    'Facturación electrónica integrada',
-    'Control de inventario en tiempo real',
-    'Reportes y dashboards al instante',
-  ];
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
