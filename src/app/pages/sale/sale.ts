@@ -152,15 +152,15 @@ export class Sale {
   }));
 
   // ── Product creation ───────────────────────────────────────────────────────
-  onProductSaved(p: { id: string; descripcion: string; sku: string; unidad: string; precio_costo: number }) {
+  onProductSaved(p: { id: string; descripcion: string; sku: string; unidad: string; costo: number }) {
     const nuevo: PosProducto = {
       id:            p.id,
       descripcion:   p.descripcion,
       sku:           p.sku,
       categoria:     'General',
-      precio_publico: p.precio_costo,
-      precio_costo:  p.precio_costo,
-      precio_min:    p.precio_costo,
+      precio_publico: p.costo,
+      precio_costo:  p.costo,
+      precio_min:    p.costo,
       stock:         0,
       color:         'bg-stone-100 dark:bg-stone-800',
       st_afecto:     1,

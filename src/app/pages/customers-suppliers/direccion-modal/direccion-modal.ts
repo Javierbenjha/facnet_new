@@ -20,8 +20,8 @@ import { Direccion, Persona } from '../customers-suppliers.models';
   imports: [FormsModule, Button, InputText, InputGroup, InputGroupAddon, Select, Checkbox, Divider, Tag, Tooltip, AppModal],
 })
 export class DireccionModal {
-  persona = input<Persona | null>(null);
-  closed  = output<Persona>();
+  readonly persona = input<Persona | null>(null);
+  readonly closed  = output<Persona>();
 
   readonly visible = computed(() => this.persona() !== null);
 

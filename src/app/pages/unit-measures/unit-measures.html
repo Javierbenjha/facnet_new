@@ -1,177 +1,144 @@
-<div class="h-full overflow-auto" style="padding: 24px 28px 40px">
+<div class="p-6 flex flex-col gap-5">
 
   <!-- Header -->
-  <div class="flex items-end justify-between gap-4 mb-[22px]">
+  <div class="flex items-center justify-between">
     <div>
-      <h1 style="font-size:22px;font-weight:600;letter-spacing:-0.02em;margin:0 0 4px;color:var(--erp-text)">
-        Units of Measure
+      <h1 class="text-2xl font-semibold text-stone-900 dark:text-stone-100 tracking-tight">
+        Unidades de medida
       </h1>
-      <p style="font-size:13px;color:var(--erp-text-2);margin:0">
-        {{ unitMeasures().length }} units registered · Catalog management
+      <p class="text-sm text-stone-400 mt-0.5">
+        {{ unitMeasures().length }} unidades registradas · Catálogo
       </p>
     </div>
-    <div class="flex items-center gap-2">
-      <button class="erp-btn erp-btn-primary" (click)="openNew()">
-        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-        </svg>
-        New Unit of Measure
-      </button>
-    </div>
+    <p-button label="Nueva unidad" icon="pi pi-plus" (onClick)="editing.set('new')" />
   </div>
 
-  <!-- Principal Card -->
-  <div class="erp-card">
+  <!-- Card -->
+  <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl overflow-hidden">
 
-    <!-- Filter bar -->
-    <div style="padding:14px;border-bottom:1px solid var(--erp-border);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-
-      <!-- Search -->
-      <div style="position:relative;flex:1 1 220px;max-width:320px">
-        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-          style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--erp-text-3)">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-        <input
-          type="text"
-          [ngModel]="query()"
-          (ngModelChange)="onQueryChange($event)"
-          placeholder="Search name or symbol..."
-          style="width:100%;height:34px;padding:0 10px 0 32px;border:1px solid var(--erp-border);background:var(--erp-surface-2);border-radius:8px;font-size:13px;outline:none;color:var(--erp-text);font-family:inherit"
-        />
-      </div>
-
-      <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
-        <span style="font-size:12px;color:var(--erp-text-3)">{{ totalItems() }} results</span>
-      </div>
+    <!-- Buscador -->
+    <div class="p-4 border-b border-stone-100 dark:border-stone-800">
+      <p-iconfield styleClass="w-full max-w-sm">
+        <p-inputicon class="pi pi-search" />
+        <input pInputText
+               [ngModel]="query()"
+               (ngModelChange)="onQueryChange($event)"
+               placeholder="Buscar por descripción o siglas..."
+               class="w-full" />
+      </p-iconfield>
     </div>
 
-    <!-- Table -->
-    <div style="overflow-x:auto">
-      <table class="erp-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Description</th>
-            <th>Abbreviation</th>
-            <th class="td-actions"></th>
+    <!-- Tabla -->
+    <table class="w-full text-sm">
+      <thead class="bg-stone-50 dark:bg-stone-800 text-xs font-semibold text-stone-500 uppercase tracking-wide">
+        <tr>
+          <th class="px-4 py-3 text-left w-24">ID</th>
+          <th class="px-4 py-3 text-left">Descripción</th>
+          <th class="px-4 py-3 text-left w-28">Siglas</th>
+          <th class="px-4 py-3 w-16"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
+        @for (u of paginated(); track u.id_unidad) {
+          <tr class="hover:bg-stone-50 dark:hover:bg-stone-800/50 cursor-pointer"
+              (click)="editing.set(u)">
+            <td class="px-4 py-3 font-mono text-xs text-stone-400 font-semibold">{{ u.id_unidad }}</td>
+            <td class="px-4 py-3 font-medium text-stone-800 dark:text-stone-100">{{ u.descripcion }}</td>
+            <td class="px-4 py-3">
+              <span class="inline-block px-2 py-0.5 rounded-md bg-stone-100 dark:bg-stone-700
+                           text-xs font-bold text-stone-600 dark:text-stone-300 font-mono">
+                {{ u.siglas }}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-right" (click)="$event.stopPropagation()">
+              <p-button icon="pi pi-trash" [text]="true" severity="danger" size="small"
+                        (onClick)="delete(u.id_unidad)" />
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          @for (u of paginatedUnitMeasures(); track u.id_unidad) {
-            <tr (click)="openEdit(u)">
-              <!-- ID -->
-              <td class="mono" style="color:var(--erp-text-2);font-size:12px;font-weight:600">{{ u.id_unidad }}</td>
+        }
+        @empty {
+          <tr>
+            <td colspan="4" class="py-12 text-center text-stone-400 text-sm">
+              <i class="pi pi-inbox text-3xl text-stone-200 block mb-2"></i>
+              No se encontraron unidades de medida
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
 
-              <!-- Description -->
-              <td>
-                <span style="font-weight:500;color:var(--erp-text)">{{ u.descripcion }}</span>
-              </td>
-
-              <!-- Abbreviation -->
-              <td>
-                <span class="badge badge-cyan font-bold">{{ u.siglas }}</span>
-              </td>
-
-              <!-- Actions -->
-              <td class="td-actions" (click)="$event.stopPropagation()">
-                <div style="display:flex;gap:4px">
-                  <button class="icon-btn" (click)="openEdit(u)" title="Edit">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                    </svg>
-                  </button>
-                  <button class="icon-btn" style="color:var(--erp-danger)" (click)="delete(u.id_unidad)" title="Delete">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                    </svg>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="4" style="text-align:center;padding:24px;color:var(--erp-text-3)">
-                No units of measure found.
-              </td>
-            </tr>
+    <!-- Paginación -->
+    @if (totalPages() > 1) {
+      <div class="px-4 py-3 border-t border-stone-100 dark:border-stone-800
+                  flex items-center justify-between text-sm text-stone-400">
+        <span>{{ totalItems() }} resultado{{ totalItems() !== 1 ? 's' : '' }}</span>
+        <div class="flex items-center gap-1">
+          <p-button icon="pi pi-chevron-left" [text]="true" severity="secondary" size="small"
+                    [disabled]="currentPage() <= 1"
+                    (onClick)="goPage(currentPage() - 1)" />
+          @for (p of pageRange(); track p) {
+            <p-button
+              [label]="'' + p"
+              [text]="currentPage() !== p"
+              severity="secondary"
+              size="small"
+              (onClick)="goPage(p)" />
           }
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Pagination -->
-    <div style="padding:12px 18px;border-top:1px solid var(--erp-border);display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--erp-text-2)">
-      <span>
-        @if (totalItems() > 0) {
-          Showing {{ showingStart() }}–{{ showingEnd() }} of {{ totalItems() }}
-        } @else {
-          No results
-        }
-      </span>
-      <div style="display:flex;gap:4px">
-        <button class="erp-btn erp-btn-sm"
-          [disabled]="currentPage() <= 1"
-          [style.opacity]="currentPage() <= 1 ? '0.4' : '1'"
-          (click)="goPage(currentPage() - 1)">
-          Previous
-        </button>
-        @for (p of [].constructor(totalPages()); track $index) {
-          <button
-            class="erp-btn erp-btn-sm"
-            [class.erp-btn-primary]="currentPage() === $index + 1"
-            (click)="goPage($index + 1)">
-            {{ $index + 1 }}
-          </button>
-        }
-        <button class="erp-btn erp-btn-sm"
-          [disabled]="currentPage() >= totalPages()"
-          [style.opacity]="currentPage() >= totalPages() ? '0.4' : '1'"
-          (click)="goPage(currentPage() + 1)">
-          Next
-        </button>
+          <p-button icon="pi pi-chevron-right" [text]="true" severity="secondary" size="small"
+                    [disabled]="currentPage() >= totalPages()"
+                    (onClick)="goPage(currentPage() + 1)" />
+        </div>
       </div>
-    </div>
+    }
+
   </div>
+
 </div>
 
-<!-- MODAL UNIT MEASURE -->
+<!-- Modal crear / editar -->
 <app-modal
-  [visible]="showModal()"
-  (visibleChange)="$event || closeModal()"
-  (closed)="closeModal()"
+  [visible]="visible()"
+  (visibleChange)="$event || close()"
+  (closed)="close()"
   [title]="modalTitle()"
-  size="md">
+  size="sm">
 
-  <form [formGroup]="form" (ngSubmit)="save()" style="padding:4px 0">
-    <div class="erp-field">
-      <label class="erp-field-label">Description</label>
-      <input class="erp-input" formControlName="descripcion" placeholder="Ej: Kilograms"/>
+  <div class="flex flex-col gap-4 pt-1">
+
+    <div class="flex flex-col gap-1.5">
+      <label class="text-xs font-medium text-stone-500">
+        Descripción <span class="text-red-400">*</span>
+      </label>
+      <input pInputText
+             [formControl]="form.controls.descripcion"
+             placeholder="Ej: Kilogramos"
+             class="w-full" />
       @if (form.controls.descripcion.touched && form.controls.descripcion.invalid) {
-        <span style="font-size:11px;color:var(--erp-danger)">Description is required</span>
+        <span class="text-xs text-red-500">La descripción es requerida</span>
       }
     </div>
 
-    <div class="erp-field">
-      <label class="erp-field-label">Abbreviation / Symbol</label>
-      <input class="erp-input mono" formControlName="siglas" placeholder="Ej: KG" style="text-transform: uppercase"/>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-xs font-medium text-stone-500">
+        Siglas <span class="text-red-400">*</span>
+      </label>
+      <input pInputText
+             [formControl]="form.controls.siglas"
+             placeholder="Ej: KG"
+             class="w-full font-mono" />
       @if (form.controls.siglas.touched && form.controls.siglas.invalid) {
-        <span style="font-size:11px;color:var(--erp-danger)">Abbreviation is required</span>
+        <span class="text-xs text-red-500">Las siglas son requeridas</span>
       }
     </div>
 
-    <!-- Footer of modal -->
-    <div modal-footer style="display:flex;justify-content:flex-end;gap:8px;padding-top:4px">
-      <button type="button" class="erp-btn" (click)="closeModal()">Cancel</button>
-      <button type="submit" class="erp-btn erp-btn-primary" [disabled]="form.invalid">
-        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-        </svg>
-        {{ editing() === 'new' ? 'Create Unit' : 'Save Changes' }}
-      </button>
-    </div>
-  </form>
+  </div>
+
+  <div modal-footer class="flex justify-end gap-2 pt-1">
+    <p-button label="Cancelar" severity="secondary" [outlined]="true" (onClick)="close()" />
+    <p-button
+      [label]="editing() === 'new' ? 'Crear unidad' : 'Guardar cambios'"
+      icon="pi pi-check"
+      (onClick)="save()" />
+  </div>
 
 </app-modal>
