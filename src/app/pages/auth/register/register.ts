@@ -11,7 +11,6 @@ import { Router, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Password } from 'primeng/password';
-import { Checkbox } from 'primeng/checkbox';
 import { Auth } from '../../../core/services/auth';
 import { Toaster } from '../../../core/services/toast';
 import { AuthBranding } from '../../../shared/auth-branding/auth-branding';
@@ -28,7 +27,7 @@ const passwordsMatch: ValidatorFn = (group: AbstractControl): ValidationErrors |
   templateUrl: './register.html',
   styleUrl: './register.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, ButtonModule, InputText, Password, Checkbox, AuthBranding],
+  imports: [ReactiveFormsModule, RouterLink, ButtonModule, InputText, Password, AuthBranding],
 })
 export class Register {
   private readonly fb = inject(FormBuilder);
@@ -47,7 +46,6 @@ export class Register {
     password: ['', [Validators.required, Validators.minLength(8)]],
     confirmPassword: ['', [Validators.required]],
     telefono: ['', [Validators.required]],
-    terms: [false, [Validators.requiredTrue]],
   },
   {
     validators: passwordsMatch,
@@ -55,7 +53,7 @@ export class Register {
 
   onSubmit() {
     if (this.form.invalid) return;
-    const { confirmPassword, terms, ...payload } = this.form.getRawValue();
+    const { confirmPassword, ...payload } = this.form.getRawValue();
     this.loading.set(true);
     this.auth
       .register(payload)

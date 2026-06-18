@@ -4,6 +4,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   selector: 'app-auth-branding',
   templateUrl: './auth-branding.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: ':host { display: contents; }',
 })
 export class AuthBranding {
   readonly year = new Date().getFullYear();
