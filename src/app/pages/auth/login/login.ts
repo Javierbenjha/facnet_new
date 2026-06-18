@@ -3,7 +3,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
-import { Checkbox } from 'primeng/checkbox';
 import { Auth } from '../../../core/services/auth';
 import { Password } from 'primeng/password';
 import { finalize } from 'rxjs';
@@ -14,7 +13,7 @@ import { Toaster } from '../../../core/services/toast';
   templateUrl: './login.html',
   styleUrl: './login.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, ButtonModule, InputText, Checkbox,Password],
+  imports: [ReactiveFormsModule, RouterLink, ButtonModule, InputText, Password],
 })
 export class Login {
   private readonly fb = inject(FormBuilder);
@@ -23,6 +22,13 @@ export class Login {
   private readonly route = inject(ActivatedRoute);
   readonly loading = signal(false);
   private readonly toast = inject(Toaster);
+
+  readonly year = new Date().getFullYear();
+  readonly features = [
+    'Facturación electrónica integrada',
+    'Control de inventario en tiempo real',
+    'Reportes y dashboards al instante',
+  ];
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service, signal } from '@angular/core';
-import { LoginRequest, LoginResponse, MeResponse, User } from '../models/auth.model';
+import { LoginRequest, LoginResponse, MeResponse, RegisterRequest, RegisterResponse, User } from '../models/auth.model';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -14,6 +14,13 @@ export class Auth {
     const response = this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, credentials);
     return response.pipe(
         tap(res => this._currentUser.set(res.user))
+    );
+  }
+
+  register(data: RegisterRequest):Observable<RegisterResponse>{
+    const response = this.http.post<RegisterResponse>(`${environment.apiUrl}/auth/register`, data);
+    return response.pipe(
+      tap(res => this._currentUser.set(res.user))
     );
   }
 
