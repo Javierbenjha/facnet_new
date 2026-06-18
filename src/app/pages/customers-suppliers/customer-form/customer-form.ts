@@ -18,10 +18,10 @@ import { Persona, TipoDocumento, TipoPersona } from '../customers-suppliers.mode
 export class CustomerForm {
   private readonly fb = inject(FormBuilder);
 
-  editing     = input<Persona | 'new' | null>(null);
-  tipoPersona = input<TipoPersona>('CLIENTE');
-  closed      = output<void>();
-  saved       = output<Persona>();
+  readonly editing     = input<Persona | 'new' | null>(null);
+  readonly tipoPersona = input<TipoPersona>('CLIENTE');
+  readonly closed      = output<void>();
+  readonly saved       = output<Persona>();
 
   readonly visible = computed(() => this.editing() !== null);
 

@@ -18,10 +18,9 @@
           <div class="relative group w-full h-44 bg-white dark:bg-stone-900 border-2 border-dashed border-stone-300 dark:border-stone-600 rounded-xl flex items-center justify-center overflow-hidden hover:border-primary transition-colors">
             @if (logoVerticalPreview()) {
               <img [src]="logoVerticalPreview()" alt="Logo Vertical" class="max-w-full max-h-full object-contain" />
-              <button type="button" (click)="removeLogo('vertical')"
-                class="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <i class="pi pi-times text-xs"></i>
-              </button>
+              <p-button icon="pi pi-times" severity="danger" [rounded]="true" size="small"
+                class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                (onClick)="removeLogo('vertical')" />
             } @else {
               <div class="text-center text-stone-400">
                 <i class="pi pi-image text-3xl mb-2 block"></i>
@@ -41,10 +40,9 @@
           <div class="relative group w-full h-44 bg-white dark:bg-stone-900 border-2 border-dashed border-stone-300 dark:border-stone-600 rounded-xl flex items-center justify-center overflow-hidden hover:border-primary transition-colors">
             @if (logoHorizontalPreview()) {
               <img [src]="logoHorizontalPreview()" alt="Logo Horizontal" class="max-w-full max-h-full object-contain" />
-              <button type="button" (click)="removeLogo('horizontal')"
-                class="absolute top-2 right-2 w-7 h-7 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <i class="pi pi-times text-xs"></i>
-              </button>
+              <p-button icon="pi pi-times" severity="danger" [rounded]="true" size="small"
+                class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                (onClick)="removeLogo('horizontal')" />
             } @else {
               <div class="text-center text-stone-400">
                 <i class="pi pi-image text-3xl mb-2 block"></i>
@@ -157,25 +155,25 @@
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Límite DNI en boleta (S/)</label>
           <p-inputnumber [formControl]="form.controls.monto700"
-                         mode="decimal" [minFractionDigits]="0" styleClass="w-full" />
+                         mode="decimal" [minFractionDigits]="0" styleClass="w-full" inputStyleClass="w-full" />
         </div>
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Límite retención (S/)</label>
           <p-inputnumber [formControl]="form.controls.limite_retencion"
-                         mode="decimal" [minFractionDigits]="0" styleClass="w-full" />
+                         mode="decimal" [minFractionDigits]="0" styleClass="w-full" inputStyleClass="w-full" />
         </div>
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Prom. ventas mensual — SUNAT (S/)</label>
           <p-inputnumber [formControl]="form.controls.monto_mensual"
-                         mode="decimal" [minFractionDigits]="2" styleClass="w-full" />
+                         mode="decimal" [minFractionDigits]="2" styleClass="w-full" inputStyleClass="w-full" />
         </div>
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Prom. ventas anual — SUNAT (S/)</label>
           <p-inputnumber [formControl]="form.controls.monto_anual"
-                         mode="decimal" [minFractionDigits]="2" styleClass="w-full" />
+                         mode="decimal" [minFractionDigits]="2" styleClass="w-full" inputStyleClass="w-full" />
         </div>
 
       </div>

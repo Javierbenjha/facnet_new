@@ -1,11 +1,12 @@
 import { Component, ChangeDetectionStrategy, input, output, model } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 
-export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+export type ModalSize = 'sm' | 'md' | 'ml' | 'lg' | 'xl' | 'full';
 
 const SIZE_MAP: Record<ModalSize, string> = {
   sm:   '28rem',
   md:   '40rem',
+  ml:   '48rem',
   lg:   '56rem',
   xl:   '72rem',
   full: '95vw',

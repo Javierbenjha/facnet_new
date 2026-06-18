@@ -13,9 +13,16 @@ export interface Producto {
   stock:          number;
   stock_min:      number;
   sigla:          string;
+  peso?:          number;
+  stafecto?:      0 | 1;
+  stdesc?:        0 | 1;
 }
 
 export const CATEGORIES = ['Todas', 'Bebidas', 'Panadería', 'Snacks', 'Lácteos', 'Café', 'Accesorios'];
+
+export const MARCAS: string[] = ['San Luis', 'Laive', 'Illy', 'Starbucks', 'Laritza', 'Pronto', 'Naturelab', 'Gloria', 'Silk', 'FacNet', 'Klean Kanteen', 'Altomayo', 'Cassinelli'];
+
+export const UNIDADES: string[] = ['und', 'kg', 'lt', 'caja', 'doc', 'paquete', 'par', 'set'];
 
 export const BRANCHES = [
   { id: 'b1', name: 'Miraflores',      city: 'Lima'     },

@@ -3,146 +3,229 @@
   (visibleChange)="$event || close()"
   (closed)="close()"
   [title]="modalTitle()"
-  size="lg">
+  size="ml">
 
-  <div class="grid grid-cols-2 gap-5 pt-1">
+  <div class="flex flex-col gap-5 pt-1">
 
-    <!-- Columna izquierda -->
-    <div class="flex flex-col gap-3.5">
-
-      <!-- Nombre -->
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-medium text-stone-500">Nombre del producto</label>
-        <input pInputText [formControl]="form.controls.descripcion" placeholder="Ej: Latte vainilla 12oz" class="w-full" />
+    <!-- ── 1. INFORMACIÓN BÁSICA ─────────────────────────────────────────── -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center gap-2">
+        <span class="text-[10px] font-semibold uppercase tracking-widest text-stone-400">Información básica</span>
+        <div class="flex-1 h-px bg-stone-100 dark:bg-stone-800"></div>
       </div>
 
-      <!-- SKU + Moneda -->
-      <div class="grid grid-cols-2 gap-3">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-medium text-stone-500">SKU</label>
-          <p-inputgroup>
-            <input pInputText [formControl]="form.controls.sku" placeholder="CAF-001" class="font-mono" />
-            <p-inputGroupAddon>
-              <p-button icon="pi pi-barcode" [text]="true" severity="secondary" size="small"
-                        pTooltip="Generar SKU" tooltipPosition="top"
-                        (onClick)="generarSku()" />
-            </p-inputGroupAddon>
-          </p-inputgroup>
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-medium text-stone-500">Moneda</label>
-          <p-select [options]="monedaOptions" optionLabel="label" optionValue="value"
-                    [formControl]="form.controls.moneda" styleClass="w-full" appendTo="body" />
-        </div>
-      </div>
+      <div class="grid grid-cols-[1fr_140px] gap-4">
 
-      <!-- Categoría + Marca -->
-      <div class="grid grid-cols-2 gap-3">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-medium text-stone-500">Categoría</label>
-          <p-select [options]="categories" optionLabel="label" optionValue="value"
-                    [formControl]="form.controls.categoria" styleClass="w-full" appendTo="body" />
+        <!-- Nombre + SKU -->
+        <div class="flex flex-col gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-medium text-stone-500">Nombre del producto</label>
+            <input pInputText [formControl]="form.controls.descripcion"
+                   placeholder="Ej: Latte vainilla 12oz" class="w-full" />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-medium text-stone-500">SKU</label>
+            <p-inputgroup>
+              <input pInputText [formControl]="form.controls.sku"
+                     placeholder="CAF-001" class="font-mono" />
+              <p-inputGroupAddon>
+                <p-button icon="pi pi-barcode" [text]="true" severity="secondary" size="small"
+                          pTooltip="Generar SKU" tooltipPosition="top"
+                          (onClick)="generarSku()" />
+              </p-inputGroupAddon>
+            </p-inputgroup>
+          </div>
         </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-medium text-stone-500">Marca</label>
-          <input pInputText [formControl]="form.controls.marca" placeholder="Ej: Gloria, Laive…" class="w-full" />
-        </div>
-      </div>
 
-      <!-- Precios: Público + Mayor + Costo -->
-      <div class="grid grid-cols-3 gap-3">
+        <!-- Imagen -->
         <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-medium text-stone-500">Precio público</label>
-          <p-inputnumber [formControl]="form.controls.precio_publico" mode="decimal"
-                         [minFractionDigits]="2" [maxFractionDigits]="2" styleClass="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-medium text-stone-500">Precio mayor</label>
-          <p-inputnumber [formControl]="form.controls.precio_mayor" mode="decimal"
-                         [minFractionDigits]="2" [maxFractionDigits]="2" styleClass="w-full" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-medium text-stone-500">Costo</label>
-          <p-inputnumber [formControl]="form.controls.costo" mode="decimal"
-                         [minFractionDigits]="2" [maxFractionDigits]="2" styleClass="w-full" />
-        </div>
-      </div>
+          <label class="text-xs font-medium text-stone-500">Imagen</label>
+          <div class="w-[140px] h-[140px] rounded-xl overflow-hidden border-2 border-dashed
+                      border-stone-200 dark:border-stone-700 relative group cursor-pointer
+                      hover:border-stone-400 transition-colors flex flex-col items-center
+                      justify-center gap-1.5 text-stone-400 text-xs"
+               (click)="triggerFileInput()"
+               (dragover)="$event.preventDefault()"
+               (drop)="$event.preventDefault()">
 
-      <!-- Unidad + IGV -->
-      <div class="grid grid-cols-2 gap-3">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-medium text-stone-500">Unidad</label>
-          <p-select [options]="unitOptions" optionLabel="label" optionValue="value"
-                    [formControl]="form.controls.unidad" styleClass="w-full" appendTo="body" />
+            @if (imagePreview()) {
+              <img [src]="imagePreview()" alt="Imagen del producto"
+                   class="w-full h-full object-cover absolute inset-0" />
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100
+                          transition-opacity flex items-center justify-center">
+                <p-button icon="pi pi-trash" severity="danger" [rounded]="true" size="small"
+                          (onClick)="$event.stopPropagation(); removeImage()" />
+              </div>
+            } @else {
+              <i class="pi pi-image text-2xl"></i>
+              <span class="text-center leading-tight px-2">Subir imagen</span>
+            }
+          </div>
+          <input #fileInput type="file" accept="image/*" class="hidden"
+                 (change)="onFileSelected($event)" />
         </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-medium text-stone-500">IGV</label>
-          <p-select [options]="igvOptions" optionLabel="label" optionValue="value"
-                    [formControl]="form.controls.igv" styleClass="w-full" appendTo="body" />
-        </div>
-      </div>
 
-      <!-- Es servicio -->
+      </div>
+    </div>
+
+    <!-- ── 2. ES SERVICIO ────────────────────────────────────────────────── -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center gap-2">
+        <span class="text-[10px] font-semibold uppercase tracking-widest text-stone-400">Tipo</span>
+        <div class="flex-1 h-px bg-stone-100 dark:bg-stone-800"></div>
+      </div>
       <div class="flex items-center justify-between px-3 py-2.5 rounded-lg border border-stone-200 dark:border-stone-700">
         <div>
           <p class="text-sm font-medium text-stone-700 dark:text-stone-200">Es servicio</p>
-          <p class="text-xs text-stone-400">No maneja stock ni inventario</p>
+          <p class="text-xs text-stone-400">No maneja stock, categoría ni unidad de medida</p>
         </div>
         <p-toggleswitch [formControl]="form.controls.es_servicio" />
       </div>
-
-      <!-- Notas -->
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-medium text-stone-500">Notas / descripción</label>
-        <textarea pTextarea [formControl]="form.controls.descripcion_larga" rows="3"
-                  placeholder="Ingredientes, presentación, observaciones…" class="w-full resize-none"></textarea>
-      </div>
-
     </div>
 
-    <!-- Columna derecha -->
-    <div class="flex flex-col gap-3.5">
+    <!-- ── 3. CATEGORIZACIÓN Y STOCK (condicional) ───────────────────────── -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center gap-2">
+        <span class="text-[10px] font-semibold uppercase tracking-widest text-stone-400">Categorización y stock</span>
+        <div class="flex-1 h-px bg-stone-100 dark:bg-stone-800"></div>
+      </div>
 
-      <!-- Imagen -->
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-medium text-stone-500">Imagen</label>
-        <div class="h-28 border-2 border-dashed border-stone-200 dark:border-stone-700 rounded-xl flex items-center justify-center text-stone-400 text-sm cursor-pointer hover:border-stone-400 transition-colors">
-          <div class="text-center">
-            <i class="pi pi-image text-2xl mb-1 block"></i>
-            Arrastá o subí una imagen
+      @if (!esServicio()) {
+
+        <!-- Categoría + Marca + Unidad -->
+        <div class="grid grid-cols-3 gap-3">
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-medium text-stone-500">Categoría</label>
+            <p-autocomplete
+              [ngModel]="categoriaValue()"
+              (ngModelChange)="categoriaValue.set($event)"
+              [suggestions]="categoriaSuggestions()"
+              (completeMethod)="filterCategorias($event)"
+              [forceSelection]="false"
+              appendTo="body" styleClass="w-full" inputStyleClass="w-full"
+              placeholder="Buscar o crear…">
+              <ng-template #footer>
+                <div class="border-t border-stone-200 dark:border-stone-700 p-1">
+                  <p-button
+                    [label]="categoriaQuery() ? 'Agregar: ' + categoriaQuery() : 'Agregar nueva'"
+                    icon="pi pi-plus-circle" [text]="true" severity="secondary" size="small"
+                    styleClass="w-full justify-start"
+                    (onClick)="addCategoria(categoriaQuery())" />
+                </div>
+              </ng-template>
+            </p-autocomplete>
           </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-medium text-stone-500">Marca</label>
+            <p-autocomplete
+              [ngModel]="marcaValue()"
+              (ngModelChange)="marcaValue.set($event)"
+              [suggestions]="marcaSuggestions()"
+              (completeMethod)="filterMarcas($event)"
+              [forceSelection]="false"
+              appendTo="body" styleClass="w-full" inputStyleClass="w-full"
+              placeholder="Buscar o crear…">
+              <ng-template #footer>
+                <div class="border-t border-stone-200 dark:border-stone-700 p-1">
+                  <p-button
+                    [label]="marcaQuery() ? 'Agregar: ' + marcaQuery() : 'Agregar nueva'"
+                    icon="pi pi-plus-circle" [text]="true" severity="secondary" size="small"
+                    styleClass="w-full justify-start"
+                    (onClick)="addMarca(marcaQuery())" />
+                </div>
+              </ng-template>
+            </p-autocomplete>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-medium text-stone-500">Unidad</label>
+            <p-autocomplete
+              [ngModel]="unidadValue()"
+              (ngModelChange)="unidadValue.set($event)"
+              [suggestions]="unidadSuggestions()"
+              (completeMethod)="filterUnidades($event)"
+              [forceSelection]="false"
+              appendTo="body" styleClass="w-full" inputStyleClass="w-full"
+              placeholder="Buscar o crear…">
+              <ng-template #footer>
+                <div class="border-t border-stone-200 dark:border-stone-700 p-1">
+                  <p-button
+                    [label]="unidadQuery() ? 'Agregar: ' + unidadQuery() : 'Agregar nueva'"
+                    icon="pi pi-plus-circle" [text]="true" severity="secondary" size="small"
+                    styleClass="w-full justify-start"
+                    (onClick)="addUnidad(unidadQuery())" />
+                </div>
+              </ng-template>
+            </p-autocomplete>
+          </div>
+
         </div>
-      </div>
 
-      <!-- Stock por sucursal -->
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-medium text-stone-500">Inventario por sucursal</label>
-        <div class="border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
-          @for (b of branches; track b.id; let bi = $index) {
-            <div class="flex items-center justify-between px-3 py-2.5"
-                 [class.border-b]="bi < branches.length - 1"
-                 [class.border-stone-200]="bi < branches.length - 1">
-              <div>
-                <div class="text-[12.5px] font-medium text-stone-800 dark:text-stone-200">{{ b.name }}</div>
-                <div class="text-[10.5px] text-stone-400">{{ b.city }}</div>
-              </div>
-              <div class="flex items-center gap-2">
-                <p-inputnumber [ngModel]="branchStock(editingProduct(), bi)"
-                               styleClass="w-20" [showButtons]="false" />
-                <span class="text-xs text-stone-400">und</span>
-              </div>
-            </div>
-          }
+        <!-- Peso + Stock mínimo -->
+        <div class="grid grid-cols-2 gap-3">
+          <app-num-field label="Peso (kg)" [control]="form.controls.peso" [decimals]="3" />
+          <app-num-field label="Stock mínimo" [control]="form.controls.stock_min" [decimals]="0" />
         </div>
-      </div>
 
-      <!-- Stock mínimo -->
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-medium text-stone-500">Stock mínimo (alerta)</label>
-        <p-inputnumber [formControl]="form.controls.stock_min" styleClass="w-full" />
-      </div>
+      } @else {
 
+        <div class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg
+                    bg-amber-50 dark:bg-amber-950/20
+                    border border-amber-200 dark:border-amber-800/40
+                    text-amber-700 dark:text-amber-400">
+          <i class="pi pi-info-circle text-sm shrink-0"></i>
+          <p class="text-sm">Categoría, marca, unidad, peso y stock no aplican a servicios</p>
+        </div>
+
+      }
     </div>
+
+    <!-- ── 4. PRECIOS Y COSTOS ───────────────────────────────────────────── -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center gap-2">
+        <span class="text-[10px] font-semibold uppercase tracking-widest text-stone-400">Precios y costos</span>
+        <div class="flex-1 h-px bg-stone-100 dark:bg-stone-800"></div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-medium text-stone-500">Moneda</label>
+        <p-select [options]="monedaOptions" optionLabel="label" optionValue="value"
+                  [formControl]="form.controls.moneda" styleClass="w-full" appendTo="body" />
+      </div>
+
+      <div class="grid grid-cols-3 gap-5">
+        <app-num-field label="Precio público" [control]="form.controls.precio_publico" />
+        <app-num-field label="Precio mayor"   [control]="form.controls.precio_mayor" />
+        <app-num-field label="Costo"          [control]="form.controls.costo" />
+      </div>
+    </div>
+
+    <!-- ── 5. CONFIGURACIÓN ──────────────────────────────────────────────── -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center gap-2">
+        <span class="text-[10px] font-semibold uppercase tracking-widest text-stone-400">Configuración</span>
+        <div class="flex-1 h-px bg-stone-100 dark:bg-stone-800"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex items-center justify-between px-3 py-2.5 rounded-lg border border-stone-200 dark:border-stone-700">
+          <div>
+            <p class="text-sm font-medium text-stone-700 dark:text-stone-200">Gravado al IGV</p>
+            <p class="text-xs text-stone-400">Aplica 18% de impuesto</p>
+          </div>
+          <p-toggleswitch [formControl]="form.controls.stafecto" />
+        </div>
+        <div class="flex items-center justify-between px-3 py-2.5 rounded-lg border border-stone-200 dark:border-stone-700">
+          <div>
+            <p class="text-sm font-medium text-stone-700 dark:text-stone-200">Editar descrip. en ventas</p>
+            <p class="text-xs text-stone-400">Permitido al vender</p>
+          </div>
+          <p-toggleswitch [formControl]="form.controls.stdesc" />
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <div modal-footer class="flex justify-end gap-2 pt-1">

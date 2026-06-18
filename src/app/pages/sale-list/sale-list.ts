@@ -8,7 +8,6 @@ import { Select } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { TableModule } from 'primeng/table';
 import { Tag } from 'primeng/tag';
-import { Popover } from 'primeng/popover';
 import { Menu } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { PageHeader } from '../../shared/page-header/page-header';
@@ -27,7 +26,7 @@ import {
     FormsModule,
     Button, IconField, InputIcon, InputText,
     Select, DatePickerModule,
-    TableModule, Tag, Popover, Menu,
+    TableModule, Tag, Menu,
     PageHeader, KpiCard,
   ],
 })

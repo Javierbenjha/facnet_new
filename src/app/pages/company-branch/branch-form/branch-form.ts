@@ -16,10 +16,10 @@ import { Empresa, Sucursal } from '../company-branch.models';
 export class BranchForm {
   private readonly fb = inject(FormBuilder);
 
-  editing   = input<Sucursal | 'new' | null>(null);
-  empresas  = input<Empresa[]>([]);
-  closed    = output<void>();
-  saved     = output<Sucursal>();
+  readonly editing   = input<Sucursal | 'new' | null>(null);
+  readonly empresas  = input<Empresa[]>([]);
+  readonly closed    = output<void>();
+  readonly saved     = output<Sucursal>();
 
   readonly visible = computed(() => this.editing() !== null);
 

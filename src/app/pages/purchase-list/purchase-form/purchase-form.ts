@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormsModule, ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { InputNumber } from 'primeng/inputnumber';
@@ -39,12 +40,15 @@ const FORMA_PAGO_OPTS = [
   templateUrl: './purchase-form.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule, AppModal, ProductForm, Button,
+    FormsModule, ReactiveFormsModule,
+    AppModal, ProductForm, Button,
     InputText, InputNumber, Select, DatePickerModule,
     AutoComplete, ToggleSwitch,
   ],
 })
 export class PurchaseForm {
+  private readonly fb = inject(FormBuilder);
+
   readonly editing = input<CompraHistorial | 'new' | null>(null);
   readonly closed  = output<void>();
 
@@ -52,22 +56,32 @@ export class PurchaseForm {
   readonly monedaOpts = MONEDA_OPTS;
   readonly pagoOpts   = FORMA_PAGO_OPTS;
 
-  // ── Form state ─────────────────────────────────────────────────────────────
-  readonly proveedores          = signal([...PROVEEDORES_MOCK]);
-  readonly proveedorSeleccionado = signal(PROVEEDORES_MOCK[0]);
-  readonly proveedorFilterText  = signal('');
-  readonly showProductForm      = signal(false);
-  readonly tipoDoc       = signal<TipoDocCompraOption>(TIPOS_DOC_COMPRA[0]);
-  readonly correlativo   = signal('');
-  readonly fechaCompra   = signal<Date>(new Date());
-  readonly fechaVenc     = signal<Date>(new Date());
-  readonly moneda        = signal<'PEN' | 'USD'>('PEN');
-  readonly formaPago     = signal<'CONTADO' | 'CREDITO'>('CONTADO');
-  readonly igvIncluido      = signal(false);
-  readonly descuentoPct     = signal(0);
+  // ── Reactive form ──────────────────────────────────────────────────────────
+  readonly form = this.fb.nonNullable.group({
+    proveedor:   [PROVEEDORES_MOCK[0]],
+    tipoDoc:     [TIPOS_DOC_COMPRA[0] as TipoDocCompraOption],
+    correlativo: [''],
+    formaPago:   ['CONTADO'],
+    fechaCompra: [new Date()],
+    fechaVenc:   [new Date()],
+    moneda:      ['PEN' as 'PEN' | 'USD'],
+    igvIncluido: [false],
+    descuentoPct:[0],
+  });
+
+  // Signals derivados del form — para computed y template reactivo (OnPush)
+  readonly tipoDocVal     = toSignal(this.form.controls.tipoDoc.valueChanges,     { initialValue: TIPOS_DOC_COMPRA[0] as TipoDocCompraOption });
+  readonly monedaVal      = toSignal(this.form.controls.moneda.valueChanges,      { initialValue: 'PEN' as 'PEN' | 'USD' });
+  readonly igvIncluidoVal = toSignal(this.form.controls.igvIncluido.valueChanges, { initialValue: false });
+  readonly descuentoPctVal= toSignal(this.form.controls.descuentoPct.valueChanges,{ initialValue: 0 });
+
+  // ── Estado no-form ─────────────────────────────────────────────────────────
+  readonly proveedores         = signal([...PROVEEDORES_MOCK]);
+  readonly proveedorFilterText = signal('');
+  readonly showProductForm     = signal(false);
   readonly productoSuggestions = signal<PosProducto[]>([]);
+  readonly items               = signal<PurchaseItem[]>([]);
   selectedProducto: PosProducto | null = null;
-  readonly items            = signal<PurchaseItem[]>([]);
 
   // ── Computed ───────────────────────────────────────────────────────────────
   readonly visible = computed(() => this.editing() !== null);
@@ -76,10 +90,10 @@ export class PurchaseForm {
     this.editing() === 'new' ? 'Nueva Compra' : 'Editar Compra'
   );
 
-  readonly sigla = computed(() => this.moneda() === 'PEN' ? 'S/' : '$');
+  readonly sigla = computed(() => this.monedaVal() === 'PEN' ? 'S/' : '$');
 
   readonly serie = computed(() => {
-    const td = this.tipoDoc();
+    const td = this.tipoDocVal();
     if (!td.requiresSerie) return 'AUTO';
     return td.sigla === 'F' ? 'F001' : td.sigla === 'B' ? 'B001' : `${td.sigla}01`;
   });
@@ -89,13 +103,13 @@ export class PurchaseForm {
   );
 
   readonly subtotal = computed(() =>
-    this.igvIncluido() ? this.bruto() / 1.18 : this.bruto()
+    this.igvIncluidoVal() ? this.bruto() / 1.18 : this.bruto()
   );
 
   readonly igvMonto = computed(() => this.subtotal() * 0.18);
 
   readonly descuentoMonto = computed(() =>
-    this.subtotal() * (this.descuentoPct() / 100)
+    this.subtotal() * (this.descuentoPctVal() / 100)
   );
 
   readonly total = computed(() =>
@@ -103,45 +117,74 @@ export class PurchaseForm {
   );
 
   constructor() {
+    // Habilitar/deshabilitar correlativo según tipo de documento
+    effect(() => {
+      if (this.tipoDocVal()?.requiresSerie) {
+        this.form.controls.correlativo.enable();
+      } else {
+        this.form.controls.correlativo.disable();
+      }
+    });
+
+    // Patch/reset al abrir el modal
     effect(() => {
       const e = this.editing();
       if (!e) return;
       if (e === 'new') {
-        this.proveedorSeleccionado.set(PROVEEDORES_MOCK[0]);
-        this.tipoDoc.set(TIPOS_DOC_COMPRA[0]);
-        this.correlativo.set('');
-        this.fechaCompra.set(new Date());
-        this.fechaVenc.set(new Date());
-        this.moneda.set('PEN');
-        this.formaPago.set('CONTADO');
-        this.igvIncluido.set(false);
-        this.descuentoPct.set(0);
+        this.form.reset({
+          proveedor:   PROVEEDORES_MOCK[0],
+          tipoDoc:     TIPOS_DOC_COMPRA[0],
+          correlativo: '',
+          formaPago:   'CONTADO',
+          fechaCompra: new Date(),
+          fechaVenc:   new Date(),
+          moneda:      'PEN',
+          igvIncluido: false,
+          descuentoPct: 0,
+        });
+        this.items.set([]);
         this.selectedProducto = null;
         this.productoSuggestions.set([]);
-        this.items.set([]);
       } else {
         const td = TIPOS_DOC_COMPRA.find(t => t.value === e.tip_doc) ?? TIPOS_DOC_COMPRA[0];
-        this.tipoDoc.set(td);
-        this.correlativo.set(e.correlativo);
-        this.fechaCompra.set(new Date(e.fecha_compra + 'T00:00:00'));
-        this.fechaVenc.set(new Date(e.fecha_vencimiento + 'T00:00:00'));
-        this.moneda.set(e.moneda);
-        this.formaPago.set(e.forma_pago);
+        this.form.patchValue({
+          tipoDoc:     td,
+          correlativo: e.correlativo,
+          fechaCompra: new Date(e.fecha_compra + 'T00:00:00'),
+          fechaVenc:   new Date(e.fecha_vencimiento + 'T00:00:00'),
+          moneda:      e.moneda,
+          formaPago:   e.forma_pago,
+          descuentoPct: 0,
+        });
         this.items.set(
           (e.detalles ?? []).map((d, i) => ({
-            id: String(i),
-            nombre: d.producto_nombre,
-            sku: '',
-            unidad: 'und',
+            id:       String(i),
+            nombre:   d.producto_nombre,
+            sku:      '',
+            unidad:   'und',
             cantidad: d.cantidad,
-            precio: d.precio_venta,
+            precio:   d.precio_venta,
           }))
         );
       }
     });
   }
 
-  // ── Methods ────────────────────────────────────────────────────────────────
+  // ── Proveedor ──────────────────────────────────────────────────────────────
+  onProveedorFilter(e: { filter: string }) {
+    this.proveedorFilterText.set(e.filter ?? '');
+  }
+
+  addProveedor() {
+    const nombre = this.proveedorFilterText().trim();
+    if (!nombre) return;
+    const nuevo = { label: nombre, value: '00000000' };
+    this.proveedores.update(list => [...list, nuevo]);
+    this.form.controls.proveedor.setValue(nuevo);
+    this.proveedorFilterText.set('');
+  }
+
+  // ── Productos ──────────────────────────────────────────────────────────────
   onProductSearch(event: { query: string }) {
     const q = event.query.toLowerCase().trim();
     const results = q
@@ -168,6 +211,17 @@ export class PurchaseForm {
     setTimeout(() => { this.selectedProducto = null; });
   }
 
+  onProductSaved(p: { id: string; descripcion: string; sku: string; unidad: string; costo: number }) {
+    this.items.update(list => [...list, {
+      id: p.id, nombre: p.descripcion, sku: p.sku,
+      unidad: p.unidad, cantidad: 1, precio: p.costo,
+    }]);
+    this.showProductForm.set(false);
+    this.selectedProducto = null;
+    this.productoSuggestions.set([]);
+  }
+
+  // ── Tabla ──────────────────────────────────────────────────────────────────
   removeItem(id: string) {
     this.items.update(list => list.filter(i => i.id !== id));
   }
@@ -192,38 +246,9 @@ export class PurchaseForm {
     });
   }
 
-  onProductSaved(p: { id: string; descripcion: string; sku: string; unidad: string; precio_costo: number }) {
-    this.items.update(list => [...list, {
-      id:      p.id,
-      nombre:  p.descripcion,
-      sku:     p.sku,
-      unidad:  p.unidad,
-      cantidad: 1,
-      precio:  p.precio_costo,
-    }]);
-    this.showProductForm.set(false);
-    this.selectedProducto = null;
-    this.productoSuggestions.set([]);
-  }
-
-  onProveedorFilter(e: { filter: string }) {
-    this.proveedorFilterText.set(e.filter ?? '');
-  }
-
-  addProveedor() {
-    const nombre = this.proveedorFilterText().trim();
-    if (!nombre) return;
-    const nuevo = { label: nombre, value: '00000000' };
-    this.proveedores.update(list => [...list, nuevo]);
-    this.proveedorSeleccionado.set(nuevo);
-    this.proveedorFilterText.set('');
-  }
-
-  procesar() {
-    this.closed.emit();
-  }
-
-  close() { this.closed.emit(); }
+  // ── Submit ─────────────────────────────────────────────────────────────────
+  procesar() { this.closed.emit(); }
+  close()    { this.closed.emit(); }
 
   fmt(n: number) { return this.sigla() + ' ' + n.toFixed(2); }
 }

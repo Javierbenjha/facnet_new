@@ -16,9 +16,9 @@ import { Empresa } from '../company-branch.models';
 export class CompanyForm {
   private readonly fb = inject(FormBuilder);
 
-  editing = input<Empresa | 'new' | null>(null);
-  closed  = output<void>();
-  saved   = output<Empresa>();
+  readonly editing = input<Empresa | 'new' | null>(null);
+  readonly closed  = output<void>();
+  readonly saved   = output<Empresa>();
 
   readonly visible = computed(() => this.editing() !== null);
 
