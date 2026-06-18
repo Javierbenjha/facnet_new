@@ -1,9 +1,12 @@
-<h1>
-    Roles
-</h1>
+<ng-template #actions let-row>
+  <p-button [disabled]="!row.editable" size="small" (click)="update(row)">Editar</p-button>
+  <p-button [disabled]="!row.editable" size="small" (click)="remove(row)">Eliminar</p-button>
+</ng-template>
 
-@for(r of roles(); track r.id){
-    <div>
-        {{ r.description}}
-    </div>
-}
+<app-page-header title="Roles" subtitle="">
+
+<app-kpi-card label="Total Roles" [value]="kpis().total.toString()" subtitle="aea" icon="pi shield"/>
+<app-kpi-card label="Total Roles Sistema" [value]="kpis().sistema.toString()" subtitle="aea" icon="pi shield"/>
+<app-kpi-card label="Total Roles Propios" [value]="kpis().propios.toString()" subtitle="aea" icon="pi shield"/>
+
+<app-data-table [columns]="columns" [data]="roles()" [actionTemplate]="actions" />
