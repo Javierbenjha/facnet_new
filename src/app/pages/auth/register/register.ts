@@ -1,4 +1,4 @@
-﻿import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -15,6 +15,7 @@ import { Auth } from '../../../core/services/auth';
 import { Toaster } from '../../../core/services/toast';
 import { AuthBranding } from '../../../shared/auth-branding/auth-branding';
 import { finalize } from 'rxjs';
+import { NgOptimizedImage } from '@angular/common';
 
 const passwordsMatch: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
   const password = group.get('password')?.value;
@@ -27,7 +28,7 @@ const passwordsMatch: ValidatorFn = (group: AbstractControl): ValidationErrors |
   templateUrl: './register.html',
   styleUrl: './register.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, ButtonModule, InputText, Password, AuthBranding],
+  imports: [ReactiveFormsModule, RouterLink, ButtonModule, InputText, Password, AuthBranding, NgOptimizedImage],
 })
 export class Register {
   private readonly fb = inject(FormBuilder);

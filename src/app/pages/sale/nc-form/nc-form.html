@@ -1,0 +1,234 @@
+<app-modal
+  [visible]="visible()"
+  (visibleChange)="visibleChange.emit($event)"
+  (closed)="close()"
+  title="Emitir nota de crédito"
+  icon="pi pi-file-excel"
+  iconColor="danger"
+  size="md">
+
+  <!-- ── Body con scroll interno para que el footer nunca quede tapado ── -->
+  <div class="flex flex-col gap-4 pt-1 max-h-[62vh] overflow-y-auto pr-1">
+
+    <!-- 1 ── Documento de referencia ───────────────────────────────────── -->
+    <section class="flex flex-col gap-2">
+      <p class="text-xs font-semibold uppercase tracking-wide text-stone-400">
+        Documento de referencia
+      </p>
+
+      <div class="flex gap-2 items-end">
+        <!-- Tipo -->
+        <div class="flex flex-col gap-1" style="width:190px">
+          <label class="text-xs text-stone-500">Tipo</label>
+          <p-select size="small"
+            [options]="tiposDocRef" optionLabel="label" optionValue="value"
+            [ngModel]="refTipoDoc()" (ngModelChange)="refTipoDoc.set($event)"
+            appendTo="body" styleClass="w-full" />
+        </div>
+        <!-- Serie -->
+        <div class="flex flex-col gap-1" style="width:96px">
+          <label class="text-xs text-stone-500">Serie</label>
+          <input pInputText pSize="small" class="font-mono uppercase w-full"
+                 [ngModel]="refSerie()" (ngModelChange)="refSerie.set($event)"
+                 placeholder="F001" maxlength="4" />
+        </div>
+        <!-- Correlativo -->
+        <div class="flex flex-col gap-1 flex-1">
+          <label class="text-xs text-stone-500">Correlativo</label>
+          <p-inputgroup>
+            <input pInputText pSize="small" class="font-mono w-full"
+                   [ngModel]="refCorr()" (ngModelChange)="refCorr.set($event)"
+                   placeholder="000001" maxlength="8"
+                   (keyup.enter)="buscarDoc()" />
+            <p-inputGroupAddon>
+              <p-button icon="pi pi-search" [text]="true" severity="secondary" size="small"
+                        [loading]="buscando()"
+                        pTooltip="Buscar comprobante" tooltipPosition="top"
+                        (onClick)="buscarDoc()" />
+            </p-inputGroupAddon>
+          </p-inputgroup>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 ── Card del documento original ────────────────────────────────── -->
+    @if (docRef(); as doc) {
+      <div class="rounded-xl bg-black/[.04] dark:bg-white/[.06] px-4 py-3">
+
+        <!-- Título + badge -->
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <i class="pi pi-file text-stone-400 dark:text-stone-500 text-[14px]"></i>
+            <span class="text-sm font-semibold text-stone-800 dark:text-stone-100">
+              {{ doc.tipoDocLabel }} · {{ doc.serie }}-{{ doc.correlativo }}
+            </span>
+          </div>
+          <p-tag [value]="estadoLabel(doc.estado)"
+                 [severity]="estadoSeverity(doc.estado)"
+                 styleClass="text-[11px]" />
+        </div>
+
+        <!-- Campos 2 columnas -->
+        <div class="grid grid-cols-2 gap-x-4 gap-y-2">
+          <div class="min-w-0">
+            <p class="text-[11px] text-stone-400 dark:text-stone-500">Cliente</p>
+            <p class="text-[13px] font-semibold text-stone-800 dark:text-stone-100 truncate leading-tight">{{ doc.cliente }}</p>
+            <p class="text-[11px] text-stone-400 dark:text-stone-500">{{ doc.ruc }}</p>
+          </div>
+          <div>
+            <p class="text-[11px] text-stone-400 dark:text-stone-500">Serie del documento</p>
+            <p class="text-[13px] font-semibold text-stone-800 dark:text-stone-100 leading-tight">{{ doc.serieNc }}</p>
+          </div>
+          <div>
+            <p class="text-[11px] text-stone-400 dark:text-stone-500">Fecha de emisión</p>
+            <p class="text-[13px] font-semibold text-stone-800 dark:text-stone-100 leading-tight">{{ doc.fechaEmision }}</p>
+          </div>
+          <div>
+            <p class="text-[11px] text-stone-400 dark:text-stone-500">Fecha de vencimiento</p>
+            <p class="text-[13px] font-semibold text-stone-800 dark:text-stone-100 leading-tight">{{ doc.fechaVencimiento }}</p>
+          </div>
+          <div>
+            <p class="text-[11px] text-stone-400 dark:text-stone-500">Moneda</p>
+            <p class="text-[13px] font-semibold text-stone-800 dark:text-stone-100 leading-tight">
+              {{ doc.moneda === 'PEN' ? 'S/ Soles (PEN)' : '$ Dólares (USD)' }}
+            </p>
+          </div>
+          <div>
+            <p class="text-[11px] text-stone-400 dark:text-stone-500">Forma de pago</p>
+            <p class="text-[13px] font-semibold text-stone-800 dark:text-stone-100 leading-tight">{{ doc.formaPago }}</p>
+          </div>
+        </div>
+
+        <!-- Pie: subtotales + total -->
+        <div class="flex items-baseline justify-between mt-3 pt-2.5
+                    border-t border-black/[.06] dark:border-white/[.08]">
+          <span class="text-[11px] text-stone-400 dark:text-stone-500 tabular-nums">
+            Subtotal {{ fmt(doc.subtotal) }}&nbsp;·&nbsp;IGV {{ fmt(doc.igv) }}
+          </span>
+          <span class="text-base font-semibold text-stone-900 dark:text-stone-100 tabular-nums">
+            Total {{ fmt(doc.total) }}
+          </span>
+        </div>
+      </div>
+    }
+
+    <!-- 3 ── Motivo SUNAT + Fecha de emisión NC ──────────────────────────── -->
+    <div class="grid grid-cols-2 gap-3">
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-semibold uppercase tracking-wide text-stone-400">
+          Motivo SUNAT <span class="text-red-400">*</span>
+        </label>
+        <p-select size="small"
+          [options]="motivosNc" optionLabel="label" optionValue="value"
+          [ngModel]="motivo()" (ngModelChange)="motivo.set($event)"
+          appendTo="body" styleClass="w-full"
+          placeholder="Seleccioná el motivo" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-semibold uppercase tracking-wide text-stone-400">
+          Fecha de Emisión NC
+        </label>
+        <p-datepicker [ngModel]="fecha()" (ngModelChange)="fecha.set($event)"
+          dateFormat="dd/mm/yy" appendTo="body"
+          styleClass="w-full" inputStyleClass="!py-[0.375rem] !text-sm" />
+      </div>
+    </div>
+
+    <!-- 4 ── Detalle de productos (cargados del doc de referencia) ────────── -->
+    @if (lineas().length > 0) {
+      <section class="flex flex-col gap-1.5">
+        <p class="text-xs font-semibold uppercase tracking-wide text-stone-400">Detalle</p>
+
+        <p-table [value]="lineas()" styleClass="p-datatable-sm">
+          <ng-template pTemplate="header">
+            <tr>
+              <th class="w-8">
+                <p-checkbox [ngModel]="allSelected()" (ngModelChange)="toggleAll()"
+                            [binary]="true" />
+              </th>
+              <th>Descripción</th>
+              <th class="w-20 text-center">Cant.</th>
+              <th class="w-28 text-right">P. Unit.</th>
+              <th class="w-24 text-right">Total</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-linea let-i="rowIndex">
+            <tr [class.opacity-40]="!linea.isSelected">
+              <td>
+                <p-checkbox [ngModel]="linea.isSelected" (ngModelChange)="toggleLinea(i)"
+                            [binary]="true" />
+              </td>
+              <td>
+                <input pInputText pSize="small" class="w-full"
+                       [ngModel]="linea.descripcion"
+                       (ngModelChange)="updateLinea(i, 'descripcion', $event)"
+                       [disabled]="!linea.isSelected" />
+              </td>
+              <td>
+                <p-inputnumber [ngModel]="linea.cantidad"
+                  (ngModelChange)="updateLinea(i, 'cantidad', $event ?? 1)"
+                  [min]="1" [max]="linea.cantidadMax"
+                  [disabled]="!linea.isSelected"
+                  styleClass="w-full"
+                  inputStyleClass="!py-[0.375rem] !text-sm text-center w-full"
+                  [pTooltip]="'Máx: ' + linea.cantidadMax" tooltipPosition="top" />
+              </td>
+              <td>
+                <p-inputnumber [ngModel]="linea.precio"
+                  (ngModelChange)="updateLinea(i, 'precio', $event ?? 0)"
+                  mode="decimal" [minFractionDigits]="2"
+                  [disabled]="!linea.isSelected"
+                  styleClass="w-full"
+                  inputStyleClass="!py-[0.375rem] !text-sm text-right w-full" />
+              </td>
+              <td class="text-right font-medium tabular-nums text-stone-800 dark:text-stone-100 whitespace-nowrap">
+                {{ linea.isSelected ? fmt(linea.cantidad * linea.precio) : '—' }}
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </section>
+    }
+
+    <!-- 5 ── Descuento global ─────────────────────────────────────────────── -->
+    <div class="flex justify-end items-center gap-3">
+      <label class="text-sm text-stone-500 shrink-0">Descuento (S/)</label>
+      <p-inputnumber [ngModel]="descuento()" (ngModelChange)="descuento.set($event ?? 0)"
+        mode="decimal" [minFractionDigits]="2" [min]="0"
+        styleClass="w-36"
+        inputStyleClass="!py-[0.375rem] !text-sm text-right w-full" />
+    </div>
+
+    <!-- 6 ── Card de totales NC ─────────────────────────────────────────── -->
+    <div class="rounded-xl border border-red-200 dark:border-red-900
+                bg-red-50 dark:bg-red-950/50 px-4 py-3 text-sm flex flex-col gap-1.5">
+      <div class="flex justify-between text-red-700 dark:text-red-400">
+        <span>Op. gravadas</span>
+        <span class="tabular-nums">{{ fmt(subtotalLineas()) }}</span>
+      </div>
+      <div class="flex justify-between text-red-700 dark:text-red-400">
+        <span>Descuento</span>
+        <span class="tabular-nums">- {{ fmt(descuento()) }}</span>
+      </div>
+      <div class="flex justify-between text-red-700 dark:text-red-400">
+        <span>IGV 18%</span>
+        <span class="tabular-nums">{{ fmt(igv()) }}</span>
+      </div>
+      <div class="border-t border-red-200 dark:border-red-800 pt-2
+                  flex justify-between font-bold text-red-600 dark:text-red-300">
+        <span>Total NC</span>
+        <span class="text-lg tabular-nums">{{ fmt(total()) }}</span>
+      </div>
+    </div>
+
+  </div>
+  <!-- fin scroll interno -->
+
+  <div modal-footer class="flex gap-2 justify-end">
+    <p-button label="Cancelar" severity="secondary" [outlined]="true"
+              size="small" (onClick)="close()" />
+    <p-button label="Emitir NC" icon="pi pi-upload" severity="danger"
+              size="small" [disabled]="!isValid()" (onClick)="save()" />
+  </div>
+
+</app-modal>

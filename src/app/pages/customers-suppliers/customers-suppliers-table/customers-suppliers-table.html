@@ -33,7 +33,7 @@
 </ng-template>
 
 <ng-template #estadoCellTpl let-p>
-  <p-tag [value]="p.estado" [severity]="p.estado === 'ACTIVO' ? 'success' : 'danger'" />
+  <p-tag [value]="p.estado" [severity]="p.estado === 'ACTIVO' ? 'success' : 'danger'" styleClass="!text-xs" />
 </ng-template>
 
 <ng-template #actionCellTpl let-p>
@@ -45,12 +45,12 @@
 </ng-template>
 
 <!-- Layout -->
-<div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
+<div class="bg-surface-card border border-border rounded-xl overflow-hidden">
 
   <!-- Filtros -->
-  <div class="flex items-center gap-2 p-3.5 border-b border-stone-200 dark:border-stone-700 flex-wrap">
+  <div class="flex items-center gap-2 p-3.5 border-b border-border flex-wrap">
 
-    <p-selectbutton
+    <p-selectbutton size="small"
       [options]="tabOptions"
       [ngModel]="tab()"
       (ngModelChange)="onTabChange($event)"
@@ -63,14 +63,14 @@
 
     <p-iconfield>
       <p-inputicon><i class="pi pi-search"></i></p-inputicon>
-      <input pInputText
-             class="w-56 text-sm"
+      <input pInputText pSize="small"
+             class="w-56"
              [ngModel]="searchTerm()"
              (ngModelChange)="searchTerm.set($event)"
              [placeholder]="tab() === 'CLIENTE' ? 'Buscar clientes...' : 'Buscar proveedores...'" />
     </p-iconfield>
 
-    <p-selectbutton
+    <p-selectbutton size="small"
       [options]="statusOptions"
       optionLabel="label"
       optionValue="value"

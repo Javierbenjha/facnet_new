@@ -1,4 +1,4 @@
-<div class="px-5 py-3 bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-700 shrink-0 flex flex-col gap-2">
+<div class="px-5 py-3 bg-surface-card border-b border-border shrink-0 flex flex-col gap-2">
 
   <!-- Row 1: Cliente · Tipo Doc · Serie · Fecha -->
   <div class="flex items-end gap-3">
@@ -7,8 +7,8 @@
       <label class="text-[10px] font-semibold text-stone-400 uppercase tracking-wide">Cliente</label>
       <p-iconfield class="mt-1">
         <p-inputicon class="pi pi-user" />
-        <input pInputText type="text" placeholder="Buscar cliente o RUC..."
-          class="w-full text-xs"
+        <input pInputText pSize="small" type="text" placeholder="Buscar cliente o RUC..."
+          class="w-full"
           [value]="cliente()"
           (input)="clienteChange.emit($any($event.target).value)" />
       </p-iconfield>
@@ -22,13 +22,14 @@
         (ngModelChange)="tipoDocChange.emit($event)"
         optionLabel="label"
         optionValue="value"
+        size="small"
         appendTo="body"
         styleClass="w-full mt-1" />
     </div>
 
     <div class="w-16 shrink-0">
       <label class="text-[10px] font-semibold text-stone-400 uppercase tracking-wide">Serie</label>
-      <input pInputText [value]="serie()" disabled class="w-full text-xs text-center mt-1" />
+      <input pInputText pSize="small" [value]="serie()" disabled class="w-full text-center mt-1" />
     </div>
 
     <div class="w-44 shrink-0">
@@ -40,7 +41,8 @@
         [showIcon]="true"
         dateFormat="dd/mm/yy"
         appendTo="body"
-        styleClass="w-full mt-1" />
+        styleClass="w-full mt-1"
+        inputStyleClass="!py-[0.375rem] !text-sm" />
     </div>
 
   </div>
@@ -51,11 +53,11 @@
     <div class="shrink-0">
       <label class="text-[10px] font-semibold text-stone-400 uppercase tracking-wide">Moneda</label>
       <div class="flex gap-1 mt-1">
-        <p-button label="S/ PEN"
+        <p-button label="S/ PEN" size="small"
           [outlined]="moneda() !== 'PEN'"
           [severity]="moneda() !== 'PEN' ? 'secondary' : undefined"
           (onClick)="monedaChange.emit('PEN')" />
-        <p-button label="$ USD"
+        <p-button label="$ USD" size="small"
           [outlined]="moneda() !== 'USD'"
           [severity]="moneda() !== 'USD' ? 'secondary' : undefined"
           (onClick)="monedaChange.emit('USD')" />
@@ -65,11 +67,11 @@
     <div class="shrink-0">
       <label class="text-[10px] font-semibold text-stone-400 uppercase tracking-wide">Forma de Pago</label>
       <div class="flex gap-1 mt-1">
-        <p-button label="Contado"
+        <p-button label="Contado" size="small"
           [outlined]="formaPago() !== 'contado'"
           [severity]="formaPago() !== 'contado' ? 'secondary' : undefined"
           (onClick)="formaPagoChange.emit('contado')" />
-        <p-button label="Crédito"
+        <p-button label="Crédito" size="small"
           [outlined]="formaPago() !== 'credito'"
           [severity]="formaPago() !== 'credito' ? 'secondary' : undefined"
           (onClick)="formaPagoChange.emit('credito')" />
@@ -85,7 +87,7 @@
       </div>
       <p-inputnumber [ngModel]="descuento()" (ngModelChange)="descuentoChange.emit($event ?? 0)"
         [min]="0" [max]="100" [minFractionDigits]="0" [maxFractionDigits]="2"
-        suffix="%" styleClass="w-full mt-1" inputStyleClass="text-xs text-right w-full" />
+        suffix="%" styleClass="w-full mt-1" inputStyleClass="!py-[0.375rem] !text-sm text-right w-full" />
     </div>
 
     <div class="shrink-0 self-end mb-0.5">
@@ -101,7 +103,7 @@
 
   <!-- Row 3: Detracción / Retención (colapsable) -->
   @if (showDetRet()) {
-    <div class="flex items-end gap-3 pt-1 border-t border-dashed border-stone-200 dark:border-stone-700">
+    <div class="flex items-end gap-3 pt-1 border-t border-dashed border-border">
 
       <div class="flex-1 min-w-0">
         <label class="text-[10px] font-semibold text-blue-500 uppercase tracking-wide">Detracción</label>
@@ -111,6 +113,7 @@
           (ngModelChange)="detracConceptoChange.emit($event)"
           optionLabel="descripcion"
           [showClear]="true"
+          size="small"
           placeholder="Seleccionar concepto..."
           appendTo="body"
           [disabled]="aplicaRetencion()"
@@ -126,12 +129,13 @@
         </div>
       }
 
-      <div class="w-px h-10 self-end mb-1 bg-stone-200 dark:bg-stone-700 shrink-0"></div>
+      <div class="w-px h-10 self-end mb-1 bg-border shrink-0"></div>
 
       <div class="shrink-0">
         <label class="text-[10px] font-semibold text-amber-500 uppercase tracking-wide">Retención</label>
-        <div class="flex items-center gap-2 mt-1 h-[42px]">
+        <div class="flex items-center gap-2 mt-1">
           <p-button
+            size="small"
             [label]="aplicaRetencion() ? 'Aplicando ' + retencionPct() + '%' : 'Sin retención'"
             [icon]="aplicaRetencion() ? 'pi pi-check-circle' : 'pi pi-circle'"
             [severity]="aplicaRetencion() ? 'warn' : 'secondary'"

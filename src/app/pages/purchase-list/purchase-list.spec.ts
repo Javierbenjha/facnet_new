@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { PurchaseList } from './purchase_list';
+import { PurchaseList } from './purchase-list';
 
 describe('PurchaseList', () => {
   beforeEach(async () => {

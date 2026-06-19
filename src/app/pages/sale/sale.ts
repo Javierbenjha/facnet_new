@@ -8,6 +8,8 @@ import { SaleHeader } from './sale-header/sale-header';
 import { SaleInfo } from './sale-info/sale-info';
 import { SaleProducts } from './sale-products/sale-products';
 import { SaleCart } from './sale-cart/sale-cart';
+import { NcForm } from './nc-form/nc-form';
+import { NdForm } from './nd-form/nd-form';
 import {
   CartItem, CartTotals, DetraccionConcepto, DETRACCION_CONCEPTOS, FormaPago,
   METODOS_PAGO, MetodoPago, Moneda, POS_PRODUCTOS, PosProducto,
@@ -19,7 +21,7 @@ import {
   templateUrl: './sale.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { 'class': 'w-full h-full flex overflow-hidden' },
-  imports: [Button, InputNumber, AppModal, FormsModule, ProductForm, SaleHeader, SaleInfo, SaleProducts, SaleCart],
+  imports: [Button, InputNumber, AppModal, FormsModule, ProductForm, SaleHeader, SaleInfo, SaleProducts, SaleCart, NcForm, NdForm],
 })
 export class Sale {
   readonly metodosPago          = METODOS_PAGO;
@@ -31,6 +33,10 @@ export class Sale {
 
   // ── Product form modal ─────────────────────────────────────────────────────
   readonly showProductForm = signal(false);
+
+  // ── NC / ND modals ────────────────────────────────────────────────────────
+  readonly showNcForm = signal(false);
+  readonly showNdForm = signal(false);
 
   // ── Product search / filter ────────────────────────────────────────────────
   readonly query     = signal('');

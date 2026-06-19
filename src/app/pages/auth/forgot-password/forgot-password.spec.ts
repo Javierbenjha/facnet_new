@@ -1,5 +1,5 @@
-﻿import { TestBed } from '@angular/core/testing';
-import { ForgotPassword } from './forgot_password';
+import { TestBed } from '@angular/core/testing';
+import { ForgotPassword } from './forgot-password';
 
 describe('ForgotPassword', () => {
   beforeEach(async () => {

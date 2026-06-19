@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { FormRoot, FormField, form } from '@angular/forms/signals';
+import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
@@ -13,11 +13,9 @@ import { Persona, TipoDocumento, TipoPersona } from '../customers-suppliers.mode
   selector: 'app-customer-form',
   templateUrl: './customer-form.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, Button, InputText, Select, InputGroup, InputGroupAddon, AppModal],
+  imports: [FormRoot, FormField, FormsModule, Button, InputText, Select, InputGroup, InputGroupAddon, AppModal],
 })
 export class CustomerForm {
-  private readonly fb = inject(FormBuilder);
-
   readonly editing     = input<Persona | 'new' | null>(null);
   readonly tipoPersona = input<TipoPersona>('CLIENTE');
   readonly closed      = output<void>();
@@ -38,29 +36,27 @@ export class CustomerForm {
     { label: 'Carnet Ext.',  value: 'CE'  },
   ];
 
-  readonly form = this.fb.nonNullable.group({
-    tipo_documento:   ['DNI' as TipoDocumento],
-    numero_documento: [''],
-    nombre:           [''],
-    apellido_paterno: [''],
-    apellido_materno: [''],
-    telefono:         [''],
-    email:            [''],
-    direccion:        [''],
-    departamento:     [''],
-    provincia:        [''],
-    distrito:         [''],
+  readonly model = signal({
+    tipo_documento:   'DNI' as TipoDocumento,
+    numero_documento: '',
+    nombre:           '',
+    apellido_paterno: '',
+    apellido_materno: '',
+    telefono:         '',
+    email:            '',
+    direccion:        '',
+    departamento:     '',
+    provincia:        '',
+    distrito:         '',
   });
 
-  readonly tipoDoc = toSignal(this.form.controls.tipo_documento.valueChanges, {
-    initialValue: 'DNI' as TipoDocumento,
-  });
+  readonly form = form(this.model);
 
-  readonly isDni = computed(() => this.tipoDoc() === 'DNI' || this.tipoDoc() === 'CE');
-  readonly isRuc = computed(() => this.tipoDoc() === 'RUC');
+  readonly isDni = computed(() => this.model().tipo_documento === 'DNI' || this.model().tipo_documento === 'CE');
+  readonly isRuc = computed(() => this.model().tipo_documento === 'RUC');
 
   readonly docPlaceholder = computed(() => {
-    const t = this.tipoDoc();
+    const t = this.model().tipo_documento;
     if (t === 'DNI') return '76329484';
     if (t === 'RUC') return '20123456789';
     return 'CE-000000000';
@@ -71,7 +67,7 @@ export class CustomerForm {
       const e = this.editing();
       if (!e) return;
       if (e === 'new') {
-        this.form.reset({
+        this.model.set({
           tipo_documento: 'DNI', numero_documento: '',
           nombre: '', apellido_paterno: '', apellido_materno: '',
           telefono: '', email: '', direccion: '',
@@ -79,7 +75,7 @@ export class CustomerForm {
         });
       } else {
         const p = e as Persona;
-        this.form.patchValue({
+        this.model.set({
           tipo_documento:   p.tipo_documento,
           numero_documento: p.numero_documento,
           nombre:           p.nombre,
@@ -97,25 +93,27 @@ export class CustomerForm {
   }
 
   buscarDocumento() {
-    const doc  = this.form.controls.numero_documento.value.trim();
-    const tipo = this.form.controls.tipo_documento.value;
+    const { numero_documento, tipo_documento } = this.model();
+    const doc = numero_documento.trim();
     if (!doc) return;
 
-    if (tipo === 'DNI' && doc.length === 8) {
-      this.form.patchValue({
+    if (tipo_documento === 'DNI' && doc.length === 8) {
+      this.model.update(m => ({
+        ...m,
         nombre: 'Juan Carlos', apellido_paterno: 'García', apellido_materno: 'López',
-      });
-    } else if (tipo === 'RUC' && doc.length === 11) {
-      this.form.patchValue({
+      }));
+    } else if (tipo_documento === 'RUC' && doc.length === 11) {
+      this.model.update(m => ({
+        ...m,
         nombre: 'EMPRESA DEMO S.A.C.', apellido_paterno: '', apellido_materno: '',
         direccion: 'Av. Ejemplo 123, Lima',
         departamento: 'Lima', provincia: 'Lima', distrito: 'Miraflores',
-      });
+      }));
     }
   }
 
   save() {
-    const v       = this.form.getRawValue();
+    const v       = this.model();
     const existing = this.editing();
     const persona: Persona = {
       id:               existing && existing !== 'new' ? (existing as Persona).id : crypto.randomUUID(),

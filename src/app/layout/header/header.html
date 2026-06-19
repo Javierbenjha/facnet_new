@@ -1,5 +1,5 @@
 <header
-  class="flex items-center h-14 px-4 gap-3 bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-700 shrink-0"
+  class="flex items-center h-14 px-4 gap-3 bg-surface-card border-b border-border shrink-0"
 >
   <!-- Toggle sidebar -->
   <p-button
@@ -17,6 +17,7 @@
     (ngModelChange)="selectedEmpresaId.set($event)"
     optionLabel="nombre"
     optionValue="id"
+    size="small"
   />
 
   <p-select
@@ -25,6 +26,7 @@
     (ngModelChange)="selectedSucursalId.set($event)"
     optionLabel="nombre"
     optionValue="id"
+    size="small"
   />
 
   <!-- Búsqueda -->
@@ -35,18 +37,19 @@
       </p-inputicon>
       <input
         pInputText
+        pSize="small"
         type="text"
         [ngModel]="searchQuery()"
         (ngModelChange)="onSearchInput($event)"
         (blur)="closeSearch()"
         placeholder="Buscar producto, venta, cliente…"
-        class="w-full text-sm"
+        class="w-full"
       />
     </p-iconfield>
 
     @if (showSearchDropdown() && filteredModules().length > 0) {
       <div
-        class="absolute top-full left-0 right-0 mt-1.5 z-50 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl shadow-lg overflow-hidden"
+        class="absolute top-full left-0 right-0 mt-1.5 z-50 bg-surface-card border border-border rounded-xl shadow-lg overflow-hidden"
       >
         @for (mod of filteredModules(); track mod.id) {
           <button

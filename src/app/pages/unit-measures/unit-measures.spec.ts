@@ -1,6 +1,6 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { UnitMeasures } from './unit_measures';
+import { UnitMeasures } from './unit-measures';
 
 describe('UnitMeasures', () => {
   let component: UnitMeasures;

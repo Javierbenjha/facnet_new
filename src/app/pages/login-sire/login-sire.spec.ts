@@ -1,5 +1,5 @@
-﻿import { TestBed } from '@angular/core/testing';
-import { LoginSire } from './login_sire';
+import { TestBed } from '@angular/core/testing';
+import { LoginSire } from './login-sire';
 
 describe('LoginSire', () => {
   beforeEach(async () => {

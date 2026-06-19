@@ -1,5 +1,5 @@
-﻿import { TestBed } from '@angular/core/testing';
-import { NotificationHistory } from './notification_history';
+import { TestBed } from '@angular/core/testing';
+import { NotificationHistory } from './notification-history';
 
 describe('NotificationHistory', () => {
   beforeEach(async () => {

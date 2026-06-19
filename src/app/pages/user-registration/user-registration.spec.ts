@@ -1,5 +1,5 @@
-﻿import { TestBed } from '@angular/core/testing';
-import { UserRegistration } from './user_registration';
+import { TestBed } from '@angular/core/testing';
+import { UserRegistration } from './user-registration';
 
 describe('UserRegistration', () => {
   beforeEach(async () => {

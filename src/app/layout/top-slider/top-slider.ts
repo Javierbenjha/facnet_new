@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 
 interface SliderItem {
   name: string;
@@ -9,6 +10,7 @@ interface SliderItem {
 @Component({
   selector: 'app-top-slider',
   templateUrl: './top-slider.html',
+  imports: [NgOptimizedImage],
   host: { 'class': 'flex w-full h-8 bg-primary dark:bg-stone-950 overflow-hidden shrink-0' },
 })
 export class TopSlider {

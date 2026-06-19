@@ -11,7 +11,7 @@
     <div class="flex flex-col gap-3">
       <div class="flex items-center gap-2">
         <span class="text-[10px] font-semibold uppercase tracking-widest text-stone-400">Información básica</span>
-        <div class="flex-1 h-px bg-stone-100 dark:bg-stone-800"></div>
+        <div class="flex-1 h-px bg-border"></div>
       </div>
 
       <div class="grid grid-cols-[1fr_140px] gap-4">
@@ -20,13 +20,13 @@
         <div class="flex flex-col gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-medium text-stone-500">Nombre del producto</label>
-            <input pInputText [formControl]="form.controls.descripcion"
+            <input pInputText pSize="small" [formControl]="form.controls.descripcion"
                    placeholder="Ej: Latte vainilla 12oz" class="w-full" />
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-medium text-stone-500">SKU</label>
             <p-inputgroup>
-              <input pInputText [formControl]="form.controls.sku"
+              <input pInputText pSize="small" [formControl]="form.controls.sku"
                      placeholder="CAF-001" class="font-mono" />
               <p-inputGroupAddon>
                 <p-button icon="pi pi-barcode" [text]="true" severity="secondary" size="small"
@@ -36,14 +36,14 @@
             </p-inputgroup>
           </div>
           <div class="grid grid-cols-2 gap-2">
-            <div class="flex items-center justify-between px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700">
+            <div class="flex items-center justify-between px-3 py-2 rounded-lg border border-border">
               <div>
                 <p class="text-xs font-medium text-stone-700 dark:text-stone-200">Gravado IGV</p>
                 <p class="text-[10px] leading-tight text-stone-400">Aplica 18%</p>
               </div>
               <p-toggleswitch [formControl]="form.controls.stafecto" size="small" />
             </div>
-            <div class="flex items-center justify-between px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700">
+            <div class="flex items-center justify-between px-3 py-2 rounded-lg border border-border">
               <div>
                 <p class="text-xs font-medium text-stone-700 dark:text-stone-200">Editar descrip.</p>
                 <p class="text-[10px] leading-tight text-stone-400">Al vender</p>
@@ -57,7 +57,7 @@
         <div class="flex flex-col gap-1.5">
           <label class="text-xs font-medium text-stone-500">Imagen</label>
           <div class="w-[140px] h-[140px] rounded-xl overflow-hidden border-2 border-dashed
-                      border-stone-200 dark:border-stone-700 relative group cursor-pointer
+                      border-border relative group cursor-pointer
                       hover:border-stone-400 transition-colors flex flex-col items-center
                       justify-center gap-1.5 text-stone-400 text-xs"
                (click)="triggerFileInput()">
@@ -93,9 +93,9 @@
     <div class="flex flex-col gap-3">
       <div class="flex items-center gap-2">
         <span class="text-[10px] font-semibold uppercase tracking-widest text-stone-400">Tipo</span>
-        <div class="flex-1 h-px bg-stone-100 dark:bg-stone-800"></div>
+        <div class="flex-1 h-px bg-border"></div>
       </div>
-      <div class="flex items-center justify-between px-3 py-2.5 rounded-lg border border-stone-200 dark:border-stone-700">
+      <div class="flex items-center justify-between px-3 py-2.5 rounded-lg border border-border">
         <div>
           <p class="text-sm font-medium text-stone-700 dark:text-stone-200">Es servicio</p>
           <p class="text-xs text-stone-400">No maneja stock, categoría ni unidad de medida</p>
@@ -108,7 +108,7 @@
     <div class="flex flex-col gap-3">
       <div class="flex items-center gap-2">
         <span class="text-[10px] font-semibold uppercase tracking-widest text-stone-400">Categorización y stock</span>
-        <div class="flex-1 h-px bg-stone-100 dark:bg-stone-800"></div>
+        <div class="flex-1 h-px bg-border"></div>
       </div>
 
       @if (!esServicio()) {
@@ -124,10 +124,10 @@
               [suggestions]="categoriaSuggestions()"
               (completeMethod)="filterCategorias($event)"
               [forceSelection]="false"
-              appendTo="body" styleClass="w-full" inputStyleClass="w-full"
+              appendTo="body" styleClass="w-full" inputStyleClass="!py-[0.375rem] !text-sm w-full"
               placeholder="Buscar o crear…">
               <ng-template #footer>
-                <div class="border-t border-stone-200 dark:border-stone-700 p-1">
+                <div class="border-t border-border p-1">
                   <p-button
                     [label]="categoriaQuery() ? 'Agregar: ' + categoriaQuery() : 'Agregar nueva'"
                     icon="pi pi-plus-circle" [text]="true" severity="secondary" size="small"
@@ -146,10 +146,10 @@
               [suggestions]="marcaSuggestions()"
               (completeMethod)="filterMarcas($event)"
               [forceSelection]="false"
-              appendTo="body" styleClass="w-full" inputStyleClass="w-full"
+              appendTo="body" styleClass="w-full" inputStyleClass="!py-[0.375rem] !text-sm w-full"
               placeholder="Buscar o crear…">
               <ng-template #footer>
-                <div class="border-t border-stone-200 dark:border-stone-700 p-1">
+                <div class="border-t border-border p-1">
                   <p-button
                     [label]="marcaQuery() ? 'Agregar: ' + marcaQuery() : 'Agregar nueva'"
                     icon="pi pi-plus-circle" [text]="true" severity="secondary" size="small"
@@ -168,10 +168,10 @@
               [suggestions]="unidadSuggestions()"
               (completeMethod)="filterUnidades($event)"
               [forceSelection]="false"
-              appendTo="body" styleClass="w-full" inputStyleClass="w-full"
+              appendTo="body" styleClass="w-full" inputStyleClass="!py-[0.375rem] !text-sm w-full"
               placeholder="Buscar o crear…">
               <ng-template #footer>
-                <div class="border-t border-stone-200 dark:border-stone-700 p-1">
+                <div class="border-t border-border p-1">
                   <p-button
                     [label]="unidadQuery() ? 'Agregar: ' + unidadQuery() : 'Agregar nueva'"
                     icon="pi pi-plus-circle" [text]="true" severity="secondary" size="small"
@@ -207,12 +207,12 @@
     <div class="flex flex-col gap-3">
       <div class="flex items-center gap-2">
         <span class="text-[10px] font-semibold uppercase tracking-widest text-stone-400">Precios y costos</span>
-        <div class="flex-1 h-px bg-stone-100 dark:bg-stone-800"></div>
+        <div class="flex-1 h-px bg-border"></div>
       </div>
 
       <div class="flex flex-col gap-1.5">
         <label class="text-xs font-medium text-stone-500">Moneda</label>
-        <p-select [options]="monedaOptions" optionLabel="label" optionValue="value"
+        <p-select size="small" [options]="monedaOptions" optionLabel="label" optionValue="value"
                   [formControl]="form.controls.moneda" styleClass="w-full" appendTo="body" />
       </div>
 
@@ -226,13 +226,14 @@
   </div>
 
   <div modal-footer class="flex justify-end gap-2 pt-1">
-    <p-button label="Cancelar" severity="secondary" [outlined]="true" (onClick)="close()" />
+    <p-button label="Cancelar" severity="secondary" [outlined]="true" size="small" (onClick)="close()" />
     @if (editing() !== 'new') {
-      <p-button label="Eliminar" icon="pi pi-trash" severity="danger" [outlined]="true" />
+      <p-button label="Eliminar" icon="pi pi-trash" severity="danger" [outlined]="true" size="small" />
     }
     <p-button
       [label]="editing() === 'new' ? 'Crear producto' : 'Guardar cambios'"
       icon="pi pi-check"
+      size="small"
       (onClick)="save()" />
   </div>
 

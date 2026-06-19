@@ -1,4 +1,67 @@
-﻿<div class="p-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm">
-  <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Settings</h2>
-  <p class="text-gray-500 dark:text-gray-400 mt-1">View of the Settings module.</p>
+<div class="p-6 flex flex-col gap-5">
+  <app-page-header title="Configuración" subtitle="Parámetros generales del sistema" />
+
+  <div class="grid gap-5" style="grid-template-columns: 220px 1fr">
+    <!-- Sidebar nav -->
+    <nav class="flex flex-col gap-0.5 self-start">
+      @for (section of sections; track section.id) {
+        <p-button
+          [label]="section.label"
+          [icon]="section.icon"
+          [text]="activeSection() !== section.id"
+          severity="secondary"
+          size="small"
+          styleClass="w-full !justify-start"
+          (onClick)="activeSection.set(section.id)" />
+      }
+    </nav>
+
+    <!-- Module grid -->
+    <div class="bg-surface-card border border-border rounded-xl p-5">
+      <div class="mb-4 pb-4 border-b border-border">
+        <h3 class="text-base font-semibold text-stone-800 dark:text-stone-100">
+          {{ currentSection().label }}
+        </h3>
+        <p class="text-sm text-stone-400 mt-0.5">
+          {{ currentSection().modules.length }} módulo{{
+            currentSection().modules.length !== 1 ? 's' : ''
+          }}
+          en esta sección
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        @for (mod of currentSection().modules; track mod.id) {
+          <p-card styleClass="h-full">
+            <div class="flex items-start gap-3 mb-4">
+              <div class="w-10 h-10 flex-shrink-0 rounded-lg bg-border flex items-center justify-center">
+                <i [class]="mod.icon + ' text-stone-600 dark:text-stone-300 text-base'"></i>
+              </div>
+              <div class="min-w-0">
+                <p class="font-semibold text-sm text-stone-800 dark:text-stone-100 leading-snug">
+                  {{ mod.title }}
+                </p>
+                <p class="text-xs text-stone-400 mt-1 leading-relaxed">{{ mod.description }}</p>
+              </div>
+            </div>
+
+            <ng-template #footer>
+              <div class="flex flex-col gap-1">
+                @for (action of mod.actions; track action.label) {
+                  <p-button
+                    [label]="action.label"
+                    [icon]="action.icon"
+                    [text]="true"
+                    severity="secondary"
+                    size="small"
+                    styleClass="w-full !justify-start"
+                  />
+                }
+              </div>
+            </ng-template>
+          </p-card>
+        }
+      </div>
+    </div>
+  </div>
 </div>

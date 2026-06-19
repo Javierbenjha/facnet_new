@@ -13,6 +13,11 @@
   --color-primary:       #0862a1;
   --color-primary-hover: #0971B8;
   --color-primary-light: #c5e3f5;
+
+  /* Tokens semánticos — light mode */
+  --color-surface:      #ffffff; /* fondo de página */
+  --color-surface-card: #ffffff; /* tarjetas y paneles */
+  --color-border:       #e7e5e4; /* stone-200 */
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -21,4 +26,25 @@
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
+
+  /* Dark mode global — negro */
+  html.dark {
+    --color-surface:      #000000;
+    --color-surface-card: #111111;
+    --color-border:       #292524; /* stone-800 */
+  }
+
+  body {
+    background-color: var(--color-surface);
+  }
+
+  /* Paginator rows-per-page select — tamaño small */
+  .p-paginator .p-select .p-select-label {
+    font-size: 0.875rem !important;
+    padding-top: 0.375rem !important;
+    padding-bottom: 0.375rem !important;
+  }
+  .p-paginator .p-select .p-select-dropdown {
+    width: 2rem !important;
+  }
 }

@@ -29,6 +29,18 @@ const AppTheme = definePreset(Aura, {
       950: '#021e38',
     },
   },
+  components: {
+    datepicker: {
+      date: {
+        width:   '1.75rem',
+        height:  '1.75rem',
+        padding: '0.125rem',
+      },
+      weekDay: {
+        padding: '0.125rem',
+      },
+    },
+  } as any,
 });
 
 export const appConfig: ApplicationConfig = {

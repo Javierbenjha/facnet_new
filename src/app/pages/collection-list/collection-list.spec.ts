@@ -1,5 +1,5 @@
-﻿import { TestBed } from '@angular/core/testing';
-import { CollectionList } from './collection_list';
+import { TestBed } from '@angular/core/testing';
+import { CollectionList } from './collection-list';
 
 describe('CollectionList', () => {
   beforeEach(async () => {

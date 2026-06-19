@@ -1,5 +1,5 @@
-﻿import { TestBed } from '@angular/core/testing';
-import { StockAdjustment } from './stock_adjustment';
+import { TestBed } from '@angular/core/testing';
+import { StockAdjustment } from './stock-adjustment';
 
 describe('StockAdjustment', () => {
   beforeEach(async () => {

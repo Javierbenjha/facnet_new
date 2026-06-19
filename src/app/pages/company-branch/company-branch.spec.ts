@@ -1,5 +1,5 @@
-﻿import { TestBed } from '@angular/core/testing';
-import { CompanyBranch } from './company_branch';
+import { TestBed } from '@angular/core/testing';
+import { CompanyBranch } from './company-branch';
 
 describe('CompanyBranch', () => {
   beforeEach(async () => {

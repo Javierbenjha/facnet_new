@@ -2,7 +2,7 @@
 <div class="px-5 pt-3 pb-2 shrink-0">
   <p-iconfield>
     <p-inputicon class="pi pi-search" />
-    <input pInputText type="text" placeholder="Buscar producto..."
+    <input pInputText pSize="small" type="text" placeholder="Buscar producto..."
       class="w-full"
       [value]="query()"
       (input)="queryChange.emit($any($event.target).value)" />
@@ -24,7 +24,7 @@
   <div class="grid gap-2.5" style="grid-template-columns: repeat(auto-fill, minmax(148px, 1fr))">
 
     @for (p of productos(); track p.id) {
-      <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl p-2.5 cursor-pointer hover:border-primary hover:shadow-sm transition-all active:scale-[0.98]"
+      <div class="bg-surface-card border border-border rounded-xl p-2.5 cursor-pointer hover:border-primary hover:shadow-sm transition-all active:scale-[0.98]"
            (click)="productClick.emit(p)">
         <div [class]="p.color + ' h-20 rounded-lg mb-2 flex items-center justify-center font-mono text-[10px] text-stone-400'">
           {{ p.sku }}

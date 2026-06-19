@@ -16,7 +16,7 @@
 </ng-template>
 
 <ng-template #categoriaCellTpl let-p>
-  <p-tag [value]="p.categoria" severity="secondary" />
+  <p-tag [value]="p.categoria" severity="secondary" styleClass="!text-xs" />
 </ng-template>
 
 <ng-template #marcaCellTpl let-p>
@@ -40,14 +40,14 @@
 </ng-template>
 
 <ng-template #estadoCellTpl let-p>
-  <p-tag [value]="p.estado" [severity]="p.estado === 'ACTIVO' ? 'success' : 'danger'" />
+  <p-tag [value]="p.estado" [severity]="p.estado === 'ACTIVO' ? 'success' : 'danger'" styleClass="!text-xs" />
 </ng-template>
 
 <ng-template #stockCellTpl let-p>
   @if (p.stock === 999) {
-    <p-tag value="∞ ilimitado" severity="secondary" />
+    <p-tag value="∞ ilimitado" severity="secondary" styleClass="!text-xs" />
   } @else {
-    <p-tag [value]="p.stock + ' ' + p.unidad" [severity]="stockSeverity(p)" />
+    <p-tag [value]="p.stock + ' ' + p.unidad" [severity]="stockSeverity(p)" styleClass="!text-xs" />
   }
 </ng-template>
 
@@ -64,19 +64,19 @@
 </ng-template>
 
 <!-- Layout -->
-<div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
+<div class="bg-surface-card border border-border rounded-xl overflow-hidden">
 
   <!-- Filtros -->
-  <div class="flex items-center gap-2 p-3.5 border-b border-stone-200 dark:border-stone-700 flex-wrap">
+  <div class="flex items-center gap-2 p-3.5 border-b border-border flex-wrap">
 
     <p-iconfield>
       <p-inputicon><i class="pi pi-search"></i></p-inputicon>
-      <input pInputText
+      <input pInputText pSize="small"
              type="text"
              [ngModel]="query()"
              (ngModelChange)="onQueryChange($event)"
              placeholder="Buscar nombre o SKU…"
-             class="w-64 text-sm" />
+             class="w-64" />
     </p-iconfield>
 
     @if (tipo() === 'productos') {
@@ -86,11 +86,11 @@
         optionValue="value"
         [ngModel]="cat()"
         (ngModelChange)="onCatChange($event)"
-        appendTo="body"
-        styleClass="text-sm" />
+        size="small"
+        appendTo="body" />
     }
 
-    <p-selectbutton
+    <p-selectbutton size="small"
       [options]="statusOptions"
       optionLabel="label"
       optionValue="value"
@@ -100,7 +100,7 @@
     <span class="ml-auto text-xs text-stone-400">{{ filteredProducts().length }} resultados</span>
 
     <!-- Toggle vista -->
-    <div class="flex gap-0.5 border border-stone-200 dark:border-stone-700 rounded-lg p-0.5">
+    <div class="flex gap-0.5 border border-border rounded-lg p-0.5">
       <p-button icon="pi pi-list"
                 [text]="true"
                 size="small"
@@ -135,7 +135,7 @@
     <div class="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 
       @for (p of pagedGridProducts(); track p.id; let i = $index) {
-        <div class="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+        <div class="bg-surface-card border border-border rounded-xl overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
              (click)="editProduct.emit(p)">
 
           <!-- Thumbnail -->
@@ -144,7 +144,7 @@
                [style.color]="thumb(i).fg">
             {{ skuPrefix(p.sku) }}
             <span class="absolute top-2 right-2">
-              <p-tag [value]="p.estado" [severity]="p.estado === 'ACTIVO' ? 'success' : 'danger'" />
+              <p-tag [value]="p.estado" [severity]="p.estado === 'ACTIVO' ? 'success' : 'danger'" styleClass="!text-xs" />
             </span>
             <span class="absolute top-2 left-2" (click)="$event.stopPropagation()">
               <p-button icon="pi pi-ellipsis-v" [text]="true" severity="secondary" size="small"
@@ -163,13 +163,13 @@
               <p class="text-sm font-medium text-stone-900 dark:text-stone-100 mt-0.5 leading-tight">{{ p.descripcion }}</p>
               <p class="text-xs font-mono text-stone-400 mt-0.5">{{ p.sku }}</p>
             </div>
-            <div class="flex items-center justify-between pt-1 border-t border-stone-100 dark:border-stone-700">
+            <div class="flex items-center justify-between pt-1 border-t border-border">
               <span class="text-sm font-mono font-semibold text-stone-800 dark:text-stone-200">
                 {{ p.sigla }}{{ p.precio_publico.toFixed(2) }}
               </span>
               @if (tipo() === 'productos') {
                 @if (p.stock === 999) {
-                  <p-tag value="∞ ilimitado" severity="secondary" />
+                  <p-tag value="∞ ilimitado" severity="secondary" styleClass="!text-xs" />
                 } @else {
                   <p-tag [value]="'Stock: ' + p.stock" [severity]="stockSeverity(p)" />
                 }
@@ -188,7 +188,7 @@
 
     </div>
 
-    <div class="border-t border-stone-200 dark:border-stone-700">
+    <div class="border-t border-border">
       <app-table-pagination
         [currentPage]="gridPage()"
         [totalItems]="filteredProducts().length"

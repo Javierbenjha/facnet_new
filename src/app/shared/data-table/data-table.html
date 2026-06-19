@@ -6,10 +6,11 @@
          [rowsPerPageOptions]="rowsPerPageOptions()"
          [rowHover]="rowHover()"
          [scrollable]="scrollable()"
-         styleClass="p-datatable-sm">
+         styleClass="p-datatable-sm"
+         paginatorStyleClass="!text-sm">
 
   <ng-template pTemplate="header">
-    <tr>
+    <tr class="text-sm">
       @for (col of columns(); track col.key) {
         <th [class]="col.class ?? ''">{{ col.label }}</th>
       }

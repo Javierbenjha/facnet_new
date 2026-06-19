@@ -8,7 +8,7 @@
           </span>
           <div class="flex items-center gap-2 text-[12px] text-white font-medium whitespace-nowrap">
             @if (item.logo) {
-              <img [src]="item.logo" alt="Logo" class="h-4 w-auto drop-shadow-sm" />
+              <img [ngSrc]="item.logo" width="800" height="173" alt="Logo" class="h-4 w-auto drop-shadow-sm" />
             } @else {
               <span>·</span>
             }

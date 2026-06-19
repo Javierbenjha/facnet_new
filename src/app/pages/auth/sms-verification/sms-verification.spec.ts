@@ -1,5 +1,5 @@
-﻿import { TestBed } from '@angular/core/testing';
-import { SmsVerification } from './sms_verification';
+import { TestBed } from '@angular/core/testing';
+import { SmsVerification } from './sms-verification';
 
 describe('SmsVerification', () => {
   beforeEach(async () => {

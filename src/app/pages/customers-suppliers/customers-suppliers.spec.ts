@@ -1,5 +1,5 @@
-﻿import { TestBed } from '@angular/core/testing';
-import { CustomersSuppliers } from './customers_suppliers';
+import { TestBed } from '@angular/core/testing';
+import { CustomersSuppliers } from './customers-suppliers';
 
 describe('CustomersSuppliers', () => {
   beforeEach(async () => {

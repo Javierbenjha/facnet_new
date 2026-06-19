@@ -3,7 +3,7 @@
   (visibleChange)="$event || close()"
   (closed)="close()"
   [title]="modalTitle()"
-  size="xl">
+  size="lg">
 
   <div class="flex flex-col gap-4 pt-1">
 
@@ -70,9 +70,9 @@
             <span class="ml-2 text-xs font-normal text-stone-400">11 dígitos</span>
           </label>
           <div class="flex gap-2">
-            <input pInputText [formControl]="form.controls.ruc" placeholder="20123456789"
+            <input pInputText pSize="small" [formControl]="form.controls.ruc" placeholder="20123456789"
                    class="w-full font-mono" maxlength="11" />
-            <p-button icon="pi pi-search" severity="secondary" [outlined]="true" (onClick)="buscarRuc()" />
+            <p-button icon="pi pi-search" severity="secondary" [outlined]="true" size="small" (onClick)="buscarRuc()" />
           </div>
         </div>
 
@@ -81,7 +81,7 @@
             Razón Social
             <span class="ml-2 text-xs font-normal text-stone-400">Auto-completado</span>
           </label>
-          <input pInputText [formControl]="form.controls.razon_social"
+          <input pInputText pSize="small" [formControl]="form.controls.razon_social"
                  placeholder="Se completa desde SUNAT" class="w-full" />
         </div>
 
@@ -90,7 +90,7 @@
             Dirección
             <span class="ml-2 text-xs font-normal text-stone-400">Auto-completado</span>
           </label>
-          <input pInputText [formControl]="form.controls.direccion"
+          <input pInputText pSize="small" [formControl]="form.controls.direccion"
                  placeholder="Se completa desde SUNAT" class="w-full" />
         </div>
 
@@ -99,14 +99,14 @@
             Ubigeo
             <span class="ml-2 text-xs font-normal text-stone-400">Auto-completado</span>
           </label>
-          <input pInputText [formControl]="form.controls.ubigeo"
+          <input pInputText pSize="small" [formControl]="form.controls.ubigeo"
                  placeholder="000000" class="w-full font-mono" />
         </div>
 
       </div>
     </div>
 
-    <div class="border-t border-stone-100 dark:border-stone-800"></div>
+    <div class="border-t border-border"></div>
 
     <!-- ── Credenciales SUNAT ── -->
     <div class="flex flex-col gap-2">
@@ -115,37 +115,37 @@
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Usuario SOL</label>
-          <input pInputText [formControl]="form.controls.usuario_sol" placeholder="USUARIO" class="w-full" />
+          <input pInputText pSize="small" [formControl]="form.controls.usuario_sol" placeholder="USUARIO" class="w-full" />
         </div>
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Clave SOL</label>
-          <input pInputText type="password" [formControl]="form.controls.clave_sol"
+          <input pInputText pSize="small" type="password" [formControl]="form.controls.clave_sol"
                  placeholder="••••••" class="w-full" />
         </div>
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Cta. Detracción</label>
-          <input pInputText [formControl]="form.controls.ctedetra"
+          <input pInputText pSize="small" [formControl]="form.controls.ctedetra"
                  placeholder="00-000000" class="w-full font-mono" />
         </div>
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Client ID</label>
-          <input pInputText [formControl]="form.controls.client_id"
+          <input pInputText pSize="small" [formControl]="form.controls.client_id"
                  placeholder="client_id" class="w-full font-mono" />
         </div>
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Client Secret</label>
-          <input pInputText type="password" [formControl]="form.controls.client_secret"
+          <input pInputText pSize="small" type="password" [formControl]="form.controls.client_secret"
                  placeholder="••••••••" class="w-full font-mono" />
         </div>
 
       </div>
     </div>
 
-    <div class="border-t border-stone-100 dark:border-stone-800"></div>
+    <div class="border-t border-border"></div>
 
     <!-- ── Configuración de Ventas ── -->
     <div class="flex flex-col gap-2">
@@ -155,35 +155,35 @@
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Límite DNI en boleta (S/)</label>
           <p-inputnumber [formControl]="form.controls.monto700"
-                         mode="decimal" [minFractionDigits]="0" styleClass="w-full" inputStyleClass="w-full" />
+                         mode="decimal" [minFractionDigits]="0" styleClass="w-full" inputStyleClass="!py-[0.375rem] !text-sm w-full" />
         </div>
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Límite retención (S/)</label>
           <p-inputnumber [formControl]="form.controls.limite_retencion"
-                         mode="decimal" [minFractionDigits]="0" styleClass="w-full" inputStyleClass="w-full" />
+                         mode="decimal" [minFractionDigits]="0" styleClass="w-full" inputStyleClass="!py-[0.375rem] !text-sm w-full" />
         </div>
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Prom. ventas mensual — SUNAT (S/)</label>
           <p-inputnumber [formControl]="form.controls.monto_mensual"
-                         mode="decimal" [minFractionDigits]="2" styleClass="w-full" inputStyleClass="w-full" />
+                         mode="decimal" [minFractionDigits]="2" styleClass="w-full" inputStyleClass="!py-[0.375rem] !text-sm w-full" />
         </div>
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Prom. ventas anual — SUNAT (S/)</label>
           <p-inputnumber [formControl]="form.controls.monto_anual"
-                         mode="decimal" [minFractionDigits]="2" styleClass="w-full" inputStyleClass="w-full" />
+                         mode="decimal" [minFractionDigits]="2" styleClass="w-full" inputStyleClass="!py-[0.375rem] !text-sm w-full" />
         </div>
 
       </div>
 
       <div class="grid grid-cols-2 gap-4 mt-1">
-        <div class="flex items-center justify-between px-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700">
+        <div class="flex items-center justify-between px-4 py-3 rounded-xl bg-border border border-border">
           <span class="text-sm font-medium text-stone-700 dark:text-stone-300">Aplica detracción en ventas</span>
           <p-toggleswitch [formControl]="form.controls.stdetraccion" />
         </div>
-        <div class="flex items-center justify-between px-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700">
+        <div class="flex items-center justify-between px-4 py-3 rounded-xl bg-border border border-border">
           <span class="text-sm font-medium text-stone-700 dark:text-stone-300">Aplica retención en ventas</span>
           <p-toggleswitch [formControl]="form.controls.stretencion" />
         </div>
@@ -193,8 +193,8 @@
   </div>
 
   <div modal-footer class="flex gap-2 justify-end">
-    <p-button label="Cancelar" severity="secondary" [outlined]="true" (onClick)="close()" />
-    <p-button label="Guardar Cambios" icon="pi pi-check" (onClick)="save()" />
+    <p-button label="Cancelar" severity="secondary" [outlined]="true" size="small" (onClick)="close()" />
+    <p-button label="Guardar Cambios" icon="pi pi-check" size="small" (onClick)="save()" />
   </div>
 
 </app-modal>

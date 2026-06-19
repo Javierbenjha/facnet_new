@@ -1,14 +1,14 @@
 <aside
-  class="h-full flex flex-col bg-white dark:bg-stone-900 border-r border-stone-200 dark:border-stone-700 overflow-hidden shrink-0 transition-all duration-200"
+  class="h-full flex flex-col bg-surface-card border-r border-border overflow-hidden shrink-0 transition-all duration-200"
   [class.w-16]="layout.isSidebarCollapsed()"
   [class.w-60]="!layout.isSidebarCollapsed()"
 >
   <!-- Brand -->
   <div class="flex items-center justify-center px-4 py-[18px] shrink-0">
     @if (layout.isSidebarCollapsed()) {
-      <img src="assets/images/logoHS_1.png" alt="Logo" class="h-8 w-auto object-contain" />
+      <img ngSrc="assets/images/logoHS_1.png" width="390" height="380" alt="Logo" class="h-8 w-auto object-contain" priority />
     } @else {
-      <img src="assets/images/logo.png" alt="Logo" class="h-9 w-auto object-contain" />
+      <img ngSrc="assets/images/logo.png" width="800" height="173" alt="Logo" class="h-9 w-auto object-contain" priority />
     }
   </div>
   @if (!layout.isSidebarCollapsed()) {
@@ -38,7 +38,7 @@
   </nav>
 
   <!-- User footer -->
-  <div class="shrink-0 border-t border-stone-200 dark:border-stone-700 p-3">
+  <div class="shrink-0 border-t border-border p-3">
     <div
       class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer transition-colors"
       [class.justify-center]="layout.isSidebarCollapsed()"

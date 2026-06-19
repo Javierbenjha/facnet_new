@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TooltipModule } from 'primeng/tooltip';
+import { NgOptimizedImage } from '@angular/common';
 import { Layout } from '../layout';
 import { NAV_SECTIONS } from '../nav.config';
 import { Auth } from '../../core/services/auth';
@@ -10,7 +11,7 @@ import { Menu } from '../../core/services/menu';
   selector: 'app-sidebar',
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss',
-  imports: [RouterLink, RouterLinkActive, TooltipModule]
+  imports: [RouterLink, RouterLinkActive, TooltipModule, NgOptimizedImage]
 })
 export class Sidebar {
   private readonly auth = inject(Auth);

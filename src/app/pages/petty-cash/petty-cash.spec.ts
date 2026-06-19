@@ -1,5 +1,5 @@
-﻿import { TestBed } from '@angular/core/testing';
-import { PettyCash } from './petty_cash';
+import { TestBed } from '@angular/core/testing';
+import { PettyCash } from './petty-cash';
 
 describe('PettyCash', () => {
   beforeEach(async () => {

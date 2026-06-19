@@ -1,5 +1,5 @@
-﻿import { TestBed } from '@angular/core/testing';
-import { ConfirmPassword } from './confirm_password';
+import { TestBed } from '@angular/core/testing';
+import { ConfirmPassword } from './confirm-password';
 
 describe('ConfirmPassword', () => {
   beforeEach(async () => {

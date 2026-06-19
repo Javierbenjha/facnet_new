@@ -1,15 +1,15 @@
-<div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
+<div class="bg-surface-card border border-border rounded-xl overflow-hidden">
 
   <!-- Filtros -->
-  <div class="flex items-center gap-2 p-3.5 border-b border-stone-200 dark:border-stone-700 flex-wrap">
+  <div class="flex items-center gap-2 p-3.5 border-b border-border flex-wrap">
 
     <p-iconfield>
       <p-inputicon><i class="pi pi-search"></i></p-inputicon>
-      <input pInputText type="text"
+      <input pInputText pSize="small" type="text"
         [ngModel]="searchText()"
         (ngModelChange)="searchText.set($event)"
         placeholder="Nº doc, proveedor, RUC..."
-        class="w-56 text-sm" />
+        class="w-56" />
     </p-iconfield>
 
     <p-datepicker
@@ -18,7 +18,8 @@
       dateFormat="dd/mm/yy"
       placeholder="Desde"
       appendTo="body"
-      styleClass="w-36 text-sm" />
+      styleClass="w-36"
+      inputStyleClass="!py-[0.375rem] !text-sm" />
 
     <p-datepicker
       [ngModel]="endDate()"
@@ -26,7 +27,8 @@
       dateFormat="dd/mm/yy"
       placeholder="Hasta"
       appendTo="body"
-      styleClass="w-36 text-sm" />
+      styleClass="w-36"
+      inputStyleClass="!py-[0.375rem] !text-sm" />
 
     <p-select
       [options]="tipoDocOpciones"
@@ -34,8 +36,9 @@
       (ngModelChange)="tipoDocFiltro.set($event)"
       optionLabel="label"
       optionValue="value"
+      size="small"
       appendTo="body"
-      styleClass="w-44 text-sm" />
+      styleClass="w-44" />
 
     <span class="ml-auto text-xs text-stone-400">{{ filteredCompras().length }} resultados</span>
 
@@ -51,10 +54,11 @@
     [rowsPerPageOptions]="[10, 25, 50]"
     [rowHover]="true"
     styleClass="p-datatable-sm"
+    paginatorStyleClass="!text-sm"
     [scrollable]="true">
 
     <ng-template pTemplate="header">
-      <tr>
+      <tr class="text-sm">
         <th pSortableColumn="sigla_documento">Tipo Documento <p-sortIcon field="sigla_documento" /></th>
         <th pSortableColumn="serie">Documento <p-sortIcon field="serie" /></th>
         <th>Referencia</th>
@@ -103,7 +107,7 @@
 
         <!-- Estado -->
         <td class="text-center">
-          <p-tag [value]="c.estado" [severity]="estadoSev(c.estado)" />
+          <p-tag [value]="c.estado" [severity]="estadoSev(c.estado)" styleClass="!text-xs" />
         </td>
 
         <!-- Acciones -->

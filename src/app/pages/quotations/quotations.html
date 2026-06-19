@@ -46,19 +46,19 @@
   </div>
 
   <!-- ── Tabla ── -->
-  <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
+  <div class="bg-surface-card border border-border rounded-xl overflow-hidden">
 
     <!-- Barra de filtros -->
-    <div class="flex items-center gap-2 p-3.5 border-b border-stone-200 dark:border-stone-700 flex-wrap">
+    <div class="flex items-center gap-2 p-3.5 border-b border-border flex-wrap">
 
       <p-iconfield>
         <p-inputicon><i class="pi pi-search"></i></p-inputicon>
-        <input pInputText
+        <input pInputText pSize="small"
                type="text"
                [ngModel]="searchTerm()"
                (ngModelChange)="searchTerm.set($event)"
                placeholder="Nº cotización, cliente, RUC..."
-               class="w-56 text-sm" />
+               class="w-56" />
       </p-iconfield>
 
       <p-datepicker
@@ -67,7 +67,8 @@
         dateFormat="dd/mm/yy"
         placeholder="Desde"
         appendTo="body"
-        styleClass="w-36 text-sm" />
+        styleClass="w-36"
+        inputStyleClass="!py-[0.375rem] !text-sm" />
 
       <p-datepicker
         [ngModel]="endDate()"
@@ -75,7 +76,8 @@
         dateFormat="dd/mm/yy"
         placeholder="Hasta"
         appendTo="body"
-        styleClass="w-36 text-sm" />
+        styleClass="w-36"
+        inputStyleClass="!py-[0.375rem] !text-sm" />
 
       <p-select
         [options]="statusOptions"
@@ -83,8 +85,9 @@
         (ngModelChange)="statusFilter.set($event)"
         optionLabel="label"
         optionValue="value"
+        size="small"
         appendTo="body"
-        styleClass="w-40 text-sm" />
+        styleClass="w-40" />
 
       <span class="ml-auto text-xs text-stone-400">{{ tableData().length }} resultados</span>
 
@@ -106,10 +109,11 @@
       [rowsPerPageOptions]="[10, 25, 50]"
       [rowHover]="true"
       styleClass="p-datatable-sm"
+      paginatorStyleClass="!text-sm"
       [scrollable]="true">
 
       <ng-template pTemplate="header">
-        <tr>
+        <tr class="text-sm">
           <th>Cotización</th>
           <th>Cliente</th>
           <th>Fecha</th>
@@ -158,7 +162,7 @@
           </td>
 
           <td>
-            <p-tag [value]="c.forma_pago" severity="secondary" />
+            <p-tag [value]="c.forma_pago" severity="secondary" styleClass="!text-xs" />
           </td>
 
           <td class="text-right text-sm font-semibold tabular-nums whitespace-nowrap text-stone-900 dark:text-stone-100">
@@ -166,11 +170,11 @@
           </td>
 
           <td class="text-center">
-            <p-tag [value]="c.estado" [severity]="estadoSev(c.estado)" />
+            <p-tag [value]="c.estado" [severity]="estadoSev(c.estado)" styleClass="!text-xs" />
           </td>
 
           <td class="text-center">
-            <p-tag [value]="c.estado_facturacion" [severity]="factSev(c.estado_facturacion)" />
+            <p-tag [value]="c.estado_facturacion" [severity]="factSev(c.estado_facturacion)" styleClass="!text-xs" />
           </td>
 
           <td (click)="$event.stopPropagation()">
@@ -202,22 +206,21 @@
 </div>
 
 <!-- ══ Slide-in Detail Drawer ══ -->
-<div class="fixed inset-y-0 right-0 w-full max-w-lg bg-white dark:bg-stone-900 shadow-2xl z-[9999] flex flex-col
-            transition-transform duration-300 ease-in-out overflow-hidden"
-  [class.translate-x-0]="showDetail()"
-  [class.translate-x-full]="!showDetail()">
+<div class="fixed inset-y-0 right-0 w-full max-w-lg bg-surface-card shadow-2xl z-[9999] flex flex-col
+            transition-transform duration-300 ease-in-out overflow-hidden translate-x-full"
+  [style.transform]="showDetail() ? 'translateX(0)' : null">
 
   @if (selectedCot(); as c) {
 
     <!-- Cabecera del drawer -->
-    <div class="flex items-center justify-between px-6 py-4 border-b border-stone-200 dark:border-stone-700 shrink-0">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
       <div>
         <h3 class="text-lg font-semibold text-stone-900 dark:text-stone-100">Detalle de Cotización</h3>
         <p class="text-xs text-stone-400 mt-0.5">
           {{ c.serie }}-{{ c.correlativo }} · {{ fmtDate(c.fecha_emision) }}
         </p>
       </div>
-      <p-button icon="pi pi-times" [text]="true" severity="secondary" (onClick)="closeDetail()" />
+      <p-button icon="pi pi-times" [text]="true" severity="secondary" size="small" (onClick)="closeDetail()" />
     </div>
 
     <div class="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-6">
@@ -253,7 +256,7 @@
           <div>
             <p class="text-stone-400 text-xs">Estado</p>
             <div class="mt-1">
-              <p-tag [value]="c.estado" [severity]="estadoSev(c.estado)" />
+              <p-tag [value]="c.estado" [severity]="estadoSev(c.estado)" styleClass="!text-xs" />
             </div>
           </div>
           <div class="col-span-2">
@@ -270,9 +273,9 @@
       <section>
         <h4 class="text-xs font-semibold text-stone-400 uppercase tracking-wide mb-3">Productos</h4>
         @if (c.detalles && c.detalles.length > 0) {
-          <div class="border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
+          <div class="border border-border rounded-xl overflow-hidden">
             <table class="w-full text-sm">
-              <thead class="bg-stone-50 dark:bg-stone-800">
+              <thead class="bg-border">
                 <tr>
                   <th class="px-4 py-2.5 text-left text-xs font-semibold text-stone-500 uppercase tracking-wide">Producto</th>
                   <th class="px-4 py-2.5 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide w-14">Cant.</th>
@@ -280,7 +283,7 @@
                   <th class="px-4 py-2.5 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide w-24">Total</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
+              <tbody class="divide-y divide-border">
                 @for (d of c.detalles; track $index) {
                   <tr class="hover:bg-stone-50 dark:hover:bg-stone-800/50">
                     <td class="px-4 py-2.5 text-stone-700 dark:text-stone-300">{{ d.producto_nombre }}</td>
@@ -301,7 +304,7 @@
       </section>
 
       <!-- Totales -->
-      <section class="bg-stone-50 dark:bg-stone-800 rounded-xl px-5 py-4 flex flex-col gap-2">
+      <section class="bg-border rounded-xl px-5 py-4 flex flex-col gap-2">
         <div class="flex justify-between text-sm text-stone-500">
           <span>Op. Gravadas</span>
           <span class="tabular-nums">{{ c.sigla }} {{ fmtNum(c.subtotal) }}</span>
@@ -316,7 +319,7 @@
           <span>IGV 18%</span>
           <span class="tabular-nums">{{ c.sigla }} {{ fmtNum(c.igv) }}</span>
         </div>
-        <div class="border-t border-stone-200 dark:border-stone-700 pt-2 flex justify-between font-bold text-stone-900 dark:text-stone-100">
+        <div class="border-t border-border pt-2 flex justify-between font-bold text-stone-900 dark:text-stone-100">
           <span>Total</span>
           <span class="text-base tabular-nums">{{ c.sigla }} {{ fmtNum(c.total) }}</span>
         </div>
@@ -325,9 +328,9 @@
     </div>
 
     <!-- Footer del drawer -->
-    <div class="shrink-0 px-6 py-4 border-t border-stone-200 dark:border-stone-700 flex gap-2">
-      <p-button label="Descargar PDF" icon="pi pi-file-pdf" severity="secondary" [outlined]="true" styleClass="flex-1 justify-center" />
-      <p-button label="Imprimir"      icon="pi pi-print"    severity="secondary" [outlined]="true" styleClass="flex-1 justify-center" />
+    <div class="shrink-0 px-6 py-4 border-t border-border flex gap-2">
+      <p-button label="Descargar PDF" icon="pi pi-file-pdf" severity="secondary" [outlined]="true" size="small" styleClass="flex-1 justify-center" />
+      <p-button label="Imprimir"      icon="pi pi-print"    severity="secondary" [outlined]="true" size="small" styleClass="flex-1 justify-center" />
     </div>
 
   }

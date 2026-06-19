@@ -1,5 +1,5 @@
-﻿import { TestBed } from '@angular/core/testing';
-import { ReferralGuide } from './referral_guide';
+import { TestBed } from '@angular/core/testing';
+import { ReferralGuide } from './referral-guide';
 
 describe('ReferralGuide', () => {
   beforeEach(async () => {

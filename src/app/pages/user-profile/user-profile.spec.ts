@@ -1,5 +1,5 @@
-﻿import { TestBed } from '@angular/core/testing';
-import { UserProfile } from './user_profile';
+import { TestBed } from '@angular/core/testing';
+import { UserProfile } from './user-profile';
 
 describe('UserProfile', () => {
   beforeEach(async () => {

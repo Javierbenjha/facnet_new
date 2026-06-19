@@ -1,5 +1,5 @@
-﻿import { TestBed } from '@angular/core/testing';
-import { ContentSire } from './content_sire';
+import { TestBed } from '@angular/core/testing';
+import { ContentSire } from './content-sire';
 
 describe('ContentSire', () => {
   beforeEach(async () => {

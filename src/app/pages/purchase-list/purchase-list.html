@@ -29,21 +29,20 @@
   (closed)="closeForm()" />
 
 <!-- ══ Slide-in Detail Drawer ══ -->
-<div class="fixed inset-y-0 right-0 w-full max-w-lg bg-white dark:bg-stone-900 shadow-2xl z-[9999] flex flex-col
-            transition-transform duration-300 ease-in-out overflow-hidden"
-  [class.translate-x-0]="showDetail()"
-  [class.translate-x-full]="!showDetail()">
+<div class="fixed inset-y-0 right-0 w-full max-w-lg bg-surface-card shadow-2xl z-[9999] flex flex-col
+            transition-transform duration-300 ease-in-out overflow-hidden translate-x-full"
+  [style.transform]="showDetail() ? 'translateX(0)' : null">
 
   @if (selectedCompra(); as c) {
 
-    <div class="flex items-center justify-between px-6 py-4 border-b border-stone-200 dark:border-stone-700 shrink-0">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
       <div>
         <h3 class="text-lg font-semibold text-stone-900 dark:text-stone-100">Detalle de Compra</h3>
         <p class="text-xs text-stone-400 mt-0.5">
           {{ c.sigla_documento }} {{ c.serie }}-{{ c.correlativo }} · {{ fmtDate(c.fecha_compra) }}
         </p>
       </div>
-      <p-button icon="pi pi-times" [text]="true" severity="secondary" (onClick)="closeDetail()" />
+      <p-button icon="pi pi-times" [text]="true" severity="secondary" size="small" (onClick)="closeDetail()" />
     </div>
 
     <div class="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-6">
@@ -86,9 +85,9 @@
       <section>
         <h4 class="text-xs font-semibold text-stone-400 uppercase tracking-wide mb-3">Productos</h4>
         @if (c.detalles && c.detalles.length > 0) {
-          <div class="border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
+          <div class="border border-border rounded-xl overflow-hidden">
             <table class="w-full text-sm">
-              <thead class="bg-stone-50 dark:bg-stone-800">
+              <thead class="bg-border">
                 <tr>
                   <th class="px-4 py-2.5 text-left text-xs font-semibold text-stone-500 uppercase tracking-wide">Producto</th>
                   <th class="px-4 py-2.5 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide w-14">Cant.</th>
@@ -96,7 +95,7 @@
                   <th class="px-4 py-2.5 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide w-24">Neto</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
+              <tbody class="divide-y divide-border">
                 @for (d of c.detalles; track $index) {
                   <tr class="hover:bg-stone-50 dark:hover:bg-stone-800/50">
                     <td class="px-4 py-2.5 text-stone-700 dark:text-stone-300">{{ d.producto_nombre }}</td>
@@ -116,7 +115,7 @@
         }
       </section>
 
-      <section class="bg-stone-50 dark:bg-stone-800 rounded-xl px-5 py-4 flex flex-col gap-2">
+      <section class="bg-border rounded-xl px-5 py-4 flex flex-col gap-2">
         @if (c.subtotal > 0) {
           <div class="flex justify-between text-sm text-stone-500">
             <span>Subtotal</span><span class="tabular-nums">{{ c.sigla }} {{ fmtNum(c.subtotal) }}</span>
@@ -132,7 +131,7 @@
             <span>IGV 18%</span><span class="tabular-nums">{{ c.sigla }} {{ fmtNum(c.igv) }}</span>
           </div>
         }
-        <div class="border-t border-stone-200 dark:border-stone-700 pt-2 flex justify-between font-bold text-stone-900 dark:text-stone-100">
+        <div class="border-t border-border pt-2 flex justify-between font-bold text-stone-900 dark:text-stone-100">
           <span>Total</span>
           <span class="text-base tabular-nums">{{ c.sigla }} {{ fmtNum(c.total) }}</span>
         </div>
@@ -140,9 +139,9 @@
 
     </div>
 
-    <div class="shrink-0 px-6 py-4 border-t border-stone-200 dark:border-stone-700 flex gap-2">
-      <p-button label="Descargar" icon="pi pi-download" severity="secondary" [outlined]="true" styleClass="flex-1 justify-center" />
-      <p-button label="Editar"    icon="pi pi-pencil"   severity="secondary" [outlined]="true" styleClass="flex-1 justify-center"
+    <div class="shrink-0 px-6 py-4 border-t border-border flex gap-2">
+      <p-button label="Descargar" icon="pi pi-download" severity="secondary" [outlined]="true" size="small" styleClass="flex-1 justify-center" />
+      <p-button label="Editar"    icon="pi pi-pencil"   severity="secondary" [outlined]="true" size="small" styleClass="flex-1 justify-center"
         [disabled]="c.estado === 'ANULADA'" (onClick)="openEdit(c); closeDetail()" />
     </div>
 
