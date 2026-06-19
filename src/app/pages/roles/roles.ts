@@ -1,16 +1,17 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
 import { Rbac } from '../../core/services/rbac';
-import { RoleListItem } from './roles.model';
+import { RoleDetail, RoleListItem } from './roles.model';
 import { TableColumn, DataTable } from '../../shared/data-table/data-table';
 import { Button } from 'primeng/button';
-import { KpiCard } from "../../shared/kpi-card/kpi-card";
-import { PageHeader } from "../../shared/page-header/page-header";
+import { KpiCard } from '../../shared/kpi-card/kpi-card';
+import { PageHeader } from '../../shared/page-header/page-header';
+import { RoleForm } from './role-form/role-form';
 
 @Component({
   selector: 'app-roles',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './roles.html',
-  imports: [DataTable, Button, KpiCard, PageHeader],
+  imports: [DataTable, Button, KpiCard, PageHeader, RoleForm],
 })
 export class Roles {
   private readonly rbac = inject(Rbac);
@@ -19,6 +20,7 @@ export class Roles {
     { key: 'name', label: 'Rol' },
     { key: 'permissionsCount', label: 'Permisos' },
   ];
+  readonly editing = signal<RoleDetail | 'new' | null>(null);
 
   readonly kpis = computed(() => {
     const rs = this.roles();
@@ -34,15 +36,19 @@ export class Roles {
   }
 
   nuevo() {
-    // TODO (Capa 5): abrir el modal de creación de rol
-    console.log('nuevo rol');
+    this.editing.set('new');
   }
 
   update(role: RoleListItem) {
-    console.log(role);
+    this.rbac.getRole(role.id).subscribe((detail) => this.editing.set(detail));
   }
 
   remove(role: RoleListItem) {
     console.log(role);
+  }
+
+  onSaved() {
+    this.rbac.listRoles().subscribe((roles) => this.roles.set(roles));
+    this.editing.set(null);
   }
 }
