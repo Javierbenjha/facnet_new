@@ -59,7 +59,7 @@ export class Register {
       .register(payload)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: () => this.router.navigate(['./login']),
+        next: () => this.router.navigate(['/company-setup']),
         error: (err) => this.toast.error('Error al registrarse', err.error?.message),
       });
   }
