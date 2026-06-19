@@ -33,6 +33,11 @@ export class Roles {
     this.rbac.listRoles().subscribe((roles) => this.roles.set(roles));
   }
 
+  nuevo() {
+    // TODO (Capa 5): abrir el modal de creación de rol
+    console.log('nuevo rol');
+  }
+
   update(role: RoleListItem) {
     console.log(role);
   }
