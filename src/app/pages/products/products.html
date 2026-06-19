@@ -1,26 +1,44 @@
 <div class="p-6 flex flex-col gap-5">
 
   <!-- Encabezado -->
-  <app-page-header title="Productos" subtitle="{{ products().length }} productos · Inventario por sucursal · Andina Retail">
+  <app-page-header
+    [title]="tipo() === 'productos' ? 'Productos' : 'Servicios'"
+    [subtitle]="kpis().total + (tipo() === 'productos' ? ' productos' : ' servicios') + ' · Andina Retail'">
+    <p-selectbutton
+      [options]="tipoOptions"
+      optionLabel="label"
+      optionValue="value"
+      [ngModel]="tipo()"
+      (ngModelChange)="tipo.set($event)" />
     <p-button label="Exportar" icon="pi pi-download" severity="secondary" [outlined]="true" size="small"
               (onClick)="exportExcel()" />
     <p-button label="Herramientas" icon="pi pi-cog" severity="secondary" [outlined]="true" size="small"
               (onClick)="toolMenu.toggle($event)" />
     <p-menu #toolMenu [model]="toolItems" [popup]="true" appendTo="body" />
-    <p-button label="Nuevo producto" icon="pi pi-plus" size="small" (onClick)="openNew()" />
+    <p-button
+      [label]="tipo() === 'productos' ? 'Nuevo producto' : 'Nuevo servicio'"
+      icon="pi pi-plus"
+      size="small"
+      (onClick)="openNew()" />
   </app-page-header>
 
   <!-- KPIs -->
   <div class="grid grid-cols-4 gap-3.5">
-    <app-kpi-card label="Total Productos"  [value]="kpis().total.toString()"          subtitle="en catálogo"      icon="pi-box"         />
-    <app-kpi-card label="Valor Inventario" [value]="fmtCurrency(kpis().valorInventario)" subtitle="costo valorizado" icon="pi-wallet"      />
-    <app-kpi-card label="Activos"          [value]="kpis().activos.toString()"         subtitle="habilitados"      icon="pi-check-circle" variant="success" />
-    <app-kpi-card label="Inactivos"        [value]="kpis().inactivos.toString()"       subtitle="deshabilitados"   icon="pi-times-circle" variant="danger"  />
+    @if (tipo() === 'productos') {
+      <app-kpi-card label="Total Productos"  [value]="kpis().total.toString()"             subtitle="en catálogo"      icon="pi-box"         />
+      <app-kpi-card label="Valor Inventario" [value]="fmtCurrency(kpis().valorInventario)" subtitle="costo valorizado" icon="pi-wallet"      />
+    } @else {
+      <app-kpi-card label="Total Servicios"  [value]="kpis().total.toString()"             subtitle="en catálogo"      icon="pi-server"      />
+      <app-kpi-card label="Facturación Est." [value]="fmtCurrency(kpis().valorInventario)" subtitle="precio promedio"  icon="pi-wallet"      />
+    }
+    <app-kpi-card label="Activos"   [value]="kpis().activos.toString()"   subtitle="habilitados"    icon="pi-check-circle" variant="success" />
+    <app-kpi-card label="Inactivos" [value]="kpis().inactivos.toString()" subtitle="deshabilitados" icon="pi-times-circle" variant="danger"  />
   </div>
 
   <!-- Tabla -->
   <app-products-table
     [products]="products()"
+    [tipo]="tipo()"
     (editProduct)="openEdit($event)" />
 
   <app-product-form

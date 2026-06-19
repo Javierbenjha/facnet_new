@@ -1,6 +1,11 @@
 <p-table [value]="data()"
          [loading]="loading()"
          [dataKey]="trackByKey()"
+         [paginator]="paginator()"
+         [rows]="rows()"
+         [rowsPerPageOptions]="rowsPerPageOptions()"
+         [rowHover]="rowHover()"
+         [scrollable]="scrollable()"
          styleClass="p-datatable-sm">
 
   <ng-template pTemplate="header">
@@ -14,14 +19,14 @@
     </tr>
   </ng-template>
 
-  <ng-template pTemplate="body" let-row>
-    <tr>
+  <ng-template pTemplate="body" let-row let-rowIndex="rowIndex">
+    <tr class="cursor-pointer" (click)="rowClick.emit(row)">
       @for (col of columns(); track col.key) {
         <td [class]="col.class ?? ''">
           @if (col.cellTemplate) {
-            <ng-container *ngTemplateOutlet="col.cellTemplate; context: { $implicit: row }"></ng-container>
+            <ng-container *ngTemplateOutlet="col.cellTemplate; context: { $implicit: row, index: rowIndex }"></ng-container>
           } @else {
-            {{ row[col.key] ?? '—' }}
+            {{ $any(row)[col.key] ?? '—' }}
           }
         </td>
       }

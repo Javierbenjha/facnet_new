@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, input, output, signal, untracked, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule, ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { Button } from 'primeng/button';
@@ -15,13 +15,12 @@ import { CATEGORIES, MARCAS, UNIDADES, Producto } from '../products.models';
 @Component({
   selector: 'app-product-form',
   templateUrl: './product-form.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, ReactiveFormsModule, Button, Select, InputText, InputGroup, InputGroupAddon, ToggleSwitch, AutoComplete, AppModal, NumField],
 })
 export class ProductForm {
   private readonly fb = inject(FormBuilder);
 
-  editing = input<Producto | 'new' | null>(null);
+  editing = input<Producto | 'new' | 'new-service' | null>(null);
   closed  = output<void>();
   saved   = output<Producto>();
 
@@ -31,13 +30,15 @@ export class ProductForm {
 
   readonly editingProduct = computed(() => {
     const e = this.editing();
-    return (e && e !== 'new') ? e as Producto : null;
+    return (e && e !== 'new' && e !== 'new-service') ? e as Producto : null;
   });
 
   readonly modalTitle = computed(() => {
     const e = this.editing();
     if (!e) return '';
-    return e === 'new' ? 'Nuevo producto' : `Editar · ${(e as Producto).descripcion}`;
+    if (e === 'new')         return 'Nuevo producto';
+    if (e === 'new-service') return 'Nuevo servicio';
+    return `Editar · ${(e as Producto).descripcion}`;
   });
 
   readonly monedaOptions = [
@@ -91,15 +92,15 @@ export class ProductForm {
       const e = this.editing();
       if (!e) return;
 
-      const prev = this.imagePreview();
+      const prev = untracked(() => this.imagePreview());
       if (prev) URL.revokeObjectURL(prev);
       this.imagePreview.set(null);
 
-      if (e === 'new') {
+      if (e === 'new' || e === 'new-service') {
         this.form.reset({
           descripcion: '', sku: '', moneda: 'PEN',
           precio_publico: 0, precio_mayor: 0, costo: 0,
-          peso: 0, stock_min: 0, es_servicio: false, stafecto: true, stdesc: false,
+          peso: 0, stock_min: 0, es_servicio: e === 'new-service', stafecto: true, stdesc: false,
         });
         this.marcaValue.set('');
         this.categoriaValue.set('');

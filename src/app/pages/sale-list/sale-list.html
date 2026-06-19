@@ -86,7 +86,6 @@
           <th class="text-right">Saldo</th>
           <th class="text-center">Estado</th>
           <th class="text-center">Pago</th>
-          <th class="text-center">SUNAT</th>
           <th style="width: 3.5rem"></th>
         </tr>
       </ng-template>
@@ -99,6 +98,12 @@
               {{ v.sigla_documento }} {{ v.serie }}-{{ v.correlativo }}
             </p>
             <p class="text-[11px] text-stone-400">{{ v.moneda }}</p>
+            @if (v.tip_doc === 1 || v.tip_doc === 2) {
+              <div class="flex items-center gap-1 mt-1">
+                <span class="text-[10px] text-stone-400 font-medium">SUNAT:</span>
+                <p-tag [value]="v.estado_sunat" [severity]="sunatSev(v.estado_sunat)" styleClass="text-[10px] px-1.5 py-0.5" />
+              </div>
+            }
           </td>
 
           <td class="whitespace-nowrap text-sm text-stone-600 dark:text-stone-300">
@@ -146,10 +151,6 @@
             <p-tag [value]="v.estado_pago" [severity]="pagoSev(v.estado_pago)" />
           </td>
 
-          <td class="text-center">
-            <p-tag [value]="v.estado_sunat" [severity]="sunatSev(v.estado_sunat)" />
-          </td>
-
           <td (click)="$event.stopPropagation()">
             <p-button icon="pi pi-ellipsis-v" [text]="true" severity="secondary" size="small"
               (onClick)="rowMenu.toggle($event)" />
@@ -161,7 +162,7 @@
 
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="12" class="text-center py-12 text-stone-400 text-sm">
+          <td colspan="11" class="text-center py-12 text-stone-400 text-sm">
             <i class="pi pi-receipt text-4xl text-stone-200 block mb-2"></i>
             No se encontraron ventas
           </td>
@@ -174,25 +175,36 @@
 
 </div>
 
-<!-- ══ Slide-in Detail Drawer ══ -->
-<div class="fixed inset-y-0 right-0 w-full max-w-lg bg-white dark:bg-stone-900 shadow-2xl z-[9999] flex flex-col
-            transition-transform duration-300 ease-in-out overflow-hidden"
-  [class.translate-x-0]="showDetail()"
-  [class.translate-x-full]="!showDetail()">
+<!-- ══ Drawer detalle venta ══ -->
+<p-drawer
+  [visible]="showDetail()"
+  (visibleChange)="$event || closeDetail()"
+  position="right"
+  styleClass="!w-full sm:!w-[32rem]">
 
-  @if (selectedVenta(); as v) {
-
-    <div class="flex items-center justify-between px-6 py-4 border-b border-stone-200 dark:border-stone-700 shrink-0">
+  <ng-template pTemplate="header">
+    @if (selectedVenta(); as v) {
       <div>
-        <h3 class="text-lg font-semibold text-stone-900 dark:text-stone-100">Detalles de la Venta</h3>
+        <h3 class="text-base font-semibold text-stone-900 dark:text-stone-100">Detalles de la Venta</h3>
         <p class="text-xs text-stone-400 mt-0.5">
           {{ v.sigla_documento }} {{ v.serie }}-{{ v.correlativo }} · {{ fmtDate(v.fecha_emision) }}
         </p>
       </div>
-      <p-button icon="pi pi-times" [text]="true" severity="secondary" (onClick)="closeDetail()" />
-    </div>
+    }
+  </ng-template>
 
-    <div class="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-6">
+  <ng-template pTemplate="footer">
+    @if (selectedVenta(); as v) {
+      <div class="flex gap-2">
+        <p-button label="Descargar"  icon="pi pi-download" severity="secondary" [outlined]="true" styleClass="flex-1 justify-center" />
+        <p-button label="Reimprimir" icon="pi pi-print"    severity="secondary" [outlined]="true" styleClass="flex-1 justify-center" />
+      </div>
+    }
+  </ng-template>
+
+  @if (selectedVenta(); as v) {
+
+    <div class="flex flex-col gap-6">
 
       <section>
         <h4 class="text-xs font-semibold text-stone-400 uppercase tracking-wide mb-3">Información General</h4>
@@ -304,19 +316,6 @@
 
     </div>
 
-    <div class="shrink-0 px-6 py-4 border-t border-stone-200 dark:border-stone-700 flex gap-2">
-      <p-button label="Descargar"  icon="pi pi-download" severity="secondary" [outlined]="true" styleClass="flex-1 justify-center" />
-      <p-button label="Reimprimir" icon="pi pi-print"    severity="secondary" [outlined]="true" styleClass="flex-1 justify-center" />
-      <p-button label="Cerrar"     icon="pi pi-times"    styleClass="flex-1 justify-center" (onClick)="closeDetail()" />
-    </div>
-
   }
-</div>
 
-<!-- Overlay detrás del drawer -->
-<div class="fixed inset-0 bg-black/50 z-[9998] transition-opacity duration-300"
-  [class.opacity-100]="showDetail()"
-  [class.opacity-0]="!showDetail()"
-  [class.pointer-events-none]="!showDetail()"
-  (click)="closeDetail()">
-</div>
+</p-drawer>

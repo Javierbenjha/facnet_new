@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
+import { SelectButton } from 'primeng/selectbutton';
 import { Menu } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { PRODUCTS, Producto } from './products.models';
@@ -11,15 +13,22 @@ import { KpiCard } from '../../shared/kpi-card/kpi-card';
 @Component({
   selector: 'app-products',
   templateUrl: './products.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Button, Menu, ProductsTable, ProductForm, PageHeader, KpiCard],
+  imports: [FormsModule, Button, SelectButton, Menu, ProductsTable, ProductForm, PageHeader, KpiCard],
 })
 export class Products {
   readonly products = signal<Producto[]>(PRODUCTS);
-  readonly editing  = signal<Producto | 'new' | null>(null);
+  readonly editing  = signal<Producto | 'new' | 'new-service' | null>(null);
+  readonly tipo     = signal<'productos' | 'servicios'>('productos');
+
+  readonly tipoOptions = [
+    { label: 'Productos', value: 'productos' },
+    { label: 'Servicios', value: 'servicios' },
+  ];
 
   readonly kpis = computed(() => {
-    const ps = this.products();
+    const ps = this.products().filter(p =>
+      this.tipo() === 'productos' ? p.st_producto !== 0 : p.st_producto === 0
+    );
     return {
       total:           ps.length,
       activos:         ps.filter(p => p.estado === 'ACTIVO').length,
@@ -50,7 +59,7 @@ export class Products {
     }
   }
 
-  openNew()             { this.editing.set('new'); }
+  openNew()             { this.editing.set(this.tipo() === 'servicios' ? 'new-service' : 'new'); }
   openEdit(p: Producto) { this.editing.set(p);    }
   closeModal()          { this.editing.set(null);  }
 }
