@@ -1,0 +1,102 @@
+<!-- Cell templates — always in DOM so viewChild.required can find them -->
+
+<ng-template #nombreCellTpl let-p>
+  <div class="flex items-center gap-2.5">
+    <div [class]="avatarClass(p)">
+      <span class="text-xs font-bold text-white">{{ initials(p) }}</span>
+    </div>
+    <div>
+      <p class="font-medium text-sm text-stone-800 dark:text-stone-100">{{ nombreCompleto(p) }}</p>
+      <p class="text-xs text-stone-400">{{ p.tipo_documento }}</p>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #docCellTpl let-p>
+  <span class="font-mono text-xs font-semibold
+               bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300
+               px-2.5 py-0.5 rounded-full">
+    {{ p.numero_documento }}
+  </span>
+</ng-template>
+
+<ng-template #telefonoCellTpl let-p>
+  <span class="text-sm text-stone-500 dark:text-stone-400">{{ p.telefono || '—' }}</span>
+</ng-template>
+
+<ng-template #emailCellTpl let-p>
+  <span class="text-sm text-stone-500 dark:text-stone-400">{{ p.email || '—' }}</span>
+</ng-template>
+
+<ng-template #ubicacionCellTpl let-p>
+  <span class="text-sm text-stone-500 dark:text-stone-400">{{ p.distrito }}, {{ p.departamento }}</span>
+</ng-template>
+
+<ng-template #estadoCellTpl let-p>
+  <p-tag [value]="p.estado" [severity]="p.estado === 'ACTIVO' ? 'success' : 'danger'" />
+</ng-template>
+
+<ng-template #actionCellTpl let-p>
+  <div (click)="$event.stopPropagation()">
+    <p-button icon="pi pi-ellipsis-v" [text]="true" severity="secondary" size="small"
+              (onClick)="rowMenu.toggle($event)" />
+    <p-menu #rowMenu [popup]="true" [model]="getMenuItems(p)" appendTo="body" />
+  </div>
+</ng-template>
+
+<!-- Layout -->
+<div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
+
+  <!-- Filtros -->
+  <div class="flex items-center gap-2 p-3.5 border-b border-stone-200 dark:border-stone-700 flex-wrap">
+
+    <p-selectbutton
+      [options]="tabOptions"
+      [ngModel]="tab()"
+      (ngModelChange)="onTabChange($event)"
+      optionLabel="label"
+      optionValue="value">
+      <ng-template #item let-opt>
+        <i [class]="opt.icon + ' mr-1.5'"></i>{{ opt.label }}
+      </ng-template>
+    </p-selectbutton>
+
+    <p-iconfield>
+      <p-inputicon><i class="pi pi-search"></i></p-inputicon>
+      <input pInputText
+             class="w-56 text-sm"
+             [ngModel]="searchTerm()"
+             (ngModelChange)="searchTerm.set($event)"
+             [placeholder]="tab() === 'CLIENTE' ? 'Buscar clientes...' : 'Buscar proveedores...'" />
+    </p-iconfield>
+
+    <p-selectbutton
+      [options]="statusOptions"
+      optionLabel="label"
+      optionValue="value"
+      [ngModel]="status()"
+      (ngModelChange)="status.set($event)" />
+
+    <span class="ml-auto text-xs text-stone-400">{{ tableData().length }} resultados</span>
+
+    <p-button
+      label="Exportar"
+      icon="pi pi-download"
+      severity="secondary"
+      [outlined]="true"
+      size="small"
+      (onClick)="exportar()" />
+
+  </div>
+
+  <app-data-table
+    [data]="tableData()"
+    [columns]="tableColumns()"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 20, 50]"
+    [scrollable]="true"
+    emptyMessage="No se encontraron registros con los filtros aplicados"
+    (rowClick)="editPersona.emit($any($event))" />
+
+</div>

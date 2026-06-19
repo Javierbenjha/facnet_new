@@ -1,3 +1,69 @@
+<!-- Cell templates — always in DOM so viewChild.required can find them -->
+
+<ng-template #productoCellTpl let-p let-i="index">
+  <div class="flex items-center gap-2.5">
+    <div class="w-8 h-8 rounded-lg flex items-center justify-center text-[9px] font-bold font-mono shrink-0"
+         [style.background]="thumb(i).bg"
+         [style.color]="thumb(i).fg">
+      {{ tipo() === 'servicios' ? 'SVC' : skuPrefix(p.sku) }}
+    </div>
+    <span class="font-medium text-sm">{{ p.descripcion }}</span>
+  </div>
+</ng-template>
+
+<ng-template #skuCellTpl let-p>
+  <span class="font-mono text-xs text-stone-500 dark:text-stone-400">{{ p.sku }}</span>
+</ng-template>
+
+<ng-template #categoriaCellTpl let-p>
+  <p-tag [value]="p.categoria" severity="secondary" />
+</ng-template>
+
+<ng-template #marcaCellTpl let-p>
+  <span class="text-sm text-stone-500 dark:text-stone-400">{{ p.marca }}</span>
+</ng-template>
+
+<ng-template #unidadCellTpl let-p>
+  <span class="font-mono text-xs text-stone-500 dark:text-stone-400">{{ p.unidad }}</span>
+</ng-template>
+
+<ng-template #costoCellTpl let-p>
+  <span class="font-mono text-sm text-stone-400">{{ p.sigla }}{{ p.costo.toFixed(2) }}</span>
+</ng-template>
+
+<ng-template #precioPubCellTpl let-p>
+  <span class="font-mono text-sm font-medium">{{ p.sigla }}{{ p.precio_publico.toFixed(2) }}</span>
+</ng-template>
+
+<ng-template #precioMayCellTpl let-p>
+  <span class="font-mono text-sm text-stone-400">{{ p.sigla }}{{ p.precio_mayor.toFixed(2) }}</span>
+</ng-template>
+
+<ng-template #estadoCellTpl let-p>
+  <p-tag [value]="p.estado" [severity]="p.estado === 'ACTIVO' ? 'success' : 'danger'" />
+</ng-template>
+
+<ng-template #stockCellTpl let-p>
+  @if (p.stock === 999) {
+    <p-tag value="∞ ilimitado" severity="secondary" />
+  } @else {
+    <p-tag [value]="p.stock + ' ' + p.unidad" [severity]="stockSeverity(p)" />
+  }
+</ng-template>
+
+<ng-template #stockMinCellTpl let-p>
+  <span class="font-mono text-sm text-stone-400">{{ p.stock_min }}</span>
+</ng-template>
+
+<ng-template #actionCellTpl let-p>
+  <div (click)="$event.stopPropagation()">
+    <p-button icon="pi pi-ellipsis-v" [text]="true" severity="secondary" size="small"
+              (onClick)="actionMenu.toggle($event)" />
+    <p-menu #actionMenu [popup]="true" [model]="getMenuItems(p)" appendTo="body" />
+  </div>
+</ng-template>
+
+<!-- Layout -->
 <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden">
 
   <!-- Filtros -->
@@ -13,14 +79,16 @@
              class="w-64 text-sm" />
     </p-iconfield>
 
-    <p-select
-      [options]="categories"
-      optionLabel="label"
-      optionValue="value"
-      [ngModel]="cat()"
-      (ngModelChange)="onCatChange($event)"
-      appendTo="body"
-      styleClass="text-sm" />
+    @if (tipo() === 'productos') {
+      <p-select
+        [options]="categories"
+        optionLabel="label"
+        optionValue="value"
+        [ngModel]="cat()"
+        (ngModelChange)="onCatChange($event)"
+        appendTo="body"
+        styleClass="text-sm" />
+    }
 
     <p-selectbutton
       [options]="statusOptions"
@@ -51,92 +119,15 @@
 
   <!-- Vista tabla -->
   @if (view() === 'table') {
-    <p-table
-      [value]="filteredProducts()"
+    <app-data-table
+      [data]="filteredProducts()"
+      [columns]="tableColumns()"
       [paginator]="true"
       [rows]="8"
       [rowsPerPageOptions]="[8, 16, 32]"
-      [rowHover]="true"
-      styleClass="p-datatable-sm"
-      [scrollable]="true">
-
-      <ng-template pTemplate="header">
-        <tr>
-          <th>Producto</th>
-          <th>SKU</th>
-          <th>Categoría</th>
-          <th>Marca</th>
-          <th>Unidad</th>
-          <th class="text-right">Costo</th>
-          <th class="text-right">P. Público</th>
-          <th class="text-right">P. Mayor</th>
-          <th>Estado</th>
-          <th>Stock</th>
-          <th class="text-right">Stock Mín.</th>
-          <th style="width:4rem"></th>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="body" let-p let-i="rowIndex">
-        <tr class="cursor-pointer" (click)="editProduct.emit(p)">
-
-          <td>
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-lg flex items-center justify-center text-[9px] font-bold font-mono shrink-0"
-                   [style.background]="thumb(i).bg"
-                   [style.color]="thumb(i).fg">
-                {{ skuPrefix(p.sku) }}
-              </div>
-              <span class="font-medium text-sm">{{ p.descripcion }}</span>
-            </div>
-          </td>
-
-          <td class="font-mono text-xs text-stone-500 dark:text-stone-400">{{ p.sku }}</td>
-
-          <td><p-tag [value]="p.categoria" severity="secondary" /></td>
-
-          <td class="text-sm text-stone-500 dark:text-stone-400">{{ p.marca }}</td>
-
-          <td class="font-mono text-xs text-stone-500 dark:text-stone-400">{{ p.unidad }}</td>
-
-          <td class="text-right font-mono text-sm text-stone-400">{{ p.sigla }}{{ p.costo.toFixed(2) }}</td>
-
-          <td class="text-right font-mono text-sm font-medium">{{ p.sigla }}{{ p.precio_publico.toFixed(2) }}</td>
-
-          <td class="text-right font-mono text-sm text-stone-400">{{ p.sigla }}{{ p.precio_mayor.toFixed(2) }}</td>
-
-          <td>
-            <p-tag [value]="p.estado" [severity]="p.estado === 'ACTIVO' ? 'success' : 'danger'" />
-          </td>
-
-          <td>
-            @if (p.stock === 999) {
-              <p-tag value="∞ ilimitado" severity="secondary" />
-            } @else {
-              <p-tag [value]="p.stock + ' ' + p.unidad" [severity]="stockSeverity(p)" />
-            }
-          </td>
-
-          <td class="text-right font-mono text-sm text-stone-400">{{ p.stock_min }}</td>
-
-          <td (click)="$event.stopPropagation()">
-            <p-button icon="pi pi-ellipsis-v" [text]="true" severity="secondary" size="small"
-                      (onClick)="rowMenu.toggle($event)" />
-            <p-menu #rowMenu [popup]="true" [model]="getMenuItems(p)" appendTo="body" />
-          </td>
-
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="12" class="text-center py-10 text-stone-400 text-sm">
-            Sin productos que coincidan con los filtros
-          </td>
-        </tr>
-      </ng-template>
-
-    </p-table>
+      [scrollable]="true"
+      [emptyMessage]="'Sin ' + tipo() + ' que coincidan con los filtros'"
+      (rowClick)="editProduct.emit($any($event))" />
   }
 
   <!-- Vista grilla -->
@@ -152,11 +143,9 @@
                [style.background]="thumb(i).bg"
                [style.color]="thumb(i).fg">
             {{ skuPrefix(p.sku) }}
-            <!-- Estado badge -->
             <span class="absolute top-2 right-2">
               <p-tag [value]="p.estado" [severity]="p.estado === 'ACTIVO' ? 'success' : 'danger'" />
             </span>
-            <!-- Menú -->
             <span class="absolute top-2 left-2" (click)="$event.stopPropagation()">
               <p-button icon="pi pi-ellipsis-v" [text]="true" severity="secondary" size="small"
                         styleClass="!bg-white/80 hover:!bg-white"
@@ -168,7 +157,9 @@
           <!-- Info -->
           <div class="p-3.5 flex flex-col gap-2">
             <div>
-              <p class="text-[11px] text-stone-400 uppercase tracking-wide">{{ p.categoria }}</p>
+              <p class="text-[11px] text-stone-400 uppercase tracking-wide">
+                {{ tipo() === 'productos' ? p.categoria : 'Servicio' }}
+              </p>
               <p class="text-sm font-medium text-stone-900 dark:text-stone-100 mt-0.5 leading-tight">{{ p.descripcion }}</p>
               <p class="text-xs font-mono text-stone-400 mt-0.5">{{ p.sku }}</p>
             </div>
@@ -176,10 +167,12 @@
               <span class="text-sm font-mono font-semibold text-stone-800 dark:text-stone-200">
                 {{ p.sigla }}{{ p.precio_publico.toFixed(2) }}
               </span>
-              @if (p.stock === 999) {
-                <p-tag value="∞ ilimitado" severity="secondary" />
-              } @else {
-                <p-tag [value]="'Stock: ' + p.stock" [severity]="stockSeverity(p)" />
+              @if (tipo() === 'productos') {
+                @if (p.stock === 999) {
+                  <p-tag value="∞ ilimitado" severity="secondary" />
+                } @else {
+                  <p-tag [value]="'Stock: ' + p.stock" [severity]="stockSeverity(p)" />
+                }
               }
             </div>
           </div>
@@ -189,19 +182,20 @@
 
       @empty {
         <div class="col-span-full py-16 text-center text-stone-400 text-sm">
-          Sin productos que coincidan con los filtros
+          Sin {{ tipo() }} que coincidan con los filtros
         </div>
       }
 
     </div>
 
     <div class="border-t border-stone-200 dark:border-stone-700">
-      <p-paginator
-        [first]="gridFirst()"
-        [rows]="gridRows()"
-        [totalRecords]="filteredProducts().length"
-        [rowsPerPageOptions]="[8, 16, 32]"
-        (onPageChange)="onGridPageChange($event)" />
+      <app-table-pagination
+        [currentPage]="gridPage()"
+        [totalItems]="filteredProducts().length"
+        [pageSize]="gridPageSize()"
+        [pageSizeOptions]="[8, 16, 32]"
+        (pageChange)="onGridPageChange($event)"
+        (pageSizeChange)="onGridPageSizeChange($event)" />
     </div>
   }
 
