@@ -8,13 +8,17 @@ import { Auth } from './auth';
 @Service()
 export class Company {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/companies`;
+  private readonly apiUrl = `${environment.apiUrl}/cia`;
   private readonly auth = inject(Auth);
 
-
   create(body: CompanyRequest): Observable<CompanyResponse> {
-    return this.http.post<CompanyResponse>(`${this.apiUrl}`, body).pipe(
-      tap(res => this.auth.setSession(res))
-    );
+    const fd = new FormData();
+
+  Object.entries(body).forEach(([key, value]) => {
+    fd.append(key, value instanceof File ? value : String(value));
+  });
+    return this.http
+      .post<CompanyResponse>(`${this.apiUrl}`, fd)
+      .pipe(tap((res) => this.auth.setSession(res)));
   }
 }

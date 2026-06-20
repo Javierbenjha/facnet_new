@@ -32,22 +32,23 @@ export interface CreateCompanyPayload {
   client_secret?: string;
 }
 
-export interface CreateSucursalPayload {
-  descripcion: string;
-  departamento: string; // 2 dígitos (ubigeo)
-  provincia: string; // 2 dígitos
-  distrito: string; // 2 dígitos
-  ubigeo: string; // 6 dígitos
-  direccion: string;
-  telefono?: string;
-  email?: string;
-}
-
 export interface CompanyRequest {
-  descripcion: string;
-  ruc: string;
-  direccion: string;
-  ubigeo: string;
+  ruc: string;              // Requerido, exactamente 11 dígitos
+  descripcion: string;      // Requerido - Razón social
+  direccion: string;        // Requerido - Dirección fiscal
+  ubigeo: string;           // Requerido - Código de ubigeo
+  usuario_sol?: string;     // Opcional - Usuario SOL de SUNAT
+  clave_sol?: string;       // Opcional - Clave SOL de SUNAT
+  logo_vertical?: File;     // Opcional - JPG
+  logo_horizontal?: File;   // Opcional - JPG
+  monto700: number;         // Requerido, mín. 0 (default: 700)
+  monto_mensual: number;    // Requerido, mín. 0 (default: 0)
+  monto_anual: number;      // Requerido, mín. 0 (default: 0)
+  stdetraccion: boolean;    // Default: false - ¿Aplica detracción?
+  stretencion: boolean;     // Default: false - ¿Aplica retención?
+  limit_ret: number;        // Requerido, mín. 0 (default: 700)
+  ctedetra?: string;        // Opcional - Cuenta de detracción
+  usuario_id: string;       // Requerido - ID del usuario (del JWT)
 }
 
 export interface CompanyResponse {

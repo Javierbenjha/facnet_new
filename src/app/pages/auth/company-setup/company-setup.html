@@ -1,6 +1,188 @@
-﻿<div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-6">
-  <div class="max-w-md w-full bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-8 shadow-lg">
-    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 text-center">Company Setup</h2>
-    <p class="text-gray-500 dark:text-gray-400 mt-1 text-center">Auth page for Company Setup.</p>
-  </div>
+<div class="min-h-screen flex bg-surface-0 dark:bg-surface-950">
+  <!-- Right panel: form -->
+  <main class="flex flex-1 items-center justify-center p-6 sm:p-12">
+    <div class="w-full max-w-lg flex flex-col gap-8">
+      <!-- Logo -->
+      <img src="assets/images/logoHS.png" alt="HS Perú" class="h-12 w-auto self-start" />
+
+      <!-- Header -->
+      <div class="flex flex-col gap-2">
+        <h2 class="text-surface-900 dark:text-surface-0 text-3xl font-semibold leading-tight">
+          Crea tu empresa
+        </h2>
+        <p class="text-surface-600 dark:text-surface-300 leading-normal">
+          Un último paso: registra los datos de tu empresa para empezar a operar.
+        </p>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-6 w-full">
+        <!-- Razón social -->
+        <div class="flex flex-col gap-2 w-full">
+          <label
+            for="descripcion"
+            class="text-surface-900 dark:text-surface-0 font-medium leading-normal"
+            >Razón social</label
+          >
+          <input
+            pInputText
+            id="descripcion"
+            type="text"
+            formControlName="descripcion"
+            placeholder="Mi Empresa SAC"
+            class="w-full px-3 py-2 shadow-sm rounded-lg"
+          />
+          @if (form.controls.descripcion.invalid && form.controls.descripcion.touched) {
+            <small class="text-red-500">Ingresa la razón social.</small>
+          }
+        </div>
+
+        <!-- RUC y Ubigeo -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-2">
+            <label for="ruc" class="text-surface-900 dark:text-surface-0 font-medium leading-normal"
+              >RUC</label
+            >
+            <input
+              pInputText
+              id="ruc"
+              type="text"
+              formControlName="ruc"
+              placeholder="20123456789"
+              maxlength="11"
+              class="w-full px-3 py-2 shadow-sm rounded-lg"
+            />
+            @if (form.controls.ruc.invalid && form.controls.ruc.touched) {
+              <small class="text-red-500">El RUC debe tener 11 dígitos.</small>
+            }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label
+              for="ubigeo"
+              class="text-surface-900 dark:text-surface-0 font-medium leading-normal"
+              >Ubigeo</label
+            >
+            <input
+              pInputText
+              id="ubigeo"
+              type="text"
+              formControlName="ubigeo"
+              placeholder="150101"
+              maxlength="6"
+              class="w-full px-3 py-2 shadow-sm rounded-lg"
+            />
+            @if (form.controls.ubigeo.invalid && form.controls.ubigeo.touched) {
+              <small class="text-red-500">El ubigeo debe tener 6 dígitos.</small>
+            }
+          </div>
+        </div>
+
+        <!-- Dirección -->
+        <div class="flex flex-col gap-2 w-full">
+          <label
+            for="direccion"
+            class="text-surface-900 dark:text-surface-0 font-medium leading-normal"
+            >Dirección fiscal</label
+          >
+          <input
+            pInputText
+            id="direccion"
+            type="text"
+            formControlName="direccion"
+            placeholder="Av. Principal 123, Lima"
+            class="w-full px-3 py-2 shadow-sm rounded-lg"
+          />
+          @if (form.controls.direccion.invalid && form.controls.direccion.touched) {
+            <small class="text-red-500">Ingresa la dirección fiscal.</small>
+          }
+        </div>
+
+        <!-- Credenciales SOL (opcional) -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-2">
+            <label
+              for="usuario_sol"
+              class="text-surface-900 dark:text-surface-0 font-medium leading-normal"
+              >Usuario SOL <span class="text-surface-400 font-normal">(opcional)</span></label
+            >
+            <input
+              pInputText
+              id="usuario_sol"
+              type="text"
+              formControlName="usuario_sol"
+              placeholder="MODDATOS"
+              class="w-full px-3 py-2 shadow-sm rounded-lg"
+            />
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label
+              for="clave_sol"
+              class="text-surface-900 dark:text-surface-0 font-medium leading-normal"
+              >Clave SOL <span class="text-surface-400 font-normal">(opcional)</span></label
+            >
+            <p-password
+              inputId="password"
+              formControlName="password"
+              [toggleMask]="true"
+              [feedback]="false"
+              [fluid]="true"
+              placeholder="Mínimo 8 caracteres"
+            />
+          </div>
+        </div>
+
+        <!-- Logos (opcional) -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-2">
+            <label
+              for="logoVertical"
+              class="text-surface-900 dark:text-surface-0 font-medium leading-normal"
+              >Logo vertical <span class="text-surface-400 font-normal">(opcional)</span></label
+            >
+            <input
+              id="logoVertical"
+              type="file"
+              accept="image/*"
+              (change)="onFileSelect($event, 'vertical')"
+              class="w-full text-sm text-surface-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-surface-100 file:text-surface-700 hover:file:bg-surface-200"
+            />
+            @if (logoVertical(); as f) {
+              <small class="text-surface-500">{{ f.name }}</small>
+            }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label
+              for="logoHorizontal"
+              class="text-surface-900 dark:text-surface-0 font-medium leading-normal"
+              >Logo horizontal <span class="text-surface-400 font-normal">(opcional)</span></label
+            >
+            <input
+              id="logoHorizontal"
+              type="file"
+              accept="image/*"
+              (change)="onFileSelect($event, 'horizontal')"
+              class="w-full text-sm text-surface-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-surface-100 file:text-surface-700 hover:file:bg-surface-200"
+            />
+            @if (logoHorizontal(); as f) {
+              <small class="text-surface-500">{{ f.name }}</small>
+            }
+          </div>
+        </div>
+
+        <button
+          pButton
+          type="submit"
+          [disabled]="form.invalid || loading()"
+          [loading]="loading()"
+          class="w-full py-2.5 rounded-lg flex justify-center items-center gap-2"
+        >
+          <i pButtonIcon class="pi pi-check text-base! leading-normal!"></i>
+          <span pButtonLabel>Crear empresa</span>
+        </button>
+      </form>
+    </div>
+  </main>
 </div>
