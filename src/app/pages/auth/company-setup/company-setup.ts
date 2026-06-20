@@ -37,8 +37,6 @@ export class CompanySetup {
     ubigeo: ['', [Validators.required, Validators.minLength(6)]],
     usuario_sol: ['',[Validators.required]],
     clave_sol: ['',[Validators.required]],
-    logoVertical: [,[Validators.required]],
-    logoHorizontal: [,[Validators.required]],
     monto700: [700,[Validators.required]],
     monto_mensual: [0,[Validators.required]],
     monto_anual: [0,[Validators.required]],
