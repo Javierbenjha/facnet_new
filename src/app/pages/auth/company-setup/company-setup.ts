@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -8,7 +8,7 @@ import { Auth } from '../../../core/services/auth';
 import { Company } from '../../../core/services/company';
 import { Toaster } from '../../../core/services/toast';
 import { CompanyRequest } from '../../../core/models/company.model';
-import { Password } from "primeng/password";
+import { Password } from 'primeng/password';
 
 @Component({
   selector: 'app-company-setup',
@@ -30,20 +30,32 @@ export class CompanySetup {
   readonly logoVertical = signal<File | null>(null);
   readonly logoHorizontal = signal<File | null>(null);
 
+  readonly hasBothLogos = computed(
+    () => this.logoHorizontal() !== null && this.logoVertical() !== null,
+  );
+
+  readonly previewVertical = computed(
+    () => this.logoVertical()  URL.createObjectURL(file)
+  )
+
+    readonly previewHorizontal = computed(
+    () => this.logoHorizontal()   URL.createObjectURL(file)
+  )
+
   readonly form = this.fb.nonNullable.group({
     descripcion: ['', [Validators.required]],
-    ruc: ['', [Validators.required, Validators.minLength(11)]],
+    ruc: ['', [Validators.required, Validators.pattern(/^\d{11}$/)]],
     direccion: ['', [Validators.required]],
-    ubigeo: ['', [Validators.required, Validators.minLength(6)]],
-    usuario_sol: ['',[Validators.required]],
-    clave_sol: ['',[Validators.required]],
-    monto700: [700,[Validators.required]],
-    monto_mensual: [0,[Validators.required]],
-    monto_anual: [0,[Validators.required]],
-    stdetraccion: [false,[Validators.required]],
-    stretencion:[false,[Validators.required]],
-    limit_ret: [700,[Validators.required]],
-    ctedra: ['',[Validators.required]],
+    ubigeo: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
+    usuario_sol: ['', [Validators.required]],
+    clave_sol: ['', [Validators.required]],
+    monto700: [700, [Validators.required]],
+    monto_mensual: [0, [Validators.required]],
+    monto_anual: [0, [Validators.required]],
+    stdetraccion: [false, [Validators.required]],
+    stretencion: [false, [Validators.required]],
+    limit_ret: [700, [Validators.required]],
+    ctedetra: ['', [Validators.required]],
   });
 
   onFileSelect(event: Event, slot: 'vertical' | 'horizontal') {
@@ -55,6 +67,8 @@ export class CompanySetup {
 
   onSubmit() {
     if (this.form.invalid) return;
+    if (!this.logoHorizontal()) return this.toast.warning('Imagen obligatoria', 'Sube una imagen');
+    if (!this.logoVertical()) return this.toast.warning('Imagen obligatoria', 'Sube una imagen');
 
     const userId = this.auth.currentUser()?.id;
     if (!userId) {
@@ -74,10 +88,13 @@ export class CompanySetup {
       monto700: v.monto700,
       monto_mensual: v.monto_mensual,
       monto_anual: v.monto_anual,
-      stdetraccion: v.stdetraccion,
-      stretencion: v.stretencion,
+      stdetraccion: v.stdetraccion === true ? 1 : 0,
+      stretencion: v.stretencion === true ? 1 : 0,
       limit_ret: v.limit_ret,
-    }
+      ctedetra: v.ctedetra,
+      logo_horizontal: this.logoHorizontal()!,
+      logo_vertical: this.logoVertical()!,
+    };
 
     this.loading.set(true);
     this.company
