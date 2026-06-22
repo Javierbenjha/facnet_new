@@ -236,18 +236,12 @@
         <span class="text-surface-500 dark:text-surface-300 text-sm">Opciones adicionales</span>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <label class="inline-flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" formControlName="stdetraccion" class="peer sr-only" />
-            <span
-              class="relative h-6 w-11 shrink-0 rounded-full bg-surface-300 dark:bg-surface-600 transition-colors peer-checked:bg-primary after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-5"
-            ></span>
+            <p-toggleswitch formControlName="stdetraccion" />
             <span class="text-surface-900 dark:text-surface-0 leading-normal">Aplica detracción</span>
           </label>
 
           <label class="inline-flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" formControlName="stretencion" class="peer sr-only" />
-            <span
-              class="relative h-6 w-11 shrink-0 rounded-full bg-surface-300 dark:bg-surface-600 transition-colors peer-checked:bg-primary after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-5"
-            ></span>
+            <p-toggleswitch formControlName="stretencion" />
             <span class="text-surface-900 dark:text-surface-0 leading-normal">Aplica retención</span>
           </label>
         </div>
