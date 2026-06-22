@@ -61,13 +61,13 @@
 
     <div class="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-6">
 
-      <!-- Tipo + Monto -->
+      <!-- Tipo + Importe -->
       <div class="flex items-center justify-between">
         <p-tag [value]="m.tipo" [severity]="tipoSev(m.tipo)" />
         <p class="text-2xl font-bold tabular-nums"
           [class.text-emerald-600]="m.tipo === 'INGRESO'"
           [class.text-red-500]="m.tipo === 'EGRESO'">
-          {{ m.tipo === 'INGRESO' ? '+' : '-' }} S/ {{ fmtNum(m.monto) }}
+          {{ m.tipo === 'INGRESO' ? '+' : '-' }} {{ m.sigla }} {{ fmtNum(m.importe) }}
         </p>
       </div>
 
@@ -84,28 +84,26 @@
               <p-tag [value]="m.estado" [severity]="estadoSev(m.estado)" styleClass="!text-xs" />
             </div>
           </div>
+          <div>
+            <p class="text-stone-400 text-xs">Serie</p>
+            <p class="font-mono font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ m.serie }}</p>
+          </div>
+          <div>
+            <p class="text-stone-400 text-xs">Moneda</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ m.moneda === 'PEN' ? 'Soles' : 'Dólares' }}</p>
+          </div>
           <div class="col-span-2">
-            <p class="text-stone-400 text-xs">Concepto</p>
-            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ m.concepto }}</p>
+            <p class="text-stone-400 text-xs">Motivo</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ m.motivo }}</p>
           </div>
-          <div>
-            <p class="text-stone-400 text-xs">Categoría</p>
-            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ m.categoria }}</p>
+          <div class="col-span-2">
+            <p class="text-stone-400 text-xs">Entregado a</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ m.entregado_a }}</p>
           </div>
-          <div>
-            <p class="text-stone-400 text-xs">Responsable</p>
-            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ m.responsable }}</p>
-          </div>
-          @if (m.comprobante) {
+          @if (m.detalle) {
             <div class="col-span-2">
-              <p class="text-stone-400 text-xs">Comprobante</p>
-              <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ m.comprobante }}</p>
-            </div>
-          }
-          @if (m.observaciones) {
-            <div class="col-span-2">
-              <p class="text-stone-400 text-xs">Observaciones</p>
-              <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ m.observaciones }}</p>
+              <p class="text-stone-400 text-xs">Detalle del documento</p>
+              <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ m.detalle }}</p>
             </div>
           }
         </div>

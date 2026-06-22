@@ -38,10 +38,10 @@ export class PettyCashTable {
   // ── Cell template refs ─────────────────────────────────────────────────────
   private readonly fechaCellTpl      = viewChild.required<TemplateRef<unknown>>('fechaCellTpl');
   private readonly tipoCellTpl       = viewChild.required<TemplateRef<unknown>>('tipoCellTpl');
-  private readonly conceptoCellTpl   = viewChild.required<TemplateRef<unknown>>('conceptoCellTpl');
-  private readonly categoriaCellTpl  = viewChild.required<TemplateRef<unknown>>('categoriaCellTpl');
-  private readonly responsableCellTpl= viewChild.required<TemplateRef<unknown>>('responsableCellTpl');
-  private readonly montoCellTpl      = viewChild.required<TemplateRef<unknown>>('montoCellTpl');
+  private readonly serieCellTpl      = viewChild.required<TemplateRef<unknown>>('serieCellTpl');
+  private readonly motivoCellTpl     = viewChild.required<TemplateRef<unknown>>('motivoCellTpl');
+  private readonly entregadoCellTpl  = viewChild.required<TemplateRef<unknown>>('entregadoCellTpl');
+  private readonly importeCellTpl    = viewChild.required<TemplateRef<unknown>>('importeCellTpl');
   private readonly estadoCellTpl     = viewChild.required<TemplateRef<unknown>>('estadoCellTpl');
   private readonly actionCellTpl     = viewChild.required<TemplateRef<unknown>>('actionCellTpl');
 
@@ -67,10 +67,10 @@ export class PettyCashTable {
 
       if (q) {
         return (
-          m.concepto.toLowerCase().includes(q) ||
-          m.responsable.toLowerCase().includes(q) ||
+          m.motivo.toLowerCase().includes(q) ||
+          m.entregado_a.toLowerCase().includes(q) ||
           m.id.toLowerCase().includes(q) ||
-          (m.comprobante?.toLowerCase().includes(q) ?? false)
+          m.serie.toLowerCase().includes(q)
         );
       }
       return true;
@@ -78,14 +78,14 @@ export class PettyCashTable {
   });
 
   readonly tableColumns = computed<TableColumn[]>(() => [
-    { key: 'fecha',       label: 'Fecha',                                  cellTemplate: this.fechaCellTpl() },
-    { key: 'tipo',        label: 'Tipo',       class: 'text-center',       cellTemplate: this.tipoCellTpl() },
-    { key: 'concepto',    label: 'Concepto',                               cellTemplate: this.conceptoCellTpl() },
-    { key: 'categoria',   label: 'Categoría',                              cellTemplate: this.categoriaCellTpl() },
-    { key: 'responsable', label: 'Responsable',                            cellTemplate: this.responsableCellTpl() },
-    { key: 'monto',       label: 'Monto',      class: 'text-right',        cellTemplate: this.montoCellTpl() },
-    { key: 'estado',      label: 'Estado',     class: 'text-center',       cellTemplate: this.estadoCellTpl() },
-    { key: '_actions',    label: '',           class: 'w-14 text-center',  cellTemplate: this.actionCellTpl() },
+    { key: 'fecha',       label: 'Fecha',                                 cellTemplate: this.fechaCellTpl() },
+    { key: 'tipo',        label: 'Tipo',      class: 'text-center',       cellTemplate: this.tipoCellTpl() },
+    { key: 'serie',       label: 'Serie',                                 cellTemplate: this.serieCellTpl() },
+    { key: 'motivo',      label: 'Motivo',                                cellTemplate: this.motivoCellTpl() },
+    { key: 'entregado_a', label: 'Entregado a',                           cellTemplate: this.entregadoCellTpl() },
+    { key: 'importe',     label: 'Importe',   class: 'text-right',        cellTemplate: this.importeCellTpl() },
+    { key: 'estado',      label: 'Estado',    class: 'text-center',       cellTemplate: this.estadoCellTpl() },
+    { key: '_actions',    label: '',          class: 'w-14 text-center',  cellTemplate: this.actionCellTpl() },
   ]);
 
   // ── Methods ────────────────────────────────────────────────────────────────

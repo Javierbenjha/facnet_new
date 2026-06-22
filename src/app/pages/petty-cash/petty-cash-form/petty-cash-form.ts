@@ -7,7 +7,10 @@ import { Textarea } from 'primeng/textarea';
 import { Select } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { AppModal } from '../../../shared/app-modal/app-modal';
-import { CATEGORIAS_EGRESO, CATEGORIAS_INGRESO, TipoMovimiento } from '../petty-cash.models';
+import {
+  MONEDAS, Moneda, MOTIVOS_MOCK, MotivoCajaChica,
+  TIPOS_DOC_CAJA_CHICA, TipoMovimiento,
+} from '../petty-cash.models';
 
 @Component({
   selector: 'app-petty-cash-form',
@@ -23,29 +26,43 @@ import { CATEGORIAS_EGRESO, CATEGORIAS_INGRESO, TipoMovimiento } from '../petty-
 export class PettyCashForm {
   readonly editing = input<'new' | null>(null);
   readonly closed  = output<void>();
-  readonly saved   = output<{ tipo: TipoMovimiento; concepto: string; monto: number }>();
+  readonly saved   = output<{ tipo: TipoMovimiento; importe: number; moneda: string }>();
+
+  // ── Opciones ───────────────────────────────────────────────────────────────
+  readonly monedas = MONEDAS;
 
   // ── Form state ─────────────────────────────────────────────────────────────
-  readonly tipo          = signal<TipoMovimiento>('EGRESO');
-  readonly fecha         = signal<Date>(new Date());
-  readonly concepto      = signal('');
-  readonly categoria     = signal('');
-  readonly monto         = signal(0);
-  readonly responsable   = signal('');
-  readonly comprobante   = signal('');
-  readonly observaciones = signal('');
+  readonly tipo       = signal<TipoMovimiento>('EGRESO');
+  readonly motivo     = signal<MotivoCajaChica | null>(null);
+  readonly fecha      = signal<Date>(new Date());
+  readonly entregadoA = signal('');
+  readonly moneda     = signal<Moneda>(MONEDAS[0]);
+  readonly importe    = signal(0);
+  readonly detalle    = signal('');
 
   // ── Computed ───────────────────────────────────────────────────────────────
   readonly visible = computed(() => this.editing() !== null);
 
-  readonly categorias = computed(() =>
-    this.tipo() === 'INGRESO' ? CATEGORIAS_INGRESO : CATEGORIAS_EGRESO
+  readonly modalTitle = computed(() =>
+    this.tipo() === 'INGRESO' ? 'Nuevo Ingreso' : 'Nuevo Egreso'
+  );
+
+  // tipoDoc derivado del toggle — usado para la serie y el payload
+  readonly tipoDoc = computed(() =>
+    TIPOS_DOC_CAJA_CHICA.find(t => t.tipo === this.tipo()) ?? TIPOS_DOC_CAJA_CHICA[0]
+  );
+
+  readonly serie = computed(() => this.tipoDoc().serie);
+
+  // Motivos filtrados según el tipo seleccionado
+  readonly motivosFiltrados = computed(() =>
+    MOTIVOS_MOCK.filter(m => m.tipo === this.tipo())
   );
 
   readonly esValido = computed(() =>
-    this.concepto().trim().length > 0 &&
-    this.categoria().length > 0 &&
-    this.monto() > 0
+    this.motivo() !== null &&
+    this.entregadoA().trim().length > 0 &&
+    this.importe() > 0
   );
 
   constructor() {
@@ -57,12 +74,16 @@ export class PettyCashForm {
   // ── Methods ────────────────────────────────────────────────────────────────
   setTipo(t: TipoMovimiento) {
     this.tipo.set(t);
-    this.categoria.set('');
+    this.motivo.set(null); // limpiar motivo al cambiar tipo
+  }
+
+  agregarMotivo() {
+    // placeholder — abre modal para crear motivo en producción
   }
 
   registrar() {
     if (!this.esValido()) return;
-    this.saved.emit({ tipo: this.tipo(), concepto: this.concepto(), monto: this.monto() });
+    this.saved.emit({ tipo: this.tipo(), importe: this.importe(), moneda: this.moneda().sigla });
     this.closed.emit();
   }
 
@@ -70,12 +91,11 @@ export class PettyCashForm {
 
   private resetForm() {
     this.tipo.set('EGRESO');
+    this.motivo.set(null);
     this.fecha.set(new Date());
-    this.concepto.set('');
-    this.categoria.set('');
-    this.monto.set(0);
-    this.responsable.set('');
-    this.comprobante.set('');
-    this.observaciones.set('');
+    this.entregadoA.set('');
+    this.moneda.set(MONEDAS[0]);
+    this.importe.set(0);
+    this.detalle.set('');
   }
 }

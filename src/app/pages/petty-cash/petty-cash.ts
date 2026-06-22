@@ -28,8 +28,8 @@ export class PettyCash {
   // ── KPI metrics (over full dataset) ───────────────────────────────────────
   readonly metrics = computed(() => {
     const activos  = this.movimientos().filter(m => m.estado === 'ACTIVO');
-    const ingresos = activos.filter(m => m.tipo === 'INGRESO').reduce((s, m) => s + m.monto, 0);
-    const egresos  = activos.filter(m => m.tipo === 'EGRESO').reduce((s, m) => s + m.monto, 0);
+    const ingresos = activos.filter(m => m.tipo === 'INGRESO').reduce((s, m) => s + m.importe, 0);
+    const egresos  = activos.filter(m => m.tipo === 'EGRESO').reduce((s, m) => s + m.importe, 0);
     return {
       totalMovimientos: this.movimientos().length,
       ingresos,
@@ -42,8 +42,8 @@ export class PettyCash {
   openNew()    { this.editing.set('new'); }
   closeForm()  { this.editing.set(null); }
 
-  onSaved(data: { tipo: TipoMovimiento; concepto: string; monto: number }) {
-    const delta = data.tipo === 'INGRESO' ? data.monto : -data.monto;
+  onSaved(data: { tipo: TipoMovimiento; importe: number; moneda: string }) {
+    const delta = data.tipo === 'INGRESO' ? data.importe : -data.importe;
     this.saldoActual.update(s => s + delta);
   }
 
