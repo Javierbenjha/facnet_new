@@ -28,7 +28,7 @@ const passwordsMatch: ValidatorFn = (group: AbstractControl): ValidationErrors |
   templateUrl: './register.html',
   styleUrl: './register.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, ButtonModule, InputText, Password, AuthBranding, NgOptimizedImage],
+  imports: [ReactiveFormsModule, RouterLink, ButtonModule, InputText, Password, AuthBranding],
 })
 export class Register {
   private readonly fb = inject(FormBuilder);
