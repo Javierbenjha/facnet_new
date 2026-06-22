@@ -1,9 +1,9 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
   <div
-    class="grid grid-cols-1 lg:grid-cols-3 gap-8 rounded-2xl border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 p-6 sm:p-8 shadow-sm"
+    class="grid grid-cols-1 lg:grid-cols-3 gap-6 rounded-2xl border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 p-5 sm:p-6 shadow-sm"
   >
     <!-- Left: Información de la Empresa -->
-    <section class="lg:col-span-2 flex flex-col gap-6 lg:border-r lg:border-surface-200 lg:dark:border-surface-700 lg:pr-8">
+    <section class="lg:col-span-2 flex flex-col gap-5 lg:border-r lg:border-surface-200 lg:dark:border-surface-700 lg:pr-6">
       <div class="flex items-start gap-3">
         <span class="mt-1 h-9 w-1.5 rounded-full bg-primary"></span>
         <div class="flex flex-col">
@@ -249,7 +249,7 @@
     </section>
 
     <!-- Right: Logotipo de la Compañía -->
-    <section class="flex flex-col gap-6">
+    <section class="flex flex-col gap-5">
       <div class="flex items-start gap-3">
         <span class="mt-1 h-9 w-1.5 rounded-full bg-primary"></span>
         <div class="flex flex-col">
@@ -269,7 +269,7 @@
         >
         <label
           for="logoVertical"
-          class="flex aspect-[3/4] cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border-2 border-dashed border-surface-300 dark:border-surface-600 text-surface-400 transition-colors hover:border-primary hover:text-primary"
+          class="flex aspect-[3/4] max-h-56 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border-2 border-dashed border-surface-300 dark:border-surface-600 text-surface-400 transition-colors hover:border-primary hover:text-primary"
         >
           @if (previewVertical(); as src) {
             <img [src]="src" alt="Logo vertical" class="h-full w-full rounded-xl object-contain p-2" />
@@ -299,7 +299,7 @@
         >
         <label
           for="logoHorizontal"
-          class="flex aspect-[2/1] cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border-2 border-dashed border-surface-300 dark:border-surface-600 text-surface-400 transition-colors hover:border-primary hover:text-primary"
+          class="flex aspect-[2/1] max-h-32 cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border-2 border-dashed border-surface-300 dark:border-surface-600 text-surface-400 transition-colors hover:border-primary hover:text-primary"
         >
           @if (previewHorizontal(); as src) {
             <img [src]="src" alt="Logo horizontal" class="h-full w-full rounded-xl object-contain p-2" />
