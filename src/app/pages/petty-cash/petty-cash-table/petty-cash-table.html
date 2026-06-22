@@ -1,40 +1,45 @@
 <!-- Cell templates -->
 
-<ng-template #tipoDocCellTpl let-c>
-  <span class="whitespace-nowrap text-sm font-medium text-stone-800 dark:text-stone-100">{{ c.sigla_documento }}</span>
+<ng-template #fechaCellTpl let-m>
+  <span class="whitespace-nowrap text-sm text-stone-600 dark:text-stone-300">{{ fmtDate(m.fecha) }}</span>
 </ng-template>
 
-<ng-template #documentoCellTpl let-c>
-  <span class="whitespace-nowrap text-sm font-medium text-stone-800 dark:text-stone-100">{{ c.serie }}-{{ c.correlativo }}</span>
+<ng-template #tipoCellTpl let-m>
+  <p-tag [value]="m.tipo" [severity]="tipoSev(m.tipo)" styleClass="!text-xs" />
 </ng-template>
 
-<ng-template #referenciaCellTpl let-c>
-  @if (c.serie_referencia && c.correlativo_referencia) {
-    <span class="whitespace-nowrap text-sm text-stone-500 dark:text-stone-400">{{ c.serie_referencia }}-{{ c.correlativo_referencia }}</span>
+<ng-template #conceptoCellTpl let-m>
+  <p class="text-sm font-medium text-stone-800 dark:text-stone-100 max-w-[200px] truncate">{{ m.concepto }}</p>
+  @if (m.comprobante) {
+    <p class="text-[11px] text-stone-400">{{ m.comprobante }}</p>
   }
 </ng-template>
 
-<ng-template #fechaCellTpl let-c>
-  <span class="whitespace-nowrap text-sm text-stone-500 dark:text-stone-400">{{ fmtDate(c.fecha_compra) }}</span>
+<ng-template #categoriaCellTpl let-m>
+  <span class="text-sm text-stone-500 whitespace-nowrap">{{ m.categoria }}</span>
 </ng-template>
 
-<ng-template #proveedorCellTpl let-c>
-  <span class="text-sm text-stone-500 dark:text-stone-400 max-w-[180px] truncate block">{{ c.proveedor }}</span>
+<ng-template #responsableCellTpl let-m>
+  <span class="text-sm text-stone-500">{{ m.responsable }}</span>
 </ng-template>
 
-<ng-template #totalCellTpl let-c>
-  <span class="text-sm font-semibold tabular-nums whitespace-nowrap text-stone-900 dark:text-stone-100">{{ c.sigla }} {{ fmtNum(c.total) }}</span>
+<ng-template #montoCellTpl let-m>
+  <span class="text-sm font-semibold tabular-nums whitespace-nowrap"
+    [class.text-emerald-600]="m.tipo === 'INGRESO'"
+    [class.text-red-500]="m.tipo === 'EGRESO'">
+    {{ m.tipo === 'INGRESO' ? '+' : '-' }} S/ {{ fmtNum(m.monto) }}
+  </span>
 </ng-template>
 
-<ng-template #estadoCellTpl let-c>
-  <p-tag [value]="c.estado" [severity]="estadoSev(c.estado)" styleClass="!text-xs" />
+<ng-template #estadoCellTpl let-m>
+  <p-tag [value]="m.estado" [severity]="estadoSev(m.estado)" styleClass="!text-xs" />
 </ng-template>
 
-<ng-template #actionCellTpl let-c>
+<ng-template #actionCellTpl let-m>
   <div (click)="$event.stopPropagation()">
     <p-button icon="pi pi-ellipsis-v" [text]="true" severity="secondary" size="small"
       (onClick)="rowMenu.toggle($event)" />
-    <p-menu #rowMenu [popup]="true" [model]="getMenuItems(c)" appendTo="body" />
+    <p-menu #rowMenu [popup]="true" [model]="getMenuItems(m)" appendTo="body" />
   </div>
 </ng-template>
 
@@ -49,7 +54,7 @@
       <input pInputText pSize="small" type="text"
         [ngModel]="searchText()"
         (ngModelChange)="searchText.set($event)"
-        placeholder="Nº doc, proveedor, RUC..."
+        placeholder="Concepto, responsable, N° doc..."
         class="w-56" />
     </p-iconfield>
 
@@ -72,16 +77,16 @@
       inputStyleClass="!py-[0.375rem] !text-sm" />
 
     <p-select
-      [options]="tipoDocOpciones"
-      [ngModel]="tipoDocFiltro()"
-      (ngModelChange)="tipoDocFiltro.set($event)"
+      [options]="tipoOpciones"
+      [ngModel]="tipoFiltro()"
+      (ngModelChange)="tipoFiltro.set($event)"
       optionLabel="label"
       optionValue="value"
       size="small"
       appendTo="body"
-      styleClass="w-44" />
+      styleClass="w-36" />
 
-    <span class="ml-auto text-xs text-stone-400">{{ filteredCompras().length }} resultados</span>
+    <span class="ml-auto text-xs text-stone-400">{{ filteredMovimientos().length }} resultados</span>
 
     <p-button icon="pi pi-refresh" [text]="true" severity="secondary" size="small"
       pTooltip="Limpiar filtros" (onClick)="clearFilters()" />
@@ -89,13 +94,13 @@
   </div>
 
   <app-data-table
-    [data]="filteredCompras()"
+    [data]="filteredMovimientos()"
     [columns]="tableColumns()"
     [paginator]="true"
     [rows]="10"
     [rowsPerPageOptions]="[10, 25, 50]"
     [scrollable]="true"
-    emptyMessage="No se encontraron compras"
+    emptyMessage="No se encontraron movimientos"
     (rowClick)="viewDetail.emit($any($event))" />
 
 </div>

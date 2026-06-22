@@ -143,10 +143,7 @@ export const routes: Routes = [
         path: 'warranty',
         loadComponent: () => import('./pages/warranty/warranty').then(m => m.Warranty)
       },
-      {
-        path: 'petty-cash/list',
-        loadComponent: () => import('./pages/petty-cash-list/petty-cash-list').then(m => m.PettyCashList)
-      },
+
       {
         path: 'collection',
         loadComponent: () => import('./pages/collection/collection').then(m => m.Collection)

@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal, TemplateRef, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TableModule } from 'primeng/table';
 import { Button } from 'primeng/button';
 import { Select } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
@@ -11,6 +10,7 @@ import { Tag } from 'primeng/tag';
 import { Menu } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { CompraHistorial, EstadoCompra, TIPO_DOC_FILTRO_COMPRA } from '../purchase-list.models';
+import { DataTable, TableColumn } from '../../../shared/data-table/data-table';
 
 @Component({
   selector: 'app-purchase-table',
@@ -18,14 +18,14 @@ import { CompraHistorial, EstadoCompra, TIPO_DOC_FILTRO_COMPRA } from '../purcha
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    TableModule, Tag, Menu,
-    Button, Select, InputText, IconField, InputIcon, DatePickerModule,
+    Tag, Menu, Button, Select, InputText, IconField, InputIcon, DatePickerModule,
+    DataTable,
   ],
 })
 export class PurchaseTable {
-  compras     = input<CompraHistorial[]>([]);
-  editCompra  = output<CompraHistorial>();
-  viewDetail  = output<CompraHistorial>();
+  compras    = input<CompraHistorial[]>([]);
+  editCompra = output<CompraHistorial>();
+  viewDetail = output<CompraHistorial>();
 
   readonly tipoDocOpciones = TIPO_DOC_FILTRO_COMPRA;
 
@@ -34,6 +34,16 @@ export class PurchaseTable {
   readonly startDate     = signal<Date | null>(this.firstOfMonth());
   readonly endDate       = signal<Date | null>(new Date());
   readonly tipoDocFiltro = signal(0);
+
+  // ── Cell template refs ─────────────────────────────────────────────────────
+  private readonly tipoDocCellTpl    = viewChild.required<TemplateRef<unknown>>('tipoDocCellTpl');
+  private readonly documentoCellTpl  = viewChild.required<TemplateRef<unknown>>('documentoCellTpl');
+  private readonly referenciaCellTpl = viewChild.required<TemplateRef<unknown>>('referenciaCellTpl');
+  private readonly fechaCellTpl      = viewChild.required<TemplateRef<unknown>>('fechaCellTpl');
+  private readonly proveedorCellTpl  = viewChild.required<TemplateRef<unknown>>('proveedorCellTpl');
+  private readonly totalCellTpl      = viewChild.required<TemplateRef<unknown>>('totalCellTpl');
+  private readonly estadoCellTpl     = viewChild.required<TemplateRef<unknown>>('estadoCellTpl');
+  private readonly actionCellTpl     = viewChild.required<TemplateRef<unknown>>('actionCellTpl');
 
   // ── Computed ───────────────────────────────────────────────────────────────
   readonly filteredCompras = computed(() => {
@@ -66,6 +76,17 @@ export class PurchaseTable {
       return true;
     });
   });
+
+  readonly tableColumns = computed<TableColumn[]>(() => [
+    { key: 'sigla_documento',  label: 'Tipo Documento',                      cellTemplate: this.tipoDocCellTpl() },
+    { key: 'serie',            label: 'Documento',                           cellTemplate: this.documentoCellTpl() },
+    { key: 'serie_referencia', label: 'Referencia',                          cellTemplate: this.referenciaCellTpl() },
+    { key: 'fecha_compra',     label: 'Fecha',                               cellTemplate: this.fechaCellTpl() },
+    { key: 'proveedor',        label: 'Proveedor',                           cellTemplate: this.proveedorCellTpl() },
+    { key: 'total',            label: 'Total',    class: 'text-right',       cellTemplate: this.totalCellTpl() },
+    { key: 'estado',           label: 'Estado',   class: 'text-center',      cellTemplate: this.estadoCellTpl() },
+    { key: '_actions',         label: '',         class: 'w-28 text-center', cellTemplate: this.actionCellTpl() },
+  ]);
 
   // ── Methods ────────────────────────────────────────────────────────────────
   clearFilters() {
