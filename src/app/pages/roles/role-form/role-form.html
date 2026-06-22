@@ -1,0 +1,54 @@
+<app-modal
+  [visible]="visible()"
+  (visibleChange)="$event || close()"
+  (closed)="close()"
+  [title]="modalTitle()"
+  size="md"
+>
+  <div class="flex flex-col gap-4 pt-1">
+    <div class="flex flex-col gap-1">
+      <label class="text-sm font-medium text-stone-600 dark:text-stone-400"
+        >Nombre <span class="text-red-400">*</span></label
+      >
+      <input pInputText [formControl]="form.controls.name" placeholder="Ej: Vendedor" />
+      @if (form.controls.name.invalid && form.controls.name.touched) {
+        <small class="text-red-500">El nombre es requerido</small>
+      }
+    </div>
+    <div class="flex flex-col gap-1">
+      <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Descripción </label>
+      <input pInputText [formControl]="form.controls.description" placeholder="Descripción" />
+    </div>
+
+    @for (group of grouped(); track group.module) {
+      <div class="flex flex-col gap-1">
+        <h4 class="text-sm font-semibold uppercase text-stone-500">{{ group.module }}</h4>
+        @for (perm of group.items; track perm.id) {
+          <div class="flex items-center justify-between gap-2">
+            <label class="flex items-center gap-2 text-sm">
+              <input type="checkbox" [checked]="isChecked(perm.id)" (change)="toggle(perm.id)" />
+              {{ perm.description }}
+            </label>
+
+            <select
+              class="text-sm border border-stone-200 rounded px-2 py-1 disabled:opacity-40"
+              [disabled]="!isChecked(perm.id)"
+              (change)="setScope(perm.id, $any($event.target).value)"
+            >
+              @for (opt of scopeOptions; track opt.value) {
+                <option [value]="opt.value" [selected]="scopeOf(perm.id) === opt.value">
+                  {{ opt.label }}
+                </option>
+              }
+            </select>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div modal-footer>
+    <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="close()" />
+    <p-button label="Guardar" (onClick)="save()" />
+  </div>
+</app-modal>

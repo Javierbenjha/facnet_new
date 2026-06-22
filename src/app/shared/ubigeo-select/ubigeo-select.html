@@ -1,0 +1,54 @@
+r<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+  <!-- Departamento -->
+  <div class="flex flex-col gap-2">
+    <label class="text-surface-900 dark:text-surface-0 font-medium leading-normal"
+      >Departamento <span class="text-red-500">*</span></label
+    >
+    <select
+      [value]="selectedDept()"
+      (change)="onDeptChange($any($event.target).value)"
+      class="w-full px-3 py-2 shadow-sm rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-900 dark:text-surface-0"
+    >
+      <option value="">Seleccionar</option>
+      @for (d of departments(); track d.codigo) {
+        <option [value]="d.codigo">{{ d.nombre }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- Provincia -->
+  <div class="flex flex-col gap-2">
+    <label class="text-surface-900 dark:text-surface-0 font-medium leading-normal"
+      >Provincia <span class="text-red-500">*</span></label
+    >
+    <select
+      [value]="selectedProv()"
+      (change)="onProvChange($any($event.target).value)"
+      [disabled]="!selectedDept()"
+      class="w-full px-3 py-2 shadow-sm rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-900 dark:text-surface-0 disabled:opacity-50"
+    >
+      <option value="">Seleccionar</option>
+      @for (p of provinces(); track p.codigo) {
+        <option [value]="p.codigo">{{ p.nombre }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- Distrito -->
+  <div class="flex flex-col gap-2">
+    <label class="text-surface-900 dark:text-surface-0 font-medium leading-normal"
+      >Distrito <span class="text-red-500">*</span></label
+    >
+    <select
+      [value]="selectedDist()"
+      (change)="onDistChange($any($event.target).value)"
+      [disabled]="!selectedProv()"
+      class="w-full px-3 py-2 shadow-sm rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-900 dark:text-surface-0 disabled:opacity-50"
+    >
+      <option value="">Seleccionar</option>
+      @for (di of districts(); track di.codigo) {
+        <option [value]="di.codigo">{{ di.nombre }}</option>
+      }
+    </select>
+  </div>
+</div>

@@ -49,3 +49,15 @@ export interface RegisterResponse {
   activeCompany: null;
   sucursalId: null;
 }
+
+export interface SessionResponse{
+  user: User;
+  activeCompany: ActiveCompany | null;
+}
+
+
+export interface ActiveCompany {
+  id: string;
+  descripcion: string;
+  ruc: string;
+}

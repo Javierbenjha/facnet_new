@@ -1,0 +1,120 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+  <div
+    class="flex flex-col gap-6 rounded-2xl border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 p-6 sm:p-8 shadow-sm"
+  >
+    <!-- Header -->
+    <div class="flex items-start gap-3">
+      <span class="mt-1 h-9 w-1.5 rounded-full bg-primary"></span>
+      <div class="flex flex-col">
+        <h2 class="text-surface-900 dark:text-surface-0 text-lg font-semibold leading-tight">
+          Información de la Sucursal
+        </h2>
+        <p class="text-surface-500 dark:text-surface-300 text-sm">
+          Agrega la información de tu primera sucursal
+        </p>
+      </div>
+    </div>
+
+    <!-- Nombre de Sucursal -->
+    <div class="flex flex-col gap-2">
+      <label for="descripcion" class="text-surface-900 dark:text-surface-0 font-medium leading-normal"
+        >Nombre de Sucursal <span class="text-red-500">*</span></label
+      >
+      <input
+        pInputText
+        id="descripcion"
+        type="text"
+        formControlName="descripcion"
+        placeholder="Ej: Sucursal Principal"
+        class="w-full px-3 py-2 shadow-sm rounded-lg"
+      />
+      @if (form.controls.descripcion.invalid && form.controls.descripcion.touched) {
+        <small class="text-red-500">Este campo es requerido.</small>
+      }
+    </div>
+
+    <!-- Dirección -->
+    <div class="flex flex-col gap-2">
+      <label for="direccion" class="text-surface-900 dark:text-surface-0 font-medium leading-normal"
+        >Dirección <span class="text-red-500">*</span></label
+      >
+      <input
+        pInputText
+        id="direccion"
+        type="text"
+        formControlName="direccion"
+        placeholder="Dirección completa"
+        class="w-full px-3 py-2 shadow-sm rounded-lg"
+      />
+      @if (form.controls.direccion.invalid && form.controls.direccion.touched) {
+        <small class="text-red-500">Este campo es requerido.</small>
+      }
+    </div>
+
+    <!-- Departamento / Provincia / Distrito (reusable widget) -->
+    <app-ubigeo-select (selectionChange)="onUbigeoChange($event)" />
+
+    <!-- Teléfono / Email -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="flex flex-col gap-2">
+        <label for="telefono" class="text-surface-900 dark:text-surface-0 font-medium leading-normal"
+          >Teléfono <span class="text-red-500">*</span></label
+        >
+        <input
+          pInputText
+          id="telefono"
+          type="text"
+          formControlName="telefono"
+          placeholder="987654321"
+          class="w-full px-3 py-2 shadow-sm rounded-lg"
+        />
+        @if (form.controls.telefono.invalid && form.controls.telefono.touched) {
+          <small class="text-red-500">Este campo es requerido.</small>
+        }
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="email" class="text-surface-900 dark:text-surface-0 font-medium leading-normal"
+          >Email <span class="text-red-500">*</span></label
+        >
+        <input
+          pInputText
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="correo@empresa.com"
+          class="w-full px-3 py-2 shadow-sm rounded-lg"
+        />
+        @if (form.controls.email.invalid && form.controls.email.touched) {
+          <small class="text-red-500">Ingresa un email válido.</small>
+        }
+      </div>
+    </div>
+
+    <!-- Aviso: no se puede retroceder -->
+    <div
+      class="flex items-start gap-3 rounded-lg border-l-4 border-amber-400 bg-amber-50 dark:bg-amber-900/20 p-4"
+    >
+      <i class="pi pi-exclamation-triangle text-amber-500 mt-0.5"></i>
+      <p class="text-sm text-surface-700 dark:text-surface-200 leading-normal">
+        Se ha guardado correctamente su empresa.
+        <span class="font-semibold">No podrá retroceder al Registro de Empresa.</span>
+        Si quiere realizar algún cambio, lo podrá hacer dentro del sistema una vez completado el
+        registro.
+      </p>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="flex justify-center">
+    <button
+      pButton
+      type="submit"
+      [disabled]="form.invalid || loading()"
+      [loading]="loading()"
+      class="px-8 py-2.5 rounded-lg"
+    >
+      <span pButtonLabel>Acabar de Registrar</span>
+    </button>
+  </div>
+</form>

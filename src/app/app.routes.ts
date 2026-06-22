@@ -40,6 +40,12 @@ export const routes: Routes = [
         redirectTo: 'sales',
         pathMatch: 'full'
       },
+
+
+     /*  {
+        path: 'company',
+        loadComponent: () => import('./pages/company/company').then(m => m.Company)
+      }, */
       // ─── Dashboard (landing, not a backend menu item) ──────────────────────
       {
         path: 'sales',
