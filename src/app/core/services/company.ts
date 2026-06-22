@@ -14,9 +14,9 @@ export class Company {
   create(body: CompanyRequest): Observable<CompanyResponse> {
     const fd = new FormData();
 
-  Object.entries(body).forEach(([key, value]) => {
-    fd.append(key, value instanceof File ? value : String(value));
-  });
+    Object.entries(body).forEach(([key, value]) => {
+      fd.append(key, value instanceof File ? value : String(value));
+    });
     return this.http
       .post<CompanyResponse>(`${this.apiUrl}`, fd)
       .pipe(tap((res) => this.auth.setSession(res)));

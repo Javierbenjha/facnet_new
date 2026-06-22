@@ -1,12 +1,19 @@
+<div>
+  <p-select
+    [options]="companiesOptions()"
+    [(ngModel)]="selectedCia"
+    optionLabel="label"
+    optionValue="value"
+    placeholder="Seleccionar"
+    (onChange)="onCiaChange($event.value)"
+  />
 
-
- <p-select
-  [options]="companiesOptions()"
-  [(ngModel)]="selectedCia"
-  optionLabel="label"
-  optionValue="value"
-  placeholder="Seleccionar"
-
-/>
-
-
+   <p-select
+    [options]="branchesOptions()"
+    [(ngModel)]="selectedBranch"
+    optionLabel="label"
+    optionValue="value"
+    placeholder="Seleccionar"
+  
+  />
+</div>

@@ -12,12 +12,13 @@ import { Auth } from '../../core/services/auth';
 import { Menu } from '../../core/services/menu';
 import { Modulo } from '../../core/models/menu.model';
 import { MenuModule } from 'primeng/menu';
+import { CompanySelect } from "../../shared/company-select/company-select";
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.html',
   styleUrl: './header.scss',
-  imports: [FormsModule, Button, Select, InputText, IconField, InputIcon, MenuModule],
+  imports: [FormsModule, Button, Select, InputText, IconField, InputIcon, MenuModule, CompanySelect],
 })
 export class Header {
   private readonly confirmationService = inject(ConfirmationService);

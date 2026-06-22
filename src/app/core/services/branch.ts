@@ -11,4 +11,8 @@ export class Branch {
   create(body: SucursalRequest, ciaId: string): Observable<Sucursal> {
     return this.http.post<Sucursal>(`${environment.apiUrl}/cia/${ciaId}/sucursales`, body);
   }
+
+  getBranches(): Observable<Sucursal[]> {
+    return this.http.get<Sucursal[]>(`${environment.apiUrl}/cia/my-sucursaless`);
+  }
 }

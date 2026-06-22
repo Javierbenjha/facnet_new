@@ -3,6 +3,10 @@ import { FormsModule } from '@angular/forms';
 import { Select } from 'primeng/select';
 import { Company } from '../../core/services/company';
 import { Cia } from '../../core/models/company.model';
+import { Auth } from '../../core/services/auth';
+import { Branch } from '../../core/services/branch';
+import { Sucursal } from '../../core/models/branch.model';
+import { switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-company-select',
@@ -12,16 +16,28 @@ import { Cia } from '../../core/models/company.model';
 })
 export class CompanySelect {
   private readonly company = inject(Company);
+  private readonly branch = inject(Branch);
+  private readonly auth = inject(Auth);
 
   readonly companies = signal<Cia[]>([]);
-  selectedCia = '';  // ngModel two-way no funciona bien con signal()
+  selectedCia = '';
+
+  readonly branches = signal<Sucursal[]>([]);
+  selectedBranch = '';
 
   // Mapeamos las cias al formato que espera p-select
   readonly companiesOptions = computed(() =>
     this.companies().map((c) => ({
       label: c.descripcion,
       value: c.id,
-    }))
+    })),
+  );
+
+  readonly branchesOptions = computed(() =>
+    this.branches().map((c) => ({
+      label: c.descripcion,
+      value: c.id,
+    })),
   );
 
   ngOnInit() {
@@ -29,6 +45,9 @@ export class CompanySelect {
   }
 
   onCiaChange(code: string) {
-    console.log('Cia seleccionada:', code);
-  }
+  this.auth.switchCompany({ ciaId: code, sucursalId: '' }).pipe(
+    switchMap(() => this.auth.me()),
+    switchMap(() => this.branch.getBranches()),
+  ).subscribe((branches) => this.branches.set(branches));
+}
 }
