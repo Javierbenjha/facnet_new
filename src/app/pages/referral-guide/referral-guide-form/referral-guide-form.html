@@ -1,0 +1,307 @@
+<app-modal [visible]="visible()" [title]="modalTitle()" size="lg" (closed)="close()">
+
+  <div class="flex flex-col gap-5">
+
+    <!-- ══ 1. MOTIVO ══════════════════════════════════════════════════════════ -->
+    <div class="flex flex-col gap-3">
+      <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider border-b border-border pb-1.5">
+        ¿Qué tipo de traslado es?
+      </h4>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Serie</label>
+          <input pInputText value="T001" [disabled]="true"
+            class="!text-sm !py-1.5 !bg-stone-50 dark:!bg-stone-800 !text-stone-400 font-mono" />
+        </div>
+        <div class="col-span-2 flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">
+            Motivo de Traslado <span class="text-red-400 normal-case">*</span>
+          </label>
+          <p-select
+            [options]="motivos"
+            [ngModel]="motivo()"
+            (ngModelChange)="motivo.set($event)"
+            placeholder="Seleccioná..."
+            appendTo="body"
+            size="small"
+            styleClass="w-full" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">N° Orden Compra</label>
+          <input pInputText [ngModel]="ordenCompra()" (ngModelChange)="ordenCompra.set($event)"
+            placeholder="Opcional" class="!text-sm !py-1.5" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 2. DOCUMENTO DE REFERENCIA (solo VENTA) ════════════════════════════ -->
+    @if (requiereDocRef()) {
+      <div class="flex flex-col gap-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-lg p-3.5">
+        <h4 class="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+          <i class="pi pi-link text-xs"></i> Documento de Referencia
+        </h4>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">
+            Buscar factura o boleta
+            <span class="normal-case font-normal text-stone-400 ml-1">— auto-completa cliente y productos</span>
+          </label>
+          <p-select
+            [options]="ventaOpts"
+            optionLabel="label"
+            optionValue="value"
+            [ngModel]="selectedVenta()"
+            (ngModelChange)="selectVenta($event)"
+            placeholder="Ej: F001-000042 · DISTRIBUIDORA NORTE..."
+            [filter]="true"
+            appendTo="body"
+            size="small"
+            styleClass="w-full" />
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Tipo</label>
+            <p-select [options]="tiposDocRef" [ngModel]="docRefTipo()" (ngModelChange)="docRefTipo.set($event)"
+              appendTo="body" size="small" styleClass="w-full" />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Serie</label>
+            <input pInputText [ngModel]="docRefSerie()" (ngModelChange)="docRefSerie.set($event)"
+              placeholder="F001" maxlength="5" class="!text-sm !py-1.5 uppercase font-mono" />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Correlativo</label>
+            <input pInputText [ngModel]="docRefCorrelativo()" (ngModelChange)="docRefCorrelativo.set($event)"
+              placeholder="00000001" maxlength="8" class="!text-sm !py-1.5 font-mono" />
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ══ 3. DESTINATARIO ════════════════════════════════════════════════════ -->
+    <div class="flex flex-col gap-3">
+      <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider border-b border-border pb-1.5">
+        Destinatario
+      </h4>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">
+          Buscar cliente registrado
+          <span class="normal-case font-normal text-stone-400 ml-1">— auto-completa nombre y RUC</span>
+        </label>
+        <p-select
+          [options]="clienteOpts"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="selectedCliente()"
+          (ngModelChange)="selectCliente($event)"
+          placeholder="Buscar por nombre o documento..."
+          [filter]="true"
+          appendTo="body"
+          size="small"
+          styleClass="w-full" />
+      </div>
+
+      <div class="grid grid-cols-3 gap-3">
+        <div class="col-span-2 flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">
+            Nombre / Razón Social <span class="text-red-400 normal-case">*</span>
+          </label>
+          <input pInputText [ngModel]="cliente()" (ngModelChange)="cliente.set($event)"
+            placeholder="O escribí directo si no está registrado" class="!text-sm !py-1.5" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">RUC / DNI</label>
+          <input pInputText [ngModel]="rucCliente()" (ngModelChange)="rucCliente.set($event)"
+            placeholder="Opcional" class="!text-sm !py-1.5 font-mono" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 4. RUTA ════════════════════════════════════════════════════════════ -->
+    <div class="flex flex-col gap-3">
+      <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider border-b border-border pb-1.5">
+        Ruta de Traslado
+      </h4>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Punto de Partida</label>
+          <input pInputText [ngModel]="partidaDireccion()" (ngModelChange)="partidaDireccion.set($event)"
+            placeholder="Dirección de origen" class="!text-sm !py-1.5" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">
+            Punto de Llegada <span class="text-red-400 normal-case">*</span>
+          </label>
+          @if (clienteAddresses().length > 0) {
+            <p-select
+              [options]="clienteAddresses()"
+              optionLabel="descripcion"
+              optionValue="descripcion"
+              [ngModel]="destinoDireccion()"
+              (ngModelChange)="destinoDireccion.set($event)"
+              placeholder="Elegí dirección del cliente..."
+              appendTo="body"
+              size="small"
+              styleClass="w-full" />
+          } @else {
+            <input pInputText [ngModel]="destinoDireccion()" (ngModelChange)="destinoDireccion.set($event)"
+              placeholder="Dirección de destino" class="!text-sm !py-1.5" />
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 5. FECHAS ══════════════════════════════════════════════════════════ -->
+    <div class="flex flex-col gap-3">
+      <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider border-b border-border pb-1.5">
+        Fechas
+      </h4>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Fecha Emisión</label>
+          <p-datepicker [ngModel]="fecha()" (ngModelChange)="fecha.set($event)"
+            dateFormat="dd/mm/yy" appendTo="body" size="small"
+            styleClass="w-full" inputStyleClass="!text-sm" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">
+            Fecha Traslado <span class="text-red-400 normal-case">*</span>
+          </label>
+          <p-datepicker [ngModel]="fechaTraslado()" (ngModelChange)="fechaTraslado.set($event)"
+            dateFormat="dd/mm/yy" appendTo="body" size="small"
+            styleClass="w-full" inputStyleClass="!text-sm" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 6. TRANSPORTE ══════════════════════════════════════════════════════ -->
+    <div class="flex flex-col gap-3">
+      <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider border-b border-border pb-1.5">
+        Transporte
+      </h4>
+
+      <p-selectbutton
+        [options]="opcionesModalidad"
+        [ngModel]="modalidad()"
+        (ngModelChange)="setModalidad($event)"
+        optionLabel="label"
+        optionValue="value"
+        size="small"
+        styleClass="w-full" />
+
+      <div class="grid grid-cols-2 gap-3">
+        @if (modalidad() === 'PUBLICO') {
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Empresa Transportista</label>
+            <input pInputText [ngModel]="empresaTransporte()" (ngModelChange)="empresaTransporte.set($event)"
+              placeholder="Razón social" class="!text-sm !py-1.5" />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">RUC Transportista</label>
+            <input pInputText [ngModel]="rucTransporte()" (ngModelChange)="rucTransporte.set($event)"
+              placeholder="20..." maxlength="11" class="!text-sm !py-1.5 font-mono" />
+          </div>
+        } @else {
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Conductor</label>
+            <input pInputText [ngModel]="conductor()" (ngModelChange)="conductor.set($event)"
+              placeholder="Nombre completo" class="!text-sm !py-1.5" />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">DNI Conductor</label>
+            <input pInputText [ngModel]="dniConductor()" (ngModelChange)="dniConductor.set($event)"
+              placeholder="00000000" maxlength="8" class="!text-sm !py-1.5 font-mono" />
+          </div>
+        }
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Placa</label>
+          <input pInputText [ngModel]="placa()" (ngModelChange)="placa.set($event)"
+            placeholder="ABC-123" class="!text-sm !py-1.5 uppercase font-mono" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Peso Bruto Total (kg)</label>
+          <p-inputnumber [ngModel]="pesoTotal()" (ngModelChange)="pesoTotal.set($event ?? 0)"
+            [minFractionDigits]="2" [maxFractionDigits]="2" [min]="0" mode="decimal"
+            [placeholder]="'Auto: ' + pesoCalculado().toFixed(2) + ' kg'"
+            size="small" styleClass="w-full" inputStyleClass="!text-sm" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 7. PRODUCTOS ═══════════════════════════════════════════════════════ -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <h4 class="text-xs font-bold text-stone-400 uppercase tracking-wider">Productos</h4>
+        <p-button label="Agregar producto" icon="pi pi-plus" [text]="true" severity="secondary" size="small"
+          (onClick)="addRow()" />
+      </div>
+      <div class="border border-border rounded-lg overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-stone-50 dark:bg-stone-800 border-b border-border">
+            <tr>
+              <th class="px-3 py-2 text-left text-xs font-semibold text-stone-400 uppercase tracking-wide w-28">Código</th>
+              <th class="px-3 py-2 text-left text-xs font-semibold text-stone-400 uppercase tracking-wide">Descripción</th>
+              <th class="px-3 py-2 text-center text-xs font-semibold text-stone-400 uppercase tracking-wide w-24">Cant.</th>
+              <th class="px-3 py-2 text-center text-xs font-semibold text-stone-400 uppercase tracking-wide w-24">Peso (kg)</th>
+              <th class="w-10"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of detalles(); track row._id) {
+              <tr class="border-b border-border/50 last:border-0">
+                <td class="px-2 py-1.5">
+                  <input pInputText [ngModel]="row.codigo"
+                    (ngModelChange)="updateRow(row._id, 'codigo', $event)"
+                    placeholder="PROD-001" class="!text-xs !h-8 w-full font-mono" />
+                </td>
+                <td class="px-2 py-1.5">
+                  <input pInputText [ngModel]="row.descripcion"
+                    (ngModelChange)="updateRow(row._id, 'descripcion', $event)"
+                    placeholder="Nombre del producto" class="!text-xs !h-8 w-full" />
+                </td>
+                <td class="px-2 py-1.5">
+                  <p-inputnumber [ngModel]="row.cantidad"
+                    (ngModelChange)="updateRow(row._id, 'cantidad', $event ?? 1)"
+                    [min]="1" mode="decimal" [minFractionDigits]="0"
+                    inputStyleClass="!text-xs !h-8 text-center" styleClass="w-full" />
+                </td>
+                <td class="px-2 py-1.5">
+                  <p-inputnumber [ngModel]="row.peso"
+                    (ngModelChange)="updateRow(row._id, 'peso', $event ?? 0)"
+                    [min]="0" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="4"
+                    inputStyleClass="!text-xs !h-8 text-center" styleClass="w-full" />
+                </td>
+                <td class="px-1 py-1.5 text-center">
+                  @if (detalles().length > 1) {
+                    <p-button icon="pi pi-times" [text]="true" severity="danger" size="small"
+                      (onClick)="removeRow(row._id)" />
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+          <tfoot class="bg-stone-50 dark:bg-stone-800 border-t border-border">
+            <tr>
+              <td colspan="3" class="px-3 py-2 text-right text-xs font-semibold text-stone-500">Peso total calculado:</td>
+              <td class="px-3 py-2 text-center text-xs font-semibold text-stone-700 dark:text-stone-200 tabular-nums">
+                {{ pesoCalculado().toFixed(2) }} kg
+              </td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Footer ── -->
+  <div modal-footer class="flex justify-end gap-2">
+    <p-button label="Cancelar" severity="secondary" [outlined]="true" size="small" (onClick)="close()" />
+    <p-button label="Guardar Guía" icon="pi pi-save" size="small"
+      [disabled]="!esValido()" (onClick)="registrar()" />
+  </div>
+
+</app-modal>

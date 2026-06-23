@@ -1,4 +1,205 @@
-﻿<div class="p-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm">
-  <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Reports</h2>
-  <p class="text-gray-500 dark:text-gray-400 mt-1">View of the Reports module.</p>
+<div class="p-6 flex flex-col gap-5">
+
+  <!-- ── Page Header ── -->
+  <app-page-header
+    title="Reportes"
+    subtitle="Análisis de ventas, compras y utilidad">
+    <p-button label="Exportar Excel" icon="pi pi-file-excel" severity="success" [outlined]="true" size="small" />
+    <p-button label="Exportar PDF"   icon="pi pi-file-pdf"   severity="danger"  [outlined]="true" size="small" />
+  </app-page-header>
+
+  <!-- ── KPI Cards ── -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+    <app-kpi-card
+      label="Total Ventas"
+      [value]="fmtNum(totalVentas)"
+      icon="pi-arrow-circle-down"
+      variant="success" />
+    <app-kpi-card
+      label="Total Compras"
+      [value]="fmtNum(totalCompras)"
+      icon="pi-shopping-cart"
+      variant="warning" />
+    <app-kpi-card
+      label="Total Costos"
+      [value]="fmtNum(totalCostos)"
+      icon="pi-arrow-circle-up"
+      variant="danger" />
+    <app-kpi-card
+      label="Utilidad Total"
+      [value]="fmtNum(totalUtilidad)"
+      icon="pi-chart-bar"
+      [variant]="totalUtilidad > 0 ? 'success' : 'danger'" />
+  </div>
+
+  <!-- ── Filtros ── -->
+  <div class="bg-surface-card rounded-xl border border-border p-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Fecha Inicio</label>
+        <p-datepicker
+          [ngModel]="fechaInicio()"
+          (ngModelChange)="fechaInicio.set($event)"
+          dateFormat="dd/mm/yy"
+          appendTo="body"
+          styleClass="w-full"
+          inputStyleClass="!text-sm" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Fecha Fin</label>
+        <p-datepicker
+          [ngModel]="fechaFin()"
+          (ngModelChange)="fechaFin.set($event)"
+          dateFormat="dd/mm/yy"
+          appendTo="body"
+          styleClass="w-full"
+          inputStyleClass="!text-sm" />
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Tipo de Gráfico</label>
+        <p-select
+          [options]="tiposGrafico"
+          [ngModel]="tipoGrafico()"
+          (ngModelChange)="tipoGrafico.set($event)"
+          optionLabel="label"
+          optionValue="value"
+          appendTo="body"
+          styleClass="w-full" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Gráfico Resumen Mensual ── -->
+  <div class="bg-surface-card rounded-xl border border-border p-5">
+    <h3 class="text-base font-semibold text-stone-800 dark:text-stone-100 mb-4">
+      Resumen Mensual — Ventas, Costos, Utilidad y Compras
+    </h3>
+    <div class="h-80">
+      <p-chart
+        [type]="resumenChartType()"
+        [data]="resumenChartData()"
+        [options]="resumenChartOpts()"
+        height="320" />
+    </div>
+  </div>
+
+  <!-- ── Donut + Top Productos + Top Clientes ── -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+    <!-- Donut: Categorías -->
+    <div class="bg-surface-card rounded-xl border border-border p-5">
+      <h3 class="text-sm font-semibold text-stone-700 dark:text-stone-200 mb-4">Ventas por Categoría</h3>
+      <div class="h-60">
+        <p-chart type="doughnut" [data]="donutData" [options]="donutOpts" height="240" />
+      </div>
+    </div>
+
+    <!-- Top 10 Productos -->
+    <div class="bg-surface-card rounded-xl border border-border p-5 flex flex-col gap-3">
+      <h3 class="text-sm font-semibold text-stone-700 dark:text-stone-200">Top 10 Productos Más Vendidos</h3>
+      <div class="overflow-auto max-h-64 text-sm">
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-border text-left text-xs font-semibold text-stone-400 uppercase tracking-wide">
+              <th class="pb-2 w-8">#</th>
+              <th class="pb-2">Producto</th>
+              <th class="pb-2 text-right">Cant.</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of topProductos; track p.pos) {
+              <tr class="border-b border-border/50 hover:bg-surface-hover transition-colors">
+                <td class="py-2 text-stone-400 text-xs">{{ p.pos }}</td>
+                <td class="py-2 text-stone-700 dark:text-stone-200 truncate max-w-0 w-full">{{ p.producto }}</td>
+                <td class="py-2 text-right font-medium text-stone-700 dark:text-stone-200">{{ p.cantidad }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Top 10 Clientes -->
+    <div class="bg-surface-card rounded-xl border border-border p-5 flex flex-col gap-3">
+      <h3 class="text-sm font-semibold text-stone-700 dark:text-stone-200">Top 10 Clientes</h3>
+      <div class="overflow-auto max-h-64 text-sm">
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-border text-left text-xs font-semibold text-stone-400 uppercase tracking-wide">
+              <th class="pb-2">Cliente</th>
+              <th class="pb-2 text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of topClientes; track c.nombre) {
+              <tr class="border-b border-border/50 hover:bg-surface-hover transition-colors">
+                <td class="py-2 text-stone-700 dark:text-stone-200 truncate max-w-0 w-full">{{ c.nombre }}</td>
+                <td class="py-2 text-right font-medium tabular-nums text-stone-700 dark:text-stone-200">
+                  {{ fmtNum(c.total) }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Historial de Ventas ── -->
+  <div class="bg-surface-card rounded-xl border border-border p-5 flex flex-col gap-4">
+    <div class="flex items-center justify-between gap-3 flex-wrap">
+      <h3 class="text-base font-semibold text-stone-800 dark:text-stone-100">Historial de Ventas</h3>
+      <input pInputText
+        [ngModel]="busquedaVenta()"
+        (ngModelChange)="busquedaVenta.set($event)"
+        placeholder="Buscar producto o cliente..."
+        class="!text-sm !h-9 w-64" />
+    </div>
+    <app-data-table
+      [columns]="columnsVentas()"
+      [data]="ventasFiltradas()"
+      trackByKey="id"
+      emptyMessage="No hay ventas para mostrar"
+      [paginator]="true"
+      [rows]="8" />
+  </div>
+
+  <!-- ── Historial de Compras ── -->
+  <div class="bg-surface-card rounded-xl border border-border p-5 flex flex-col gap-4">
+    <div class="flex items-center justify-between gap-3 flex-wrap">
+      <h3 class="text-base font-semibold text-stone-800 dark:text-stone-100">Historial de Compras</h3>
+      <input pInputText
+        [ngModel]="busquedaCompra()"
+        (ngModelChange)="busquedaCompra.set($event)"
+        placeholder="Buscar producto o proveedor..."
+        class="!text-sm !h-9 w-64" />
+    </div>
+    <app-data-table
+      [columns]="columnsCompras()"
+      [data]="comprasFiltradas()"
+      trackByKey="id"
+      emptyMessage="No hay compras para mostrar"
+      [paginator]="true"
+      [rows]="8" />
+  </div>
+
 </div>
+
+<!-- ── Cell Templates: Ventas ── -->
+<ng-template #tplFechaVenta   let-row>{{ fmtDate(row.fecha) }}</ng-template>
+<ng-template #tplImporteVenta let-row>{{ fmtNum(row.precio_unitario) }}</ng-template>
+<ng-template #tplTotalVenta   let-row>
+  <span class="font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
+    {{ fmtNum(row.total) }}
+  </span>
+</ng-template>
+
+<!-- ── Cell Templates: Compras ── -->
+<ng-template #tplFechaCompra   let-row>{{ fmtDate(row.fecha) }}</ng-template>
+<ng-template #tplImporteCompra let-row>{{ fmtNum(row.precio_unitario) }}</ng-template>
+<ng-template #tplTotalCompra   let-row>
+  <span class="font-semibold text-amber-600 dark:text-amber-400 tabular-nums">
+    {{ fmtNum(row.total) }}
+  </span>
+</ng-template>

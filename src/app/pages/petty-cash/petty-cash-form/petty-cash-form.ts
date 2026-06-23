@@ -5,6 +5,7 @@ import { InputText } from 'primeng/inputtext';
 import { InputNumber } from 'primeng/inputnumber';
 import { Textarea } from 'primeng/textarea';
 import { Select } from 'primeng/select';
+import { SelectButton } from 'primeng/selectbutton';
 import { DatePickerModule } from 'primeng/datepicker';
 import { AppModal } from '../../../shared/app-modal/app-modal';
 import {
@@ -20,7 +21,7 @@ import {
     FormsModule,
     AppModal, Button,
     InputText, InputNumber, Textarea,
-    Select, DatePickerModule,
+    Select, SelectButton, DatePickerModule,
   ],
 })
 export class PettyCashForm {
@@ -30,6 +31,10 @@ export class PettyCashForm {
 
   // ── Opciones ───────────────────────────────────────────────────────────────
   readonly monedas = MONEDAS;
+  readonly opcionesTipo = [
+    { label: 'Egreso',  value: 'EGRESO'  },
+    { label: 'Ingreso', value: 'INGRESO' },
+  ];
 
   // ── Form state ─────────────────────────────────────────────────────────────
   readonly tipo       = signal<TipoMovimiento>('EGRESO');

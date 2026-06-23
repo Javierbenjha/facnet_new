@@ -1,0 +1,55 @@
+<app-data-table
+  [columns]="columns()"
+  [data]="guias()"
+  trackByKey="id"
+  emptyMessage="No hay guías de remisión"
+  [paginator]="true"
+  [rows]="10" />
+
+<!-- ── Cell templates ── -->
+<ng-template #tplComprobante let-row>
+  <div class="font-mono font-medium text-stone-800 dark:text-stone-100 text-sm">
+    {{ row.serie }}-{{ row.correlativo }}
+  </div>
+</ng-template>
+
+<ng-template #tplFecha let-row>
+  <div class="text-sm">{{ fmtDate(row.fecha) }}</div>
+  <div class="text-xs text-stone-400">Traslado: {{ fmtDate(row.fecha_traslado) }}</div>
+</ng-template>
+
+<ng-template #tplMotivo let-row>
+  <p-tag [value]="row.motivo" severity="secondary" styleClass="!text-xs" />
+</ng-template>
+
+<ng-template #tplTransporte let-row>
+  @if (row.modalidad === 'PUBLICO') {
+    <div class="text-sm text-stone-700 dark:text-stone-200">{{ row.empresa_transporte }}</div>
+    <div class="text-xs text-stone-400">RUC: {{ row.ruc_transporte }}</div>
+  } @else {
+    <div class="text-sm text-stone-700 dark:text-stone-200">{{ row.conductor }}</div>
+    <div class="text-xs text-stone-400">DNI: {{ row.dni_conductor }}</div>
+  }
+</ng-template>
+
+<ng-template #tplEstado let-row>
+  <p-tag [value]="row.estado" [severity]="estadoSev(row.estado)" styleClass="!text-xs" />
+</ng-template>
+
+<ng-template #tplSunat let-row>
+  <p-tag [value]="sunatLabel(row.estado_sunat)" [severity]="sunatSev(row.estado_sunat)" styleClass="!text-xs" />
+</ng-template>
+
+<ng-template #tplAcciones let-row>
+  <div class="flex items-center gap-1 justify-end">
+    <p-button
+      icon="pi pi-eye" [text]="true" severity="secondary" size="small"
+      pTooltip="Ver detalle" tooltipPosition="left"
+      (onClick)="viewDetail.emit(row)" />
+    <p-button
+      icon="pi pi-ban" [text]="true" severity="danger" size="small"
+      pTooltip="Anular" tooltipPosition="left"
+      [disabled]="row.estado === 'ANULADO'"
+      (onClick)="anular.emit(row)" />
+  </div>
+</ng-template>
