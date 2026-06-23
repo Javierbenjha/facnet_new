@@ -1,10 +1,10 @@
 <app-modal [visible]="visible()" [title]="modalTitle()" size="md" (closed)="close()">
 
-  <div class="flex flex-col gap-4">
+  <div class="flex flex-col gap-3 pt-1">
 
     <!-- Toggle EGRESO / INGRESO -->
-    <div class="flex flex-col gap-1.5">
-      <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Tipo de Movimiento</label>
+    <div class="flex flex-col gap-1">
+      <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Tipo de Movimiento</label>
       <p-selectbutton
         [options]="opcionesTipo"
         [ngModel]="tipo()"
@@ -17,15 +17,15 @@
     <!-- Serie (auto) + Motivo -->
     <div class="grid grid-cols-3 gap-3">
 
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Serie</label>
-        <input pInputText [ngModel]="serie()" [disabled]="true"
-          class="!text-sm p-inputtext-sm !bg-stone-50 dark:!bg-stone-800 !text-stone-400 font-mono" />
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Serie</label>
+        <input pInputText pSize="small" [ngModel]="serie()" [disabled]="true"
+          class="!bg-stone-50 dark:!bg-stone-800 !text-stone-400 font-mono" />
       </div>
 
-      <div class="col-span-2 flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">
-          Motivo <span class="text-red-400 normal-case">*</span>
+      <div class="col-span-2 flex flex-col gap-1">
+        <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+          Motivo <span class="text-red-400">*</span>
         </label>
         <p-select
           [options]="motivosFiltrados()"
@@ -35,14 +35,21 @@
           placeholder="Seleccioná..."
           [filter]="true"
           filterBy="descripcion"
+          filterMatchMode="contains"
           filterPlaceholder="Buscar motivo..."
+          (onFilter)="onFilterMotivo($event)"
           appendTo="body"
           size="small"
           styleClass="w-full">
           <ng-template #footer>
             <div class="p-2 border-t border-border">
-              <p-button label="Agregar motivo" icon="pi pi-plus" [text]="true" severity="secondary"
-                size="small" fluid (onClick)="agregarMotivo()" />
+              <p-button
+                [label]="labelAgregar()"
+                icon="pi pi-plus" [text]="true" severity="secondary"
+                size="small" fluid
+                [disabled]="!filterMotivo().trim()"
+                [loading]="guardandoMotivo()"
+                (onClick)="agregarMotivo()" />
             </div>
           </ng-template>
         </p-select>
@@ -53,28 +60,27 @@
     <!-- Fecha / Entregado a -->
     <div class="grid grid-cols-2 gap-3">
 
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">
-          Fecha <span class="text-red-400 normal-case">*</span>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+          Fecha <span class="text-red-400">*</span>
         </label>
         <p-datepicker
           [ngModel]="fecha()"
           (ngModelChange)="fecha.set($event)"
           dateFormat="dd/mm/yy"
           appendTo="body"
-          styleClass="w-full"
-          inputStyleClass="!text-sm p-inputtext-sm" />
+          size="small"
+          styleClass="w-full" />
       </div>
 
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">
-          Entregado a <span class="text-red-400 normal-case">*</span>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+          Entregado a <span class="text-red-400">*</span>
         </label>
-        <input pInputText
+        <input pInputText pSize="small"
           [ngModel]="entregadoA()"
           (ngModelChange)="entregadoA.set($event)"
-          placeholder="Nombre de la persona"
-          class="!text-sm p-inputtext-sm" />
+          placeholder="Nombre de la persona" />
       </div>
 
     </div>
@@ -82,8 +88,8 @@
     <!-- Moneda / Importe -->
     <div class="grid grid-cols-2 gap-3">
 
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Moneda</label>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Moneda</label>
         <p-select
           [options]="monedas"
           [ngModel]="moneda()"
@@ -94,9 +100,9 @@
           styleClass="w-full" />
       </div>
 
-      <div class="flex flex-col gap-1.5">
-        <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">
-          Importe <span class="text-red-400 normal-case">*</span>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+          Importe <span class="text-red-400">*</span>
         </label>
         <p-inputnumber
           [ngModel]="importe()"
@@ -106,21 +112,21 @@
           [min]="0"
           mode="decimal"
           [prefix]="moneda().sigla + ' '"
-          styleClass="w-full"
-          inputStyleClass="!text-sm p-inputtext-sm" />
+          size="small"
+          styleClass="w-full" />
       </div>
 
     </div>
 
     <!-- Detalle -->
-    <div class="flex flex-col gap-1.5">
-      <label class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Detalle del documento</label>
+    <div class="flex flex-col gap-1">
+      <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Detalle del documento</label>
       <textarea pTextarea
         [ngModel]="detalle()"
         (ngModelChange)="detalle.set($event)"
         placeholder="Describa detalladamente el concepto del gasto..."
         rows="3"
-        class="!text-sm resize-none w-full">
+        class="resize-none w-full">
       </textarea>
     </div>
 

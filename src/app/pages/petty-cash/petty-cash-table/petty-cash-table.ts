@@ -9,7 +9,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { Tag } from 'primeng/tag';
 import { Menu } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
-import { EstadoMovimiento, MovimientoCajaChica, TipoMovimiento, TIPO_OPCIONES } from '../petty-cash.models';
+import { EstadoMovimiento, MovimientoCajaChica, TipoMovimiento, TIPO_OPCIONES } from '../../../core/models/petty-cash.model';
 import { DataTable, TableColumn } from '../../../shared/data-table/data-table';
 
 @Component({

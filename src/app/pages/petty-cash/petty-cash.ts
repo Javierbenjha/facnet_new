@@ -5,7 +5,7 @@ import { PageHeader } from '../../shared/page-header/page-header';
 import { KpiCard } from '../../shared/kpi-card/kpi-card';
 import { PettyCashTable } from './petty-cash-table/petty-cash-table';
 import { PettyCashForm } from './petty-cash-form/petty-cash-form';
-import { MovimientoCajaChica, MOVIMIENTOS_MOCK, SALDO_INICIAL, TipoMovimiento } from './petty-cash.models';
+import { MovimientoCajaChica, TipoMovimiento } from '../../core/models/petty-cash.model';
 
 @Component({
   selector: 'app-petty-cash',
@@ -15,8 +15,8 @@ import { MovimientoCajaChica, MOVIMIENTOS_MOCK, SALDO_INICIAL, TipoMovimiento } 
   imports: [Button, Tag, PageHeader, KpiCard, PettyCashTable, PettyCashForm],
 })
 export class PettyCash {
-  readonly movimientos = signal<MovimientoCajaChica[]>(MOVIMIENTOS_MOCK);
-  readonly saldoActual = signal(350.00);
+  readonly movimientos = signal<MovimientoCajaChica[]>([]);
+  readonly saldoActual = signal(0);
 
   // ── Form modal state ───────────────────────────────────────────────────────
   readonly editing = signal<'new' | null>(null);
@@ -34,7 +34,7 @@ export class PettyCash {
       totalMovimientos: this.movimientos().length,
       ingresos,
       egresos,
-      saldo: SALDO_INICIAL + ingresos - egresos,
+      saldo: ingresos - egresos,
     };
   });
 

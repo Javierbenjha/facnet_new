@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
@@ -8,10 +8,9 @@ import { Select } from 'primeng/select';
 import { SelectButton } from 'primeng/selectbutton';
 import { DatePickerModule } from 'primeng/datepicker';
 import { AppModal } from '../../../shared/app-modal/app-modal';
-import {
-  MONEDAS, Moneda, MOTIVOS_MOCK, MotivoCajaChica,
-  TIPOS_DOC_CAJA_CHICA, TipoMovimiento,
-} from '../petty-cash.models';
+import { PettyCashService } from '../../../core/services/petty-cash';
+import { Toaster } from '../../../core/services/toast';
+import { MONEDAS, Moneda, Reason, ReceiptType, TIPO_A_RECIBO, TipoMovimiento } from '../../../core/models/petty-cash.model';
 
 @Component({
   selector: 'app-petty-cash-form',
@@ -25,6 +24,9 @@ import {
   ],
 })
 export class PettyCashForm {
+  private readonly svc     = inject(PettyCashService);
+  private readonly toaster = inject(Toaster);
+
   readonly editing = input<'new' | null>(null);
   readonly closed  = output<void>();
   readonly saved   = output<{ tipo: TipoMovimiento; importe: number; moneda: string }>();
@@ -36,9 +38,18 @@ export class PettyCashForm {
     { label: 'Ingreso', value: 'INGRESO' },
   ];
 
+  // ── Datos del backend ──────────────────────────────────────────────────────
+  readonly receiptTypes    = signal<ReceiptType[]>([]);
+  readonly reasons         = signal<Reason[]>([]);
+  readonly filterMotivo    = signal('');
+  readonly guardandoMotivo = signal(false);
+  readonly labelAgregar    = computed(() =>
+    this.filterMotivo().trim() ? `Agregar "${this.filterMotivo().trim()}"` : 'Agregar motivo'
+  );
+
   // ── Form state ─────────────────────────────────────────────────────────────
   readonly tipo       = signal<TipoMovimiento>('EGRESO');
-  readonly motivo     = signal<MotivoCajaChica | null>(null);
+  readonly motivo     = signal<Reason | null>(null);
   readonly fecha      = signal<Date>(new Date());
   readonly entregadoA = signal('');
   readonly moneda     = signal<Moneda>(MONEDAS[0]);
@@ -52,17 +63,16 @@ export class PettyCashForm {
     this.tipo() === 'INGRESO' ? 'Nuevo Ingreso' : 'Nuevo Egreso'
   );
 
-  // tipoDoc derivado del toggle — usado para la serie y el payload
   readonly tipoDoc = computed(() =>
-    TIPOS_DOC_CAJA_CHICA.find(t => t.tipo === this.tipo()) ?? TIPOS_DOC_CAJA_CHICA[0]
+    this.receiptTypes().find(rt => rt.id === TIPO_A_RECIBO[this.tipo()])
   );
 
-  readonly serie = computed(() => this.tipoDoc().serie);
+  readonly serie = computed(() => this.tipoDoc()?.sigla ?? '...');
 
-  // Motivos filtrados según el tipo seleccionado
-  readonly motivosFiltrados = computed(() =>
-    MOTIVOS_MOCK.filter(m => m.tipo === this.tipo())
-  );
+  readonly motivosFiltrados = computed(() => {
+    const tipoRecibo = TIPO_A_RECIBO[this.tipo()];
+    return this.reasons().filter(r => r.tipo_recibo === tipoRecibo && r.estado === 1);
+  });
 
   readonly esValido = computed(() =>
     this.motivo() !== null &&
@@ -71,6 +81,8 @@ export class PettyCashForm {
   );
 
   constructor() {
+    this.loadData();
+
     effect(() => {
       if (this.editing() === 'new') this.resetForm();
     });
@@ -79,11 +91,31 @@ export class PettyCashForm {
   // ── Methods ────────────────────────────────────────────────────────────────
   setTipo(t: TipoMovimiento) {
     this.tipo.set(t);
-    this.motivo.set(null); // limpiar motivo al cambiar tipo
+    this.motivo.set(null);
+  }
+
+  onFilterMotivo(event: { filter: string }) {
+    this.filterMotivo.set(event.filter ?? '');
   }
 
   agregarMotivo() {
-    // placeholder — abre modal para crear motivo en producción
+    const descripcion = this.filterMotivo().trim();
+    if (!descripcion) return;
+
+    this.guardandoMotivo.set(true);
+    this.svc.createReason({ descripcion, tipo_recibo: TIPO_A_RECIBO[this.tipo()] }).subscribe({
+      next: reason => {
+        this.reasons.update(list => [reason, ...list]);
+        this.motivo.set(reason);
+        this.filterMotivo.set('');
+        this.guardandoMotivo.set(false);
+        this.toaster.success('Motivo creado', `"${reason.descripcion}" agregado correctamente`);
+      },
+      error: () => {
+        this.toaster.error('Error', 'No se pudo crear el motivo. Verificá que no exista uno igual.');
+        this.guardandoMotivo.set(false);
+      },
+    });
   }
 
   registrar() {
@@ -93,6 +125,18 @@ export class PettyCashForm {
   }
 
   close() { this.closed.emit(); }
+
+  private loadData() {
+    this.svc.getReceiptTypes().subscribe({
+      next:  types => this.receiptTypes.set(types),
+      error: ()    => this.toaster.error('Error', 'No se pudieron cargar los tipos de recibo'),
+    });
+
+    this.svc.getReasons().subscribe({
+      next:  reasons => this.reasons.set(reasons),
+      error: ()       => this.toaster.error('Error', 'No se pudieron cargar los motivos'),
+    });
+  }
 
   private resetForm() {
     this.tipo.set('EGRESO');
