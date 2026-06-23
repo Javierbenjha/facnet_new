@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { MainLayout } from './layout/main-layout/main-layout';
 import { authGuard } from './core/guards/auth-guard';
+import { companySetupGuard } from './core/guards/company-setup-guard-guard';
 
 export const routes: Routes = [
   // ─── Auth Pages (Without Sidenav/Header Shell) ─────────────────────────
@@ -26,6 +27,7 @@ export const routes: Routes = [
   },
   {
     path: 'company-setup',
+    canActivate: [companySetupGuard],
     loadComponent: () => import('./pages/auth/company-setup/company-setup').then(m => m.CompanySetup)
   },
 

@@ -7,11 +7,11 @@ export const authGuard: CanActivateFn = (_route, state) => {
   const router = inject(Router);
   const user = auth.currentUser();
 
-
   if (user) {
     if (user.role === 1 && !auth.activeCompany()) {
       return router.createUrlTree(['/company-setup']);
     }
+    return true;
   }
 
   return router.createUrlTree(['/login'], {

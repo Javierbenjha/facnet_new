@@ -18,9 +18,9 @@ export interface User {
 
 export interface LoginResponse {
   user: User;
-  activeCompany: CompanySummary;
+  activeCompany: CompanySummary | null;
   companies: CompanySummary[];
-  sucursalId: string;
+  sucursalId: string | null;
 }
 
 export interface MeResponse {

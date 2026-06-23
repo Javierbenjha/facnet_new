@@ -32,16 +32,20 @@ export class Login {
   onSubmit() {
     if (this.form.invalid) return;
     this.loading.set(true);
-    this.auth.login(this.form.getRawValue())
-    
-    .pipe(finalize(() => this.loading.set(false)))
-    .subscribe({
-      //next: () => this.router.navigate(['./sales']),
-      next: () => {
-        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/sales';
-        this.router.navigateByUrl(returnUrl);
-      },
-      error: (err) => this.toast.error('Error al iniciar sesión', err.error?.message ),
-    });
+    this.auth
+      .login(this.form.getRawValue())
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (res) => {
+          // Si es dueño sin empresa, forzar redirección a setup
+          if (res.user.role === 1 && !res.activeCompany) {
+            this.router.navigate(['/company-setup']);
+          } else {
+            const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/sales';
+            this.router.navigateByUrl(returnUrl);
+          }
+        },
+        error: (err) => this.toast.error('Error al iniciar sesión', err.error?.message),
+      });
   }
 }

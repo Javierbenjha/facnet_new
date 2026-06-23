@@ -88,7 +88,6 @@ export class Auth {
   setSession(res: SessionResponse) {
     this._currentUser.set(res.user);
     this._activeCompany.set(res.activeCompany);
-    this._sucursalId.set(res.sucursalId || "");
     if (res.sucursalId) this._sucursalId.set(res.sucursalId);
     if (res.companies) this._companies.set(res.companies);
     if (res.permissions) this._permissions.set(res.permissions);
