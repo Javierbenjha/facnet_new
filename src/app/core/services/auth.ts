@@ -70,7 +70,7 @@ export class Auth {
     sucursalId,
   }: {
     ciaId: string;
-    sucursalId: string;
+    sucursalId?: string ;
   }): Observable<SessionResponse> {
     return this.http
       .post<SessionResponse>(`${environment.apiUrl}/auth/switch-company`, { ciaId, sucursalId })

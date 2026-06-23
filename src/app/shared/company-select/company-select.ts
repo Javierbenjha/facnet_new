@@ -49,15 +49,17 @@ export class CompanySelect implements OnInit {
   }
 
   onCiaChange(code: string) {
+      console.log('onCiaChange fired →', code);
     this.auth
-      .switchCompany({ ciaId: code, sucursalId: '' })
+      .switchCompany({ ciaId: code })
       .pipe(
         switchMap(() => this.auth.me()),
         switchMap(() => this.branch.getBranches()),
       )
-      .subscribe((branches) => this.branches.set(branches));
+      .subscribe((list) => this.branches.set(list));
   }
-    onBranchChange(sucursalId: string) {
+
+  onBranchChange(sucursalId: string) {
     this.auth
       .switchCompany({ ciaId: this.selectedCia(), sucursalId })
       .pipe(switchMap(() => this.auth.me()))

@@ -18,7 +18,7 @@ import { CompanySelect } from "../../shared/company-select/company-select";
   selector: 'app-header',
   templateUrl: './header.html',
   styleUrl: './header.scss',
-  imports: [FormsModule, Button, Select, InputText, IconField, InputIcon, MenuModule, CompanySelect],
+  imports: [FormsModule, Button, InputText, IconField, InputIcon, MenuModule, CompanySelect],
 })
 export class Header {
   private readonly confirmationService = inject(ConfirmationService);
