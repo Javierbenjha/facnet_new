@@ -53,5 +53,5 @@ export interface SessionResponse {
   activeCompany: CompanySummary | null;
   companies?: CompanySummary[];
   sucursalId?: string | null;
-  permissions?: Record<string, string>;
+  permissions?: Record<string, string>
 }
