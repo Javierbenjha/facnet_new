@@ -25,6 +25,10 @@
   <span class="text-sm text-stone-500">{{ r.entregado }}</span>
 </ng-template>
 
+<ng-template #monedaCellTpl let-r>
+  <span class="text-xs text-stone-500 dark:text-stone-400">{{ r.monedaDescripcion ?? sigla(r) }}</span>
+</ng-template>
+
 <ng-template #importeCellTpl let-r>
   <span class="text-sm font-semibold tabular-nums whitespace-nowrap"
     [class.text-emerald-600]="r.tip_doc === 77"

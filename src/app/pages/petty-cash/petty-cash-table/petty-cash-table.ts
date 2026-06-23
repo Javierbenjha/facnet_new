@@ -39,6 +39,7 @@ export class PettyCashTable {
   private readonly numeroCellTpl    = viewChild.required<TemplateRef<unknown>>('numeroCellTpl');
   private readonly motivoCellTpl    = viewChild.required<TemplateRef<unknown>>('motivoCellTpl');
   private readonly entregadoCellTpl = viewChild.required<TemplateRef<unknown>>('entregadoCellTpl');
+  private readonly monedaCellTpl    = viewChild.required<TemplateRef<unknown>>('monedaCellTpl');
   private readonly importeCellTpl   = viewChild.required<TemplateRef<unknown>>('importeCellTpl');
   private readonly estadoCellTpl    = viewChild.required<TemplateRef<unknown>>('estadoCellTpl');
   private readonly actionCellTpl    = viewChild.required<TemplateRef<unknown>>('actionCellTpl');
@@ -55,7 +56,7 @@ export class PettyCashTable {
         if (r.tip_doc !== tipDoc) return false;
       }
       if (from || to) {
-        const d = new Date(r.fecha + 'T00:00:00');
+        const d = new Date(r.fecha);
         if (from && d < from) return false;
         if (to) {
           const toEnd = new Date(to);
@@ -80,6 +81,7 @@ export class PettyCashTable {
     { key: 'numero',             label: 'Número',                               cellTemplate: this.numeroCellTpl() },
     { key: 'motivoDescripcion',  label: 'Motivo',                               cellTemplate: this.motivoCellTpl() },
     { key: 'entregado',          label: 'Entregado a',                          cellTemplate: this.entregadoCellTpl() },
+    { key: 'monedaDescripcion',  label: 'Moneda',   class: 'text-center',       cellTemplate: this.monedaCellTpl() },
     { key: 'importe',            label: 'Importe',  class: 'text-right',        cellTemplate: this.importeCellTpl() },
     { key: 'estadoDescripcion',  label: 'Estado',   class: 'text-center',       cellTemplate: this.estadoCellTpl() },
     { key: '_actions',           label: '',         class: 'w-14 text-center',  cellTemplate: this.actionCellTpl() },
@@ -107,8 +109,7 @@ export class PettyCashTable {
   sigla(r: Receipt): string { return r.tipo_moneda === 1 ? 'S/' : '$'; }
   fmtNum(n: string | number): string { return Number(n).toFixed(2); }
   fmtDate(s: string): string {
-    const d = new Date(s + 'T00:00:00');
-    return d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return new Date(s).toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 
   private firstOfMonth(): Date {
