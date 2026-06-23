@@ -9,6 +9,7 @@ import { SelectButton } from 'primeng/selectbutton';
 import { DatePickerModule } from 'primeng/datepicker';
 import { AppModal } from '../../../shared/app-modal/app-modal';
 import { PettyCashService } from '../../../core/services/petty-cash';
+import { StoresService } from '../../../core/services/stores';
 import { Toaster } from '../../../core/services/toast';
 import { MONEDAS, Moneda, Receipt, Reason, ReceiptType, TIPO_A_RECIBO, TipoMovimiento } from '../../../core/models/petty-cash.model';
 
@@ -25,6 +26,7 @@ import { MONEDAS, Moneda, Receipt, Reason, ReceiptType, TIPO_A_RECIBO, TipoMovim
 })
 export class PettyCashForm {
   private readonly svc     = inject(PettyCashService);
+  private readonly stores  = inject(StoresService);
   private readonly toaster = inject(Toaster);
 
   readonly editing = input<'new' | null>(null);
@@ -68,7 +70,7 @@ export class PettyCashForm {
     this.receiptTypes().find(rt => rt.id === TIPO_A_RECIBO[this.tipo()])
   );
 
-  readonly serie = computed(() => this.tipoDoc()?.sigla ?? '...');
+  readonly serie = signal('...');
 
   readonly motivosFiltrados = computed(() => {
     const tipoRecibo = TIPO_A_RECIBO[this.tipo()];
@@ -93,6 +95,7 @@ export class PettyCashForm {
   setTipo(t: TipoMovimiento) {
     this.tipo.set(t);
     this.motivo.set(null);
+    this.loadSerie(TIPO_A_RECIBO[t]);
   }
 
   onFilterMotivo(event: { filter: string }) {
@@ -150,7 +153,17 @@ export class PettyCashForm {
 
   close() { this.closed.emit(); }
 
+  private loadSerie(tipDoc: 77 | 78) {
+    this.serie.set('...');
+    this.stores.getSerie(tipDoc).subscribe({
+      next:  ({ serie }) => this.serie.set(serie),
+      error: ()          => this.serie.set('—'),
+    });
+  }
+
   private loadData() {
+    this.loadSerie(TIPO_A_RECIBO[this.tipo()]);
+
     this.svc.getReceiptTypes().subscribe({
       next:  types => this.receiptTypes.set(types),
       error: ()    => this.toaster.error('Error', 'No se pudieron cargar los tipos de recibo'),
