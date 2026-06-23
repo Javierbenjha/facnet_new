@@ -33,7 +33,7 @@
 
   <!-- ── Table ── -->
   <app-petty-cash-table
-    [movimientos]="movimientos()"
+    [receipts]="receipts()"
     (viewDetail)="openDetail($event)" />
 
 </div>
@@ -49,12 +49,12 @@
             transition-transform duration-300 ease-in-out overflow-hidden translate-x-full"
   [style.transform]="showDetail() ? 'translateX(0)' : null">
 
-  @if (selectedMovimiento(); as m) {
+  @if (selectedReceipt(); as r) {
 
     <div class="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
       <div>
         <h3 class="text-lg font-semibold text-stone-900 dark:text-stone-100">Detalle del Movimiento</h3>
-        <p class="text-xs text-stone-400 mt-0.5">{{ m.id }} · {{ fmtDate(m.fecha) }}</p>
+        <p class="text-xs text-stone-400 mt-0.5">{{ r.numero }} · {{ fmtDate(r.fecha) }}</p>
       </div>
       <p-button icon="pi pi-times" [text]="true" severity="secondary" size="small" (onClick)="closeDetail()" />
     </div>
@@ -63,11 +63,13 @@
 
       <!-- Tipo + Importe -->
       <div class="flex items-center justify-between">
-        <p-tag [value]="m.tipo" [severity]="tipoSev(m.tipo)" />
+        <p-tag
+          [value]="r.tip_doc === 77 ? 'INGRESO' : 'EGRESO'"
+          [severity]="r.tip_doc === 77 ? 'success' : 'danger'" />
         <p class="text-2xl font-bold tabular-nums"
-          [class.text-emerald-600]="m.tipo === 'INGRESO'"
-          [class.text-red-500]="m.tipo === 'EGRESO'">
-          {{ m.tipo === 'INGRESO' ? '+' : '-' }} {{ m.sigla }} {{ fmtNum(m.importe) }}
+          [class.text-emerald-600]="r.tip_doc === 77"
+          [class.text-red-500]="r.tip_doc === 78">
+          {{ r.tip_doc === 77 ? '+' : '-' }} {{ r.tipo_moneda === 1 ? 'S/' : '$' }} {{ fmtNum(+r.importe) }}
         </p>
       </div>
 
@@ -76,34 +78,37 @@
         <div class="grid grid-cols-2 gap-3 text-sm">
           <div>
             <p class="text-stone-400 text-xs">Fecha</p>
-            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ fmtDate(m.fecha) }}</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ fmtDate(r.fecha) }}</p>
           </div>
           <div>
             <p class="text-stone-400 text-xs">Estado</p>
             <div class="mt-0.5">
-              <p-tag [value]="m.estado" [severity]="estadoSev(m.estado)" styleClass="!text-xs" />
+              <p-tag
+                [value]="r.estadoDescripcion ?? ''"
+                [severity]="r.estado === 1 ? 'success' : 'danger'"
+                styleClass="!text-xs" />
             </div>
           </div>
           <div>
-            <p class="text-stone-400 text-xs">Serie</p>
-            <p class="font-mono font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ m.serie }}</p>
+            <p class="text-stone-400 text-xs">Número</p>
+            <p class="font-mono font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ r.numero }}</p>
           </div>
           <div>
             <p class="text-stone-400 text-xs">Moneda</p>
-            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ m.moneda === 'PEN' ? 'Soles' : 'Dólares' }}</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ r.monedaDescripcion }}</p>
           </div>
           <div class="col-span-2">
             <p class="text-stone-400 text-xs">Motivo</p>
-            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ m.motivo }}</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ r.motivoDescripcion }}</p>
           </div>
           <div class="col-span-2">
             <p class="text-stone-400 text-xs">Entregado a</p>
-            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ m.entregado_a }}</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ r.entregado }}</p>
           </div>
-          @if (m.detalle) {
+          @if (r.observacion) {
             <div class="col-span-2">
-              <p class="text-stone-400 text-xs">Detalle del documento</p>
-              <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ m.detalle }}</p>
+              <p class="text-stone-400 text-xs">Observación</p>
+              <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ r.observacion }}</p>
             </div>
           }
         </div>
@@ -113,8 +118,6 @@
 
     <div class="shrink-0 px-6 py-4 border-t border-border flex gap-2">
       <p-button label="Imprimir" icon="pi pi-print" severity="secondary" [outlined]="true" size="small" styleClass="flex-1 justify-center" />
-      <p-button label="Anular"   icon="pi pi-trash" severity="danger"    [outlined]="true" size="small" styleClass="flex-1 justify-center"
-        [disabled]="m.estado === 'ANULADO'" />
     </div>
 
   }

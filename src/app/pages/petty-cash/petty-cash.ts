@@ -1,11 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Button } from 'primeng/button';
 import { Tag } from 'primeng/tag';
 import { PageHeader } from '../../shared/page-header/page-header';
 import { KpiCard } from '../../shared/kpi-card/kpi-card';
 import { PettyCashTable } from './petty-cash-table/petty-cash-table';
 import { PettyCashForm } from './petty-cash-form/petty-cash-form';
-import { MovimientoCajaChica, TipoMovimiento } from '../../core/models/petty-cash.model';
+import { Receipt } from '../../core/models/petty-cash.model';
+import { PettyCashService } from '../../core/services/petty-cash';
+import { Toaster } from '../../core/services/toast';
 
 @Component({
   selector: 'app-petty-cash',
@@ -14,58 +16,57 @@ import { MovimientoCajaChica, TipoMovimiento } from '../../core/models/petty-cas
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [Button, Tag, PageHeader, KpiCard, PettyCashTable, PettyCashForm],
 })
-export class PettyCash {
-  readonly movimientos = signal<MovimientoCajaChica[]>([]);
-  readonly saldoActual = signal(0);
+export class PettyCash implements OnInit {
+  private readonly svc     = inject(PettyCashService);
+  private readonly toaster = inject(Toaster);
 
-  // ── Form modal state ───────────────────────────────────────────────────────
+  readonly receipts = signal<Receipt[]>([]);
+  readonly loading  = signal(false);
+
   readonly editing = signal<'new' | null>(null);
 
-  // ── Detail drawer state ────────────────────────────────────────────────────
-  readonly showDetail         = signal(false);
-  readonly selectedMovimiento = signal<MovimientoCajaChica | null>(null);
+  readonly showDetail      = signal(false);
+  readonly selectedReceipt = signal<Receipt | null>(null);
 
-  // ── KPI metrics (over full dataset) ───────────────────────────────────────
   readonly metrics = computed(() => {
-    const activos  = this.movimientos().filter(m => m.estado === 'ACTIVO');
-    const ingresos = activos.filter(m => m.tipo === 'INGRESO').reduce((s, m) => s + m.importe, 0);
-    const egresos  = activos.filter(m => m.tipo === 'EGRESO').reduce((s, m) => s + m.importe, 0);
+    const data     = this.receipts();
+    const ingresos = data.filter(r => r.tip_doc === 77).reduce((s, r) => s + Number(r.importe), 0);
+    const egresos  = data.filter(r => r.tip_doc === 78).reduce((s, r) => s + Number(r.importe), 0);
     return {
-      totalMovimientos: this.movimientos().length,
+      totalMovimientos: data.length,
       ingresos,
       egresos,
       saldo: ingresos - egresos,
     };
   });
 
-  // ── Methods ────────────────────────────────────────────────────────────────
-  openNew()    { this.editing.set('new'); }
-  closeForm()  { this.editing.set(null); }
+  ngOnInit() { this.loadReceipts(); }
 
-  onSaved(data: { tipo: TipoMovimiento; importe: number; moneda: string }) {
-    const delta = data.tipo === 'INGRESO' ? data.importe : -data.importe;
-    this.saldoActual.update(s => s + delta);
+  openNew()   { this.editing.set('new'); }
+  closeForm() { this.editing.set(null); }
+
+  onSaved(receipt: Receipt) {
+    this.receipts.update(list => [receipt, ...list]);
   }
 
-  openDetail(m: MovimientoCajaChica) {
-    this.selectedMovimiento.set(m);
+  openDetail(r: Receipt) {
+    this.selectedReceipt.set(r);
     this.showDetail.set(true);
   }
 
   closeDetail() { this.showDetail.set(false); }
 
-  // ── Severity helpers (needed by the detail drawer in the template) ─────────
-  tipoSev(t: TipoMovimiento): 'success' | 'danger' {
-    return t === 'INGRESO' ? 'success' : 'danger';
-  }
-
-  estadoSev(e: string): 'success' | 'danger' {
-    return e === 'ACTIVO' ? 'success' : 'danger';
-  }
-
   fmtNum(n: number): string { return n.toFixed(2); }
   fmtDate(s: string): string {
     const d = new Date(s + 'T00:00:00');
     return d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  private loadReceipts() {
+    this.loading.set(true);
+    this.svc.getReceipts({ limit: 50 }).subscribe({
+      next:  res => { this.receipts.set(res.data); this.loading.set(false); },
+      error: ()  => { this.toaster.error('Error', 'No se pudieron cargar los recibos'); this.loading.set(false); },
+    });
   }
 }

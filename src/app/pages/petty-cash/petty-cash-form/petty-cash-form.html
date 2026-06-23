@@ -140,6 +140,7 @@
       [severity]="tipo() === 'INGRESO' ? 'success' : 'danger'"
       size="small"
       [disabled]="!esValido()"
+      [loading]="guardandoRecibo()"
       (onClick)="registrar()" />
   </div>
 

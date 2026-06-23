@@ -46,7 +46,54 @@ export const MONEDAS: Moneda[] = [
   { id_moneda: 2, descripcion: 'Dólares', sigla: '$'  },
 ];
 
-// ── Movimiento ────────────────────────────────────────────────────────────────
+// ── API: recibos de caja chica ────────────────────────────────────────────────
+export interface Receipt {
+  id: string;
+  cia_id_cia: string;
+  tip_doc: number;              // 77 = ingreso | 78 = egreso
+  tipDocDescripcion: string | null;
+  serie: string;
+  correlativo: string;
+  numero: string;               // "serie-correlativo", ej. "0027-00000004"
+  fecha: string;                // ISO 8601
+  entregado: string;
+  codigo_motivo: string;
+  motivoDescripcion: string | null;
+  tipo_moneda: number;
+  monedaDescripcion: string | null;
+  importe: string;              // decimal como string
+  observacion: string;
+  estado: number;
+  estadoDescripcion: string | null;
+  fecha_adi: string;
+  fecha_mod: string | null;
+}
+
+export interface CreateReceiptPayload {
+  tip_doc: number;
+  fecha: string;                // YYYY-MM-DD
+  entregado: string;
+  codigo_motivo: number;
+  tipo_moneda: number;
+  importe: number;
+  observacion: string;
+}
+
+export interface UpdateReceiptPayload {
+  fecha?: string;
+  entregado?: string;
+  codigo_motivo?: number;
+  tipo_moneda?: number;
+  importe?: number;
+  observacion?: string;
+}
+
+export interface ReceiptListResponse {
+  data: Receipt[];
+  meta: { total: number; page: number; limit: number; lastPage: number };
+}
+
+// ── Movimiento (legacy — reemplazar por Receipt al migrar la tabla) ────────────
 export interface MovimientoCajaChica {
   id: string;
   fecha: string;

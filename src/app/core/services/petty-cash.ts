@@ -3,9 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import {
   CreateReasonPayload,
+  CreateReceiptPayload,
   Reason,
+  Receipt,
+  ReceiptListResponse,
   ReceiptType,
   UpdateReasonPayload,
+  UpdateReceiptPayload,
 } from '../models/petty-cash.model';
 
 @Service()
@@ -33,5 +37,26 @@ export class PettyCashService {
 
   toggleReason(id: string) {
     return this.http.delete<{ message: string; motivo: Reason }>(`${this.base}/reasons/${id}`);
+  }
+
+  // ── Receipts ─────────────────────────────────────────────────────────────────
+  getReceipts(params?: { tipDoc?: 77 | 78; page?: number; limit?: number }) {
+    const query: Record<string, string> = {};
+    if (params?.tipDoc)  query['tip_doc'] = params.tipDoc.toString();
+    if (params?.page)    query['page']    = params.page.toString();
+    if (params?.limit)   query['limit']   = params.limit.toString();
+    return this.http.get<ReceiptListResponse>(`${this.base}/receipts`, { params: query });
+  }
+
+  getReceipt(id: string) {
+    return this.http.get<Receipt>(`${this.base}/receipts/${id}`);
+  }
+
+  createReceipt(payload: CreateReceiptPayload) {
+    return this.http.post<Receipt>(`${this.base}/receipts`, payload);
+  }
+
+  updateReceipt(id: string, payload: UpdateReceiptPayload) {
+    return this.http.put<Receipt>(`${this.base}/receipts/${id}`, payload);
   }
 }

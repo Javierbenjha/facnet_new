@@ -10,7 +10,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { AppModal } from '../../../shared/app-modal/app-modal';
 import { PettyCashService } from '../../../core/services/petty-cash';
 import { Toaster } from '../../../core/services/toast';
-import { MONEDAS, Moneda, Reason, ReceiptType, TIPO_A_RECIBO, TipoMovimiento } from '../../../core/models/petty-cash.model';
+import { MONEDAS, Moneda, Receipt, Reason, ReceiptType, TIPO_A_RECIBO, TipoMovimiento } from '../../../core/models/petty-cash.model';
 
 @Component({
   selector: 'app-petty-cash-form',
@@ -29,7 +29,8 @@ export class PettyCashForm {
 
   readonly editing = input<'new' | null>(null);
   readonly closed  = output<void>();
-  readonly saved   = output<{ tipo: TipoMovimiento; importe: number; moneda: string }>();
+  readonly saved   = output<Receipt>();
+  readonly guardandoRecibo = signal(false);
 
   // ── Opciones ───────────────────────────────────────────────────────────────
   readonly monedas = MONEDAS;
@@ -120,8 +121,31 @@ export class PettyCashForm {
 
   registrar() {
     if (!this.esValido()) return;
-    this.saved.emit({ tipo: this.tipo(), importe: this.importe(), moneda: this.moneda().sigla });
-    this.closed.emit();
+
+    const fecha = this.fecha();
+    const payload = {
+      tip_doc:       TIPO_A_RECIBO[this.tipo()],
+      fecha:         `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}`,
+      entregado:     this.entregadoA(),
+      codigo_motivo: Number(this.motivo()!.id),
+      tipo_moneda:   this.moneda().id_moneda,
+      importe:       this.importe(),
+      observacion:   this.detalle(),
+    };
+
+    this.guardandoRecibo.set(true);
+    this.svc.createReceipt(payload).subscribe({
+      next: receipt => {
+        this.toaster.success('Recibo registrado', `N° ${receipt.numero} creado correctamente`);
+        this.saved.emit(receipt);
+        this.closed.emit();
+        this.guardandoRecibo.set(false);
+      },
+      error: () => {
+        this.toaster.error('Error', 'No se pudo registrar el recibo. Verificá los datos.');
+        this.guardandoRecibo.set(false);
+      },
+    });
   }
 
   close() { this.closed.emit(); }
