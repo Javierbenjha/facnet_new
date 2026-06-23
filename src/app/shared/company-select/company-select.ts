@@ -1,8 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  linkedSignal,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Select } from 'primeng/select';
-import { Company } from '../../core/services/company';
-import { Cia } from '../../core/models/company.model';
 import { Auth } from '../../core/services/auth';
 import { Branch } from '../../core/services/branch';
 import { Sucursal } from '../../core/models/branch.model';
@@ -14,18 +20,16 @@ import { switchMap } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [Select, FormsModule],
 })
-export class CompanySelect {
-  private readonly company = inject(Company);
+export class CompanySelect implements OnInit {
   private readonly branch = inject(Branch);
   private readonly auth = inject(Auth);
 
-  readonly companies = signal<Cia[]>([]);
-  selectedCia = '';
+  readonly companies = this.auth.companies;
+  readonly selectedCia = linkedSignal(() => this.auth.activeCompany()?.id ?? '');
 
   readonly branches = signal<Sucursal[]>([]);
-  selectedBranch = '';
+  readonly selectedBranch = linkedSignal(() => this.auth.sucursalId() ?? '');
 
-  // Mapeamos las cias al formato que espera p-select
   readonly companiesOptions = computed(() =>
     this.companies().map((c) => ({
       label: c.descripcion,
@@ -41,13 +45,22 @@ export class CompanySelect {
   );
 
   ngOnInit() {
-    this.company.getCompanies().subscribe((list) => this.companies.set(list));
+    this.branch.getBranches().subscribe((list) => this.branches.set(list));
   }
 
   onCiaChange(code: string) {
-  this.auth.switchCompany({ ciaId: code, sucursalId: '' }).pipe(
-    switchMap(() => this.auth.me()),
-    switchMap(() => this.branch.getBranches()),
-  ).subscribe((branches) => this.branches.set(branches));
-}
+    this.auth
+      .switchCompany({ ciaId: code, sucursalId: '' })
+      .pipe(
+        switchMap(() => this.auth.me()),
+        switchMap(() => this.branch.getBranches()),
+      )
+      .subscribe((branches) => this.branches.set(branches));
+  }
+    onBranchChange(sucursalId: string) {
+    this.auth
+      .switchCompany({ ciaId: this.selectedCia(), sucursalId })
+      .pipe(switchMap(() => this.auth.me()))
+      .subscribe();
+  }
 }

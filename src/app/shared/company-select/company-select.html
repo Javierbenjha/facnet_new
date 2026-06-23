@@ -1,19 +1,20 @@
-<div>
+<div class="flex gap-2 items-center">
   <p-select
     [options]="companiesOptions()"
-    [(ngModel)]="selectedCia"
+    [ngModel]="selectedCia()"
+    (ngModelChange)="selectedCia.set($event)"
     optionLabel="label"
     optionValue="value"
     placeholder="Seleccionar"
-    (onChange)="onCiaChange($event.value)"
   />
 
-   <p-select
+  <p-select
     [options]="branchesOptions()"
-    [(ngModel)]="selectedBranch"
+    [ngModel]="selectedBranch()"
+    (ngModelChange)="selectedBranch.set($event)"
     optionLabel="label"
     optionValue="value"
     placeholder="Seleccionar"
-  
+    (onChange)="onBranchChange($event.value)"
   />
 </div>

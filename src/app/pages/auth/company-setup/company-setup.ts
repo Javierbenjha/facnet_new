@@ -65,7 +65,7 @@ export class CompanySetup {
 
     this.loading.set(true);
     this.branch
-      .create({ ...data, ubigeo }, ciaId)
+      .create({ ...data, ubigeo })
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: () => this.router.navigate(['/sales']),
