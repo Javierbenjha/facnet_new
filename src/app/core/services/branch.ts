@@ -8,7 +8,11 @@ import { environment } from '../../../environments/environment';
 export class Branch {
   private readonly http = inject(HttpClient);
 
-  create(body: SucursalRequest, ciaId: string): Observable<Sucursal> {
-    return this.http.post<Sucursal>(`${environment.apiUrl}/cia/${ciaId}/sucursales`, body);
+  create(body: SucursalRequest): Observable<Sucursal> {
+    return this.http.post<Sucursal>(`${environment.apiUrl}/cia/branches`, body);
+  }
+
+  getBranches(): Observable<Sucursal[]> {
+    return this.http.get<Sucursal[]>(`${environment.apiUrl}/cia/my-branches`);
   }
 }

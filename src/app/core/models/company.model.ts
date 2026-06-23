@@ -1,3 +1,9 @@
+export interface CompanySummary {
+  id: string;
+  descripcion: string;
+  ruc: string;
+}
+
 export interface Cia {
   id: string;
   descripcion: string;
@@ -58,7 +64,7 @@ export interface CompanyResponse {
     email: string;
     role: number;
   };
-  activeCompany: { id: string; descripcion: string; ruc: string };
+  activeCompany: CompanySummary;
   sucursalId: null;
   company: Cia;
 }

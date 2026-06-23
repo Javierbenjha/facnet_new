@@ -11,23 +11,10 @@
   />
 
   <!-- Tenant switcher -->
-  <p-select
-    [options]="empresas()"
-    [ngModel]="selectedEmpresaId()"
-    (ngModelChange)="selectedEmpresaId.set($event)"
-    optionLabel="nombre"
-    optionValue="id"
-    size="small"
+  <app-company-select
   />
 
-  <p-select
-    [options]="sucursales()"
-    [ngModel]="selectedSucursalId()"
-    (ngModelChange)="selectedSucursalId.set($event)"
-    optionLabel="nombre"
-    optionValue="id"
-    size="small"
-  />
+
 
   <!-- Búsqueda -->
   <div class="relative flex-1 max-w-md">

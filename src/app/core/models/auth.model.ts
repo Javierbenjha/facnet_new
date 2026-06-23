@@ -1,12 +1,8 @@
+import { CompanySummary } from './company.model';
+
 export interface LoginRequest {
   email: string;
   password: string;
-}
-
-export interface Company {
-  id: string;
-  descripcion: string;
-  ruc: string;
 }
 
 export interface User {
@@ -22,13 +18,15 @@ export interface User {
 
 export interface LoginResponse {
   user: User;
-  activeCompany: Company;
-  companies: Company[];
-  sucursalId: string;
+  activeCompany: CompanySummary | null;
+  companies: CompanySummary[];
+  sucursalId: string | null;
 }
 
 export interface MeResponse {
   user: User;
+  activeCompany: CompanySummary | null;
+  companies: CompanySummary[];
   roles: string[];
   permissions: Record<string, string>;
 }
@@ -45,19 +43,15 @@ export interface RegisterRequest {
 export interface RegisterResponse {
   message: string;
   user: User;
-  companies: Company[];
+  companies: CompanySummary[];
   activeCompany: null;
   sucursalId: null;
 }
 
-export interface SessionResponse{
+export interface SessionResponse {
   user: User;
-  activeCompany: ActiveCompany | null;
-}
-
-
-export interface ActiveCompany {
-  id: string;
-  descripcion: string;
-  ruc: string;
+  activeCompany: CompanySummary | null;
+  companies?: CompanySummary[];
+  sucursalId?: string | null;
+  permissions?: Record<string, string>
 }

@@ -11,6 +11,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Password } from 'primeng/password';
+import { ToggleSwitch } from 'primeng/toggleswitch';
 import { CompanyRequest } from '../../../../core/models/company.model';
 
 // What the form hands up to its container: everything except usuario_id,
@@ -21,7 +22,7 @@ export type CompanyFormData = Omit<CompanyRequest, 'usuario_id'>;
   selector: 'app-company-form',
   templateUrl: './company-form.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, ButtonModule, InputText, Password],
+  imports: [ReactiveFormsModule, ButtonModule, InputText, Password, ToggleSwitch],
 })
 export class CompanyForm {
   private readonly fb = inject(FormBuilder);
