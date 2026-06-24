@@ -4,6 +4,7 @@ import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { InputNumber } from 'primeng/inputnumber';
 import { ToggleSwitch } from 'primeng/toggleswitch';
+import { ColorPicker } from 'primeng/colorpicker';
 import { AppModal } from '../../../shared/app-modal/app-modal';
 import { Cia, CompanyRequest } from '../../../core/models/company.model';
 import { Sunat } from '../../../core/services/sunat';
@@ -12,7 +13,7 @@ import { Sunat } from '../../../core/services/sunat';
   selector: 'app-company-form',
   templateUrl: './company-form.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, Button, InputText, InputNumber, ToggleSwitch, AppModal],
+  imports: [ReactiveFormsModule, Button, InputText, InputNumber, ToggleSwitch, ColorPicker, AppModal],
 })
 export class CompanyForm {
   private readonly fb = inject(FormBuilder);
@@ -70,6 +71,7 @@ export class CompanyForm {
     monto_anual:   [0],
     stdetraccion:  [false],
     stretencion:   [false],
+    color:         [''],
   });
 
   constructor() {
@@ -83,6 +85,7 @@ export class CompanyForm {
           monto700: 700, limit_ret: 700,
           monto_mensual: 0, monto_anual: 0,
           stdetraccion: false, stretencion: false,
+          color: '',
         });
         this.logoVertical.set(null);
         this.logoHorizontal.set(null);
@@ -101,6 +104,7 @@ export class CompanyForm {
           monto700: Number(emp.monto700), limit_ret: Number(emp.limit_ret),
           monto_mensual: Number(emp.monto_mensual), monto_anual: Number(emp.monto_anual),
           stdetraccion: emp.stdetraccion === 1, stretencion: emp.stretencion === 1,
+          color: (emp.color ?? '').replace(/^#/, ''),
         });
         this.logoVertical.set(null);
         this.logoHorizontal.set(null);
@@ -147,6 +151,7 @@ export class CompanyForm {
       monto_anual: v.monto_anual,
       stdetraccion: v.stdetraccion ? 1 : 0,
       stretencion: v.stretencion ? 1 : 0,
+      color: v.color ? `#${v.color.replace(/^#/, '')}` : '',
     };
     const lv = this.logoVertical();
     const lh = this.logoHorizontal();

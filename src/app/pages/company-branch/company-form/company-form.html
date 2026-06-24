@@ -3,24 +3,39 @@
   (visibleChange)="$event || close()"
   (closed)="close()"
   [title]="modalTitle()"
-  size="lg">
-
+  size="lg"
+>
   <div class="flex flex-col gap-4 pt-1">
-
     <!-- ── Logotipos ── -->
-    <div class="bg-gradient-to-br from-stone-50 to-stone-100 dark:from-stone-800 dark:to-stone-800/40 p-3 rounded-xl border border-stone-200 dark:border-stone-700">
-      <h4 class="text-base font-semibold text-stone-800 dark:text-stone-100 mb-5">Logotipos de la Empresa</h4>
+    <div
+      class="bg-gradient-to-br from-stone-50 to-stone-100 dark:from-stone-800 dark:to-stone-800/40 p-3 rounded-xl border border-stone-200 dark:border-stone-700"
+    >
+      <h4 class="text-base font-semibold text-stone-800 dark:text-stone-100 mb-5">
+        Logotipos de la Empresa
+      </h4>
       <div class="grid grid-cols-2 gap-4">
-
         <!-- Logo Vertical -->
         <div class="flex flex-col gap-3">
-          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Logo Vertical</label>
-          <div class="relative group w-full h-44 bg-white dark:bg-stone-900 border-2 border-dashed border-stone-300 dark:border-stone-600 rounded-xl flex items-center justify-center overflow-hidden hover:border-primary transition-colors">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400"
+            >Logo Vertical</label
+          >
+          <div
+            class="relative group w-full h-44 bg-white dark:bg-stone-900 border-2 border-dashed border-stone-300 dark:border-stone-600 rounded-xl flex items-center justify-center overflow-hidden hover:border-primary transition-colors"
+          >
             @if (logoVerticalPreview()) {
-              <img [src]="logoVerticalPreview()" alt="Logo Vertical" class="max-w-full max-h-full object-contain" />
-              <p-button icon="pi pi-times" severity="danger" [rounded]="true" size="small"
+              <img
+                [src]="logoVerticalPreview()"
+                alt="Logo Vertical"
+                class="max-w-full max-h-full object-contain"
+              />
+              <p-button
+                icon="pi pi-times"
+                severity="danger"
+                [rounded]="true"
+                size="small"
                 class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                (onClick)="removeLogo('vertical')" />
+                (onClick)="removeLogo('vertical')"
+              />
             } @else {
               <div class="text-center text-stone-400">
                 <i class="pi pi-image text-3xl mb-2 block"></i>
@@ -28,21 +43,41 @@
               </div>
             }
           </div>
-          <label class="flex items-center justify-center gap-2 w-full h-10 border border-dashed border-primary/50 rounded-xl cursor-pointer bg-primary/5 hover:bg-primary/10 transition-colors text-sm text-primary font-medium">
+          <label
+            class="flex items-center justify-center gap-2 w-full h-10 border border-dashed border-primary/50 rounded-xl cursor-pointer bg-primary/5 hover:bg-primary/10 transition-colors text-sm text-primary font-medium"
+          >
             <i class="pi pi-upload text-xs"></i> Subir Logo Vertical
-            <input type="file" accept="image/*" class="hidden" (change)="onLogoChange($event, 'vertical')" />
+            <input
+              type="file"
+              accept="image/*"
+              class="hidden"
+              (change)="onLogoChange($event, 'vertical')"
+            />
           </label>
         </div>
 
         <!-- Logo Horizontal -->
         <div class="flex flex-col gap-3">
-          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Logo Horizontal</label>
-          <div class="relative group w-full h-44 bg-white dark:bg-stone-900 border-2 border-dashed border-stone-300 dark:border-stone-600 rounded-xl flex items-center justify-center overflow-hidden hover:border-primary transition-colors">
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400"
+            >Logo Horizontal</label
+          >
+          <div
+            class="relative group w-full h-44 bg-white dark:bg-stone-900 border-2 border-dashed border-stone-300 dark:border-stone-600 rounded-xl flex items-center justify-center overflow-hidden hover:border-primary transition-colors"
+          >
             @if (logoHorizontalPreview()) {
-              <img [src]="logoHorizontalPreview()" alt="Logo Horizontal" class="max-w-full max-h-full object-contain" />
-              <p-button icon="pi pi-times" severity="danger" [rounded]="true" size="small"
+              <img
+                [src]="logoHorizontalPreview()"
+                alt="Logo Horizontal"
+                class="max-w-full max-h-full object-contain"
+              />
+              <p-button
+                icon="pi pi-times"
+                severity="danger"
+                [rounded]="true"
+                size="small"
                 class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                (onClick)="removeLogo('horizontal')" />
+                (onClick)="removeLogo('horizontal')"
+              />
             } @else {
               <div class="text-center text-stone-400">
                 <i class="pi pi-image text-3xl mb-2 block"></i>
@@ -50,40 +85,69 @@
               </div>
             }
           </div>
-          <label class="flex items-center justify-center gap-2 w-full h-10 border border-dashed border-primary/50 rounded-xl cursor-pointer bg-primary/5 hover:bg-primary/10 transition-colors text-sm text-primary font-medium">
+          <label
+            class="flex items-center justify-center gap-2 w-full h-10 border border-dashed border-primary/50 rounded-xl cursor-pointer bg-primary/5 hover:bg-primary/10 transition-colors text-sm text-primary font-medium"
+          >
             <i class="pi pi-upload text-xs"></i> Subir Logo Horizontal
-            <input type="file" accept="image/*" class="hidden" (change)="onLogoChange($event, 'horizontal')" />
+            <input
+              type="file"
+              accept="image/*"
+              class="hidden"
+              (change)="onLogoChange($event, 'horizontal')"
+            />
           </label>
         </div>
-
       </div>
     </div>
 
     <!-- ── Información Básica ── -->
     <div class="flex flex-col gap-2">
-      <h4 class="text-base font-semibold text-stone-800 dark:text-stone-100 mb-1">Información Básica</h4>
+      <h4 class="text-base font-semibold text-stone-800 dark:text-stone-100 mb-1">
+        Información Básica
+      </h4>
       <div class="grid grid-cols-2 gap-3">
-
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
             RUC <span class="text-red-400">*</span>
             <span class="ml-2 text-xs font-normal text-stone-400">11 dígitos</span>
           </label>
           <div class="flex gap-2">
-            <input pInputText pSize="small" [formControl]="form.controls.ruc" placeholder="20123456789"
-                   class="w-full font-mono" maxlength="11" (keydown.enter)="buscarRuc()" />
-            <p-button icon="pi pi-search" severity="secondary" [outlined]="true" size="small"
-                      [loading]="loadingRuc()" (onClick)="buscarRuc()" />
+            <input
+              pInputText
+              pSize="small"
+              [formControl]="form.controls.ruc"
+              placeholder="20123456789"
+              class="w-full font-mono"
+              maxlength="11"
+              (keydown.enter)="buscarRuc()"
+            />
+            <p-button
+              icon="pi pi-search"
+              severity="secondary"
+              [outlined]="true"
+              size="small"
+              [loading]="loadingRuc()"
+              (onClick)="buscarRuc()"
+            />
           </div>
         </div>
 
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
-            Razón Social
-            <span class="ml-2 text-xs font-normal text-stone-400">Auto-completado</span>
-          </label>
-          <input pInputText pSize="small" [formControl]="form.controls.descripcion"
-                 placeholder="Se completa desde SUNAT" class="w-full" />
+        <div class="flex flex-row items-end gap-1">
+          <div>
+            <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+              Razón Social
+              <span class="ml-2 text-xs font-normal text-stone-400">Auto-completado</span>
+            </label>
+            <input
+              pInputText
+              pSize="small"
+              [formControl]="form.controls.descripcion"
+              placeholder="Se completa desde SUNAT"
+              class="w-full"
+            />
+          </div>
+
+          <p-colorpicker [formControl]="form.controls.color" />
         </div>
 
         <div class="flex flex-col gap-1">
@@ -91,8 +155,13 @@
             Dirección
             <span class="ml-2 text-xs font-normal text-stone-400">Auto-completado</span>
           </label>
-          <input pInputText pSize="small" [formControl]="form.controls.direccion"
-                 placeholder="Se completa desde SUNAT" class="w-full" />
+          <input
+            pInputText
+            pSize="small"
+            [formControl]="form.controls.direccion"
+            placeholder="Se completa desde SUNAT"
+            class="w-full"
+          />
         </div>
 
         <div class="flex flex-col gap-1">
@@ -100,10 +169,14 @@
             Ubigeo
             <span class="ml-2 text-xs font-normal text-stone-400">Auto-completado</span>
           </label>
-          <input pInputText pSize="small" [formControl]="form.controls.ubigeo"
-                 placeholder="000000" class="w-full font-mono" />
+          <input
+            pInputText
+            pSize="small"
+            [formControl]="form.controls.ubigeo"
+            placeholder="000000"
+            class="w-full font-mono"
+          />
         </div>
-
       </div>
     </div>
 
@@ -111,26 +184,45 @@
 
     <!-- ── Credenciales SUNAT ── -->
     <div class="flex flex-col gap-2">
-      <h4 class="text-base font-semibold text-stone-800 dark:text-stone-100 mb-1">Credenciales SUNAT</h4>
+      <h4 class="text-base font-semibold text-stone-800 dark:text-stone-100 mb-1">
+        Credenciales SUNAT
+      </h4>
       <div class="grid grid-cols-3 gap-3">
-
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Usuario SOL</label>
-          <input pInputText pSize="small" [formControl]="form.controls.usuario_sol" placeholder="USUARIO" class="w-full" />
+          <input
+            pInputText
+            pSize="small"
+            [formControl]="form.controls.usuario_sol"
+            placeholder="USUARIO"
+            class="w-full"
+          />
         </div>
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Clave SOL</label>
-          <input pInputText pSize="small" type="password" [formControl]="form.controls.clave_sol"
-                 placeholder="••••••" class="w-full" />
+          <input
+            pInputText
+            pSize="small"
+            type="password"
+            [formControl]="form.controls.clave_sol"
+            placeholder="••••••"
+            class="w-full"
+          />
         </div>
 
         <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Cta. Detracción</label>
-          <input pInputText pSize="small" [formControl]="form.controls.ctedetra"
-                 placeholder="00-000000" class="w-full font-mono" />
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400"
+            >Cta. Detracción</label
+          >
+          <input
+            pInputText
+            pSize="small"
+            [formControl]="form.controls.ctedetra"
+            placeholder="00-000000"
+            class="w-full font-mono"
+          />
         </div>
-
       </div>
     </div>
 
@@ -138,52 +230,92 @@
 
     <!-- ── Configuración de Ventas ── -->
     <div class="flex flex-col gap-2">
-      <h4 class="text-base font-semibold text-stone-800 dark:text-stone-100 mb-1">Configuración de Ventas</h4>
+      <h4 class="text-base font-semibold text-stone-800 dark:text-stone-100 mb-1">
+        Configuración de Ventas
+      </h4>
       <div class="grid grid-cols-2 gap-3">
-
         <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Límite DNI en boleta (S/)</label>
-          <p-inputnumber [formControl]="form.controls.monto700"
-                         mode="decimal" [minFractionDigits]="0" styleClass="w-full" inputStyleClass="!py-[0.375rem] !text-sm w-full" />
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400"
+            >Límite DNI en boleta (S/)</label
+          >
+          <p-inputnumber
+            [formControl]="form.controls.monto700"
+            mode="decimal"
+            [minFractionDigits]="0"
+            styleClass="w-full"
+            inputStyleClass="!py-[0.375rem] !text-sm w-full"
+          />
         </div>
 
         <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Límite retención (S/)</label>
-          <p-inputnumber [formControl]="form.controls.limit_ret"
-                         mode="decimal" [minFractionDigits]="0" styleClass="w-full" inputStyleClass="!py-[0.375rem] !text-sm w-full" />
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400"
+            >Límite retención (S/)</label
+          >
+          <p-inputnumber
+            [formControl]="form.controls.limit_ret"
+            mode="decimal"
+            [minFractionDigits]="0"
+            styleClass="w-full"
+            inputStyleClass="!py-[0.375rem] !text-sm w-full"
+          />
         </div>
 
         <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Prom. ventas mensual — SUNAT (S/)</label>
-          <p-inputnumber [formControl]="form.controls.monto_mensual"
-                         mode="decimal" [minFractionDigits]="2" styleClass="w-full" inputStyleClass="!py-[0.375rem] !text-sm w-full" />
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400"
+            >Prom. ventas mensual — SUNAT (S/)</label
+          >
+          <p-inputnumber
+            [formControl]="form.controls.monto_mensual"
+            mode="decimal"
+            [minFractionDigits]="2"
+            styleClass="w-full"
+            inputStyleClass="!py-[0.375rem] !text-sm w-full"
+          />
         </div>
 
         <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Prom. ventas anual — SUNAT (S/)</label>
-          <p-inputnumber [formControl]="form.controls.monto_anual"
-                         mode="decimal" [minFractionDigits]="2" styleClass="w-full" inputStyleClass="!py-[0.375rem] !text-sm w-full" />
+          <label class="text-sm font-medium text-stone-600 dark:text-stone-400"
+            >Prom. ventas anual — SUNAT (S/)</label
+          >
+          <p-inputnumber
+            [formControl]="form.controls.monto_anual"
+            mode="decimal"
+            [minFractionDigits]="2"
+            styleClass="w-full"
+            inputStyleClass="!py-[0.375rem] !text-sm w-full"
+          />
         </div>
-
       </div>
 
       <div class="grid grid-cols-2 gap-4 mt-1">
-        <div class="flex items-center justify-between px-4 py-3 rounded-xl bg-border border border-border">
-          <span class="text-sm font-medium text-stone-700 dark:text-stone-300">Aplica detracción en ventas</span>
+        <div
+          class="flex items-center justify-between px-4 py-3 rounded-xl bg-border border border-border"
+        >
+          <span class="text-sm font-medium text-stone-700 dark:text-stone-300"
+            >Aplica detracción en ventas</span
+          >
           <p-toggleswitch [formControl]="form.controls.stdetraccion" />
         </div>
-        <div class="flex items-center justify-between px-4 py-3 rounded-xl bg-border border border-border">
-          <span class="text-sm font-medium text-stone-700 dark:text-stone-300">Aplica retención en ventas</span>
+        <div
+          class="flex items-center justify-between px-4 py-3 rounded-xl bg-border border border-border"
+        >
+          <span class="text-sm font-medium text-stone-700 dark:text-stone-300"
+            >Aplica retención en ventas</span
+          >
           <p-toggleswitch [formControl]="form.controls.stretencion" />
         </div>
       </div>
     </div>
-
   </div>
 
   <div modal-footer class="flex gap-2 justify-end">
-    <p-button label="Cancelar" severity="secondary" [outlined]="true" size="small" (onClick)="close()" />
+    <p-button
+      label="Cancelar"
+      severity="secondary"
+      [outlined]="true"
+      size="small"
+      (onClick)="close()"
+    />
     <p-button label="Guardar Cambios" icon="pi pi-check" size="small" (onClick)="save()" />
   </div>
-
 </app-modal>

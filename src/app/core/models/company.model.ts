@@ -25,6 +25,7 @@ export interface Cia {
   client_id:         string | null;
   logoVertical:      string | null;
   logoHorizontal:    string | null;
+  color:             string;
   estado:            number;
   estadoDescripcion: string | null;
   created_at:        Date;
@@ -67,6 +68,7 @@ export interface CompanyRequest {
   stretencion: number;     // Default: false - ¿Aplica retención?
   limit_ret: number;        // Requerido, mín. 0 (default: 700)
   ctedetra: string;        // Opcional - Cuenta de detracción
+  color?: string;           // Opcional - Color de marca en hex (con #)
   usuario_id?: string;      // Lo resuelve el backend desde el token; no hace falta mandarlo
 }
 
