@@ -77,6 +77,10 @@ export class Auth {
       .pipe(tap((res) => this.setSession({ user: res.user, activeCompany: res.activeCompany, sucursalId: res.sucursalId })));
   }
 
+  setSucursal(sucursalId: string) {
+    this._sucursalId.set(sucursalId);
+  }
+
   clearSession() {
     this._currentUser.set(null);
     this._activeCompany.set(null);

@@ -1,16 +1,20 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { Sucursal, SucursalRequest, SucursalListItem } from '../models/branch.model';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { Auth } from './auth';
 
 @Service()
 export class Branch {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/cia`;
+  private readonly auth = inject(Auth);
 
   create(body: SucursalRequest): Observable<Sucursal> {
-    return this.http.post<Sucursal>(`${this.apiUrl}/branches`, body);
+    return this.http.post<Sucursal>(`${this.apiUrl}/branches`, body).pipe(
+      tap((res) => this.auth.setSucursal(res.id)),
+    );
   }
 
   createByCiaID(body: SucursalRequest, ciaId: string): Observable<Sucursal> {
