@@ -76,18 +76,13 @@ export class CompanyBranch {
         : this.company.create(payload);
 
     request$.subscribe({
-      next: (res) => {
-        this.cias.update((list) => {
-          const exists = list.some((c) => c.id === res.company.id);
-          return exists
-            ? list.map((c) => (c.id === res.company.id ? res.company : c))
-            : [...list, res.company];
-        });
+      next: () => {
+        this.loadCompanies();
         this.editingEmpresa.set(null);
       },
       error: (err) => {
         this.toast.error('Error al guardar empresa', err.error?.message);
-      }
+      },
     });
   }
 
