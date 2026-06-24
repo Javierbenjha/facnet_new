@@ -9,7 +9,7 @@ import { BranchForm } from './branch-form/branch-form';
 import { Company } from '../../core/services/company';
 import { Cia, CompanyRequest } from '../../core/models/company.model';
 import { Branch } from '../../core/services/branch';
-import { Sucursal, SucursalRequest } from '../../core/models/branch.model';
+import { Sucursal, SucursalRequest, SucursalListItem } from '../../core/models/branch.model';
 import { Toaster } from '../../core/services/toast';
 
 @Component({
@@ -23,7 +23,7 @@ export class CompanyBranch {
   private readonly branch = inject(Branch);
   private readonly toast = inject(Toaster);
   readonly cias = signal<Cia[]>([]);
-  readonly branches = signal<Sucursal[]>([]);
+  readonly branches = signal<SucursalListItem[]>([]);
 
   constructor() {
     this.loadCompanies();

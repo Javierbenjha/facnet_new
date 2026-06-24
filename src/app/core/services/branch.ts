@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
-import { Sucursal, SucursalRequest } from '../models/branch.model';
+import { Sucursal, SucursalRequest, SucursalListItem } from '../models/branch.model';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -21,7 +21,7 @@ export class Branch {
     return this.http.get<Sucursal[]>(`${this.apiUrl}/my-branches`);
   }
 
-  getAllBranches(): Observable<Sucursal[]> {
-    return this.http.get<Sucursal[]>(`${this.apiUrl}/all-branches`);
+  getAllBranches(): Observable<SucursalListItem[]> {
+    return this.http.get<SucursalListItem[]>(`${this.apiUrl}/all-branches`);
   }
 }
