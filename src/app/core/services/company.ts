@@ -48,8 +48,9 @@ export class Company {
     return this.http.post<CompanyResponse>(`${this.apiUrl}/${ciaId}`, fd);
   }
 
-  delete(ciaId: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${ciaId}`);
+  // DELETE = toggle de estado (activa/desactiva), no borra. Devuelve la cía actualizada.
+  delete(ciaId: string): Observable<{ message: string; company: Cia }> {
+    return this.http.delete<{ message: string; company: Cia }>(`${this.apiUrl}/${ciaId}`);
   }
 
   getCompanyIgv(): Observable<CiaIGV> {

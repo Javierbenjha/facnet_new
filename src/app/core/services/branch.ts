@@ -21,6 +21,11 @@ export class Branch {
     return this.http.patch<SucursalListItem>(`${this.apiUrl}/branches/${id}`, body);
   }
 
+  // DELETE real (hard delete) — la sucursal se elimina, no es toggle.
+  delete(id: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/branches/${id}`);
+  }
+
   getBranches(): Observable<Sucursal[]> {
     return this.http.get<Sucursal[]>(`${this.apiUrl}/my-branches`);
   }

@@ -11,6 +11,7 @@ import { Cia, CompanyRequest } from '../../core/models/company.model';
 import { Branch } from '../../core/services/branch';
 import { SucursalRequest, SucursalListItem } from '../../core/models/branch.model';
 import { Toaster } from '../../core/services/toast';
+import { ConfirmationService } from 'primeng/api';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -23,6 +24,7 @@ export class CompanyBranch {
   private readonly company = inject(Company);
   private readonly branch = inject(Branch);
   private readonly toast = inject(Toaster);
+  private readonly confirm = inject(ConfirmationService);
   readonly cias = signal<Cia[]>([]);
   readonly branches = signal<SucursalListItem[]>([]);
 
@@ -106,6 +108,47 @@ export class CompanyBranch {
       },
       error: (err) => {
         this.toast.error('Error al guardar sucursal', err.error?.message);
+      },
+    });
+  }
+
+  toggleEmpresaEstado(e: Cia) {
+    const desactivar = e.estado === 1;
+    this.confirm.confirm({
+      header: desactivar ? 'Desactivar empresa' : 'Activar empresa',
+      message: `¿${desactivar ? 'Desactivar' : 'Activar'} "${e.descripcion}"?`,
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí',
+      rejectLabel: 'Cancelar',
+      rejectButtonProps: { severity: 'secondary', outlined: true },
+      accept: () => {
+        this.company.delete(e.id).subscribe({
+          next: (res) => {
+            this.loadCompanies();
+            this.toast.success('Listo', res.message);
+          },
+          error: (err) => this.toast.error('No se pudo cambiar el estado', err.error?.message),
+        });
+      },
+    });
+  }
+
+  deleteSucursal(s: SucursalListItem) {
+    this.confirm.confirm({
+      header: 'Eliminar sucursal',
+      message: `¿Eliminar "${s.descripcion}"? Esta acción no se puede deshacer.`,
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, eliminar',
+      rejectLabel: 'Cancelar',
+      rejectButtonProps: { severity: 'secondary', outlined: true },
+      accept: () => {
+        this.branch.delete(s.id).subscribe({
+          next: (res) => {
+            this.loadBranches();
+            this.toast.success('Sucursal eliminada', res.message);
+          },
+          error: (err) => this.toast.error('Error al eliminar', err.error?.message),
+        });
       },
     });
   }
