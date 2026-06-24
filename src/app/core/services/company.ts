@@ -1,7 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { Observable, tap } from 'rxjs';
-import { Cia, CompanyRequest, CompanyResponse } from '../models/company.model';
+import {
+  Cia,
+  CiaIGV,
+  CiaIGVResponse,
+  CiaPassword,
+  CiaPasswordResponse,
+  CompanyRequest,
+  CompanyResponse,
+} from '../models/company.model';
 import { environment } from '../../../environments/environment';
 import { Auth } from './auth';
 
@@ -24,5 +32,34 @@ export class Company {
 
   getCompanies(): Observable<Cia[]> {
     return this.http.get<Cia[]>(`${this.apiUrl}`);
+  }
+
+  getCompanyById(id: string): Observable<Cia> {
+    return this.http.get<Cia>(`${this.apiUrl}/${id}`);
+  }
+
+  update(body: Partial<CompanyRequest>, ciaId: string): Observable<CompanyResponse> {
+    const fd = new FormData();
+
+    Object.entries(body).forEach(([key, value]) => {
+      fd.append(key, value instanceof File ? value : String(value));
+    });
+
+    return this.http.post<CompanyResponse>(`${this.apiUrl}/${ciaId}`, fd);
+  }
+
+  delete(ciaId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${ciaId}`);
+  }
+
+  getCompanyIgv(): Observable<CiaIGV> {
+    return this.http.get<CiaIGV>(`${this.apiUrl}/igv`);
+  }
+  updateCompanyIgv(): Observable<CiaIGVResponse> {
+    return this.http.patch<CiaIGVResponse>(`${this.apiUrl}/igv`, {});
+  }
+
+  updatePassword(body: CiaPassword): Observable<CiaPasswordResponse> {
+    return this.http.patch<CiaPasswordResponse>(`${this.apiUrl}/password`, body);
   }
 }
