@@ -1,5 +1,6 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Products } from './products';
 
 describe('Products', () => {
@@ -8,7 +9,8 @@ describe('Products', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ReactiveFormsModule, Products],
+      imports: [Products],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Products);
@@ -20,13 +22,13 @@ describe('Products', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should list initial products', () => {
-    expect(component.products().length).toBeGreaterThan(0);
+  it('should start with empty products and loading state', () => {
+    expect(component.products()).toEqual([]);
   });
 
-  it('should filter products by query', () => {
-    component.query.set('Agua');
-    const filtered = component.filteredProducts();
-    expect(filtered.every(p => p.descripcion.toLowerCase().includes('agua') || p.sku.toLowerCase().includes('agua'))).toBe(true);
+  it('should toggle tipo between productos and servicios', () => {
+    expect(component.tipo()).toBe('productos');
+    component.tipo.set('servicios');
+    expect(component.tipo()).toBe('servicios');
   });
 });

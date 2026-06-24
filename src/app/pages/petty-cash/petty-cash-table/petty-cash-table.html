@@ -44,8 +44,8 @@
 <ng-template #actionCellTpl let-r>
   <div (click)="$event.stopPropagation()">
     <p-button icon="pi pi-ellipsis-v" [text]="true" severity="secondary" size="small"
-      (onClick)="rowMenu.toggle($event)" />
-    <p-menu #rowMenu [popup]="true" [model]="getMenuItems(r)" appendTo="body" />
+      (onClick)="openRowMenu($event, r, rowMenu)" />
+    <p-menu #rowMenu [popup]="true" [model]="rowMenuItems()" appendTo="body" />
   </div>
 </ng-template>
 

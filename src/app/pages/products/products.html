@@ -39,11 +39,19 @@
   <app-products-table
     [products]="products()"
     [tipo]="tipo()"
-    (editProduct)="openEdit($event)" />
+    [loading]="loading()"
+    (editProduct)="openEdit($event)"
+    (toggleEstado)="onToggleEstado($event)"
+    (gestionarSucursal)="openBranchModal($event)" />
 
   <app-product-form
     [editing]="editing()"
     (closed)="closeModal()"
+    (saved)="onProductSaved($event)" />
+
+  <app-product-branch-modal
+    [editing]="editingBranch()"
+    (closed)="closeBranchModal()"
     (saved)="onProductSaved($event)" />
 
 </div>

@@ -34,7 +34,8 @@
   <!-- ── Table ── -->
   <app-petty-cash-table
     [receipts]="receipts()"
-    (viewDetail)="openDetail($event)" />
+    (viewDetail)="openDetail($event)"
+    (editReceipt)="openEdit($event)" />
 
 </div>
 
@@ -45,79 +46,87 @@
   (saved)="onSaved($event)" />
 
 <!-- ══ Slide-in Detail Drawer ══ -->
-<div class="fixed inset-y-0 right-0 w-full max-w-lg bg-surface-card shadow-2xl z-[9999] flex flex-col
-            transition-transform duration-300 ease-in-out overflow-hidden translate-x-full"
-  [style.transform]="showDetail() ? 'translateX(0)' : null">
+<div class="fixed inset-y-0 right-0 w-full max-w-md bg-surface-card shadow-2xl z-[9999] flex flex-col
+            transition-transform duration-300 ease-in-out overflow-hidden"
+  [class.translate-x-full]="!showDetail()">
 
   @if (selectedReceipt(); as r) {
 
-    <div class="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
-      <div>
-        <h3 class="text-lg font-semibold text-stone-900 dark:text-stone-100">Detalle del Movimiento</h3>
-        <p class="text-xs text-stone-400 mt-0.5">{{ r.numero }} · {{ fmtDate(r.fecha) }}</p>
-      </div>
-      <p-button icon="pi pi-times" [text]="true" severity="secondary" size="small" (onClick)="closeDetail()" />
+    <!-- Barra superior -->
+    <div class="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
+      <p-button icon="pi pi-arrow-left" [text]="true" severity="secondary" size="small" (onClick)="closeDetail()" />
+      <span class="text-sm font-medium text-stone-500 dark:text-stone-400">Movimiento</span>
+      <div class="w-8"></div>
     </div>
 
-    <div class="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-6">
+    <!-- Hero: importe destacado -->
+    <div class="shrink-0 flex flex-col items-center gap-3 px-6 pt-8 pb-7 border-b border-border"
+      [class.bg-emerald-50]="r.tip_doc === 77"
+      [class.dark:bg-emerald-950]="r.tip_doc === 77"
+      [class.bg-red-100]="r.tip_doc === 78"
+      [class.dark:bg-red-950]="r.tip_doc === 78">
 
-      <!-- Tipo + Importe -->
-      <div class="flex items-center justify-between">
-        <p-tag
-          [value]="r.tip_doc === 77 ? 'INGRESO' : 'EGRESO'"
-          [severity]="r.tip_doc === 77 ? 'success' : 'danger'" />
-        <p class="text-2xl font-bold tabular-nums"
-          [class.text-emerald-600]="r.tip_doc === 77"
-          [class.text-red-500]="r.tip_doc === 78">
-          {{ r.tip_doc === 77 ? '+' : '-' }} {{ r.tipo_moneda === 1 ? 'S/' : '$' }} {{ fmtNum(+r.importe) }}
-        </p>
+      <div class="flex items-center gap-1.5">
+        <p-tag [value]="r.tip_doc === 77 ? 'INGRESO' : 'EGRESO'"
+               [severity]="r.tip_doc === 77 ? 'success' : 'danger'"
+               styleClass="!text-xs" />
+        <p-tag [value]="r.estadoDescripcion ?? ''"
+               [severity]="r.estado === 1 ? 'success' : 'danger'"
+               styleClass="!text-xs" />
       </div>
 
-      <section>
-        <h4 class="text-xs font-semibold text-stone-400 uppercase tracking-wide mb-3">Información General</h4>
-        <div class="grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <p class="text-stone-400 text-xs">Fecha</p>
-            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ fmtDate(r.fecha) }}</p>
-          </div>
-          <div>
-            <p class="text-stone-400 text-xs">Estado</p>
-            <div class="mt-0.5">
-              <p-tag
-                [value]="r.estadoDescripcion ?? ''"
-                [severity]="r.estado === 1 ? 'success' : 'danger'"
-                styleClass="!text-xs" />
-            </div>
-          </div>
-          <div>
-            <p class="text-stone-400 text-xs">Número</p>
-            <p class="font-mono font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ r.numero }}</p>
-          </div>
-          <div>
-            <p class="text-stone-400 text-xs">Moneda</p>
-            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ r.monedaDescripcion }}</p>
-          </div>
-          <div class="col-span-2">
-            <p class="text-stone-400 text-xs">Motivo</p>
-            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ r.motivoDescripcion }}</p>
-          </div>
-          <div class="col-span-2">
-            <p class="text-stone-400 text-xs">Entregado a</p>
-            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ r.entregado }}</p>
-          </div>
-          @if (r.observacion) {
-            <div class="col-span-2">
-              <p class="text-stone-400 text-xs">Observación</p>
-              <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ r.observacion }}</p>
-            </div>
-          }
+      <p class="text-5xl font-black tabular-nums tracking-tight"
+        [class.text-emerald-600]="r.tip_doc === 77"
+        [class.text-red-500]="r.tip_doc === 78">
+        {{ r.tip_doc === 77 ? '+' : '−' }}&thinsp;{{ r.tipo_moneda === 1 ? 'S/' : '$' }}&thinsp;{{ fmtNum(+r.importe) }}
+      </p>
+
+      <p class="text-sm text-stone-500 text-center max-w-[200px] leading-snug">{{ r.motivoDescripcion }}</p>
+    </div>
+
+    <!-- Filas de detalle -->
+    <div class="flex-1 overflow-y-auto">
+      <div class="divide-y divide-border px-5">
+
+        <div class="flex items-center gap-3 py-4">
+          <i class="pi pi-hashtag text-stone-400 text-sm w-4 shrink-0"></i>
+          <span class="text-xs text-stone-400 w-24 shrink-0">Número</span>
+          <span class="font-mono text-sm font-semibold text-stone-800 dark:text-stone-100 ml-auto">{{ r.numero }}</span>
         </div>
-      </section>
 
+        <div class="flex items-center gap-3 py-4">
+          <i class="pi pi-calendar text-stone-400 text-sm w-4 shrink-0"></i>
+          <span class="text-xs text-stone-400 w-24 shrink-0">Fecha</span>
+          <span class="text-sm font-medium text-stone-800 dark:text-stone-100 ml-auto">{{ fmtDate(r.fecha) }}</span>
+        </div>
+
+        <div class="flex items-center gap-3 py-4">
+          <i class="pi pi-user text-stone-400 text-sm w-4 shrink-0"></i>
+          <span class="text-xs text-stone-400 w-24 shrink-0">Entregado a</span>
+          <span class="text-sm font-medium text-stone-800 dark:text-stone-100 ml-auto text-right">{{ r.entregado }}</span>
+        </div>
+
+        <div class="flex items-center gap-3 py-4">
+          <i class="pi pi-dollar text-stone-400 text-sm w-4 shrink-0"></i>
+          <span class="text-xs text-stone-400 w-24 shrink-0">Moneda</span>
+          <span class="text-sm font-medium text-stone-800 dark:text-stone-100 ml-auto">{{ r.monedaDescripcion }}</span>
+        </div>
+
+        @if (r.observacion) {
+          <div class="flex items-start gap-3 py-4">
+            <i class="pi pi-comment text-stone-400 text-sm w-4 shrink-0 mt-0.5"></i>
+            <span class="text-xs text-stone-400 w-24 shrink-0 mt-0.5">Observación</span>
+            <span class="text-sm font-medium text-stone-800 dark:text-stone-100 ml-auto text-right leading-relaxed">{{ r.observacion }}</span>
+          </div>
+        }
+
+      </div>
     </div>
 
-    <div class="shrink-0 px-6 py-4 border-t border-border flex gap-2">
-      <p-button label="Imprimir" icon="pi pi-print" severity="secondary" [outlined]="true" size="small" styleClass="flex-1 justify-center" />
+    <!-- Acciones -->
+    <div class="shrink-0 px-5 py-4 border-t border-border flex gap-2.5">
+      <p-button label="Editar"    icon="pi pi-pencil" severity="secondary" [outlined]="true" size="small" styleClass="flex-1 justify-center" />
+      <p-button label="Imprimir"  icon="pi pi-print"  severity="secondary" [outlined]="true" size="small" styleClass="flex-1 justify-center" />
     </div>
 
   }

@@ -94,13 +94,16 @@ export class PettyCashTable {
     this.tipoFiltro.set('');
   }
 
-  getMenuItems(r: Receipt): MenuItem[] {
-    return [
+  readonly rowMenuItems = signal<MenuItem[]>([]);
+
+  openRowMenu(event: Event, r: Receipt, menu: Menu) {
+    this.rowMenuItems.set([
       { label: 'Ver detalles', icon: 'pi pi-eye',    command: () => this.viewDetail.emit(r) },
       { label: 'Editar',       icon: 'pi pi-pencil', command: () => this.editReceipt.emit(r) },
       { separator: true },
       { label: 'Imprimir',     icon: 'pi pi-print' },
-    ];
+    ]);
+    menu.toggle(event);
   }
 
   tipoLabel(r: Receipt): string { return r.tip_doc === 77 ? 'INGRESO' : 'EGRESO'; }

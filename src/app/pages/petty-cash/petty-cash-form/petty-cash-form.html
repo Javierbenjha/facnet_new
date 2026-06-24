@@ -11,7 +11,8 @@
         (ngModelChange)="setTipo($event)"
         optionLabel="label"
         optionValue="value"
-        styleClass="w-full" />
+        styleClass="w-full"
+        [disabled]="isEdit()" />
     </div>
 
     <!-- Serie (auto) + Motivo -->
@@ -136,7 +137,7 @@
   <div modal-footer class="flex justify-end gap-2">
     <p-button label="Cancelar" severity="secondary" [outlined]="true" size="small" (onClick)="close()" />
     <p-button
-      [label]="tipo() === 'INGRESO' ? 'Registrar Ingreso' : 'Registrar Egreso'"
+      [label]="isEdit() ? 'Guardar cambios' : (tipo() === 'INGRESO' ? 'Registrar Ingreso' : 'Registrar Egreso')"
       [severity]="tipo() === 'INGRESO' ? 'success' : 'danger'"
       size="small"
       [disabled]="!esValido()"

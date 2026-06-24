@@ -23,7 +23,7 @@ export class PettyCash implements OnInit {
   readonly receipts = signal<Receipt[]>([]);
   readonly loading  = signal(false);
 
-  readonly editing = signal<'new' | null>(null);
+  readonly editing = signal<'new' | Receipt | null>(null);
 
   readonly showDetail      = signal(false);
   readonly selectedReceipt = signal<Receipt | null>(null);
@@ -42,11 +42,17 @@ export class PettyCash implements OnInit {
 
   ngOnInit() { this.loadReceipts(); }
 
-  openNew()   { this.editing.set('new'); }
-  closeForm() { this.editing.set(null); }
+  openNew()             { this.editing.set('new'); }
+  openEdit(r: Receipt)  { this.closeDetail(); this.editing.set(r); }
+  closeForm()           { this.editing.set(null); }
 
   onSaved(receipt: Receipt) {
-    this.receipts.update(list => [receipt, ...list]);
+    this.receipts.update(list => {
+      const idx = list.findIndex(r => r.id === receipt.id);
+      return idx === -1
+        ? [receipt, ...list]
+        : list.map(r => r.id === receipt.id ? receipt : r);
+    });
   }
 
   openDetail(r: Receipt) {
@@ -58,7 +64,7 @@ export class PettyCash implements OnInit {
 
   fmtNum(n: number): string { return n.toFixed(2); }
   fmtDate(s: string): string {
-    const d = new Date(s + 'T00:00:00');
+    const d = new Date(s);
     return d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 

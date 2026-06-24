@@ -1,0 +1,137 @@
+<app-modal
+  [visible]="visible()"
+  (closed)="close()"
+  title="Gestionar por Sucursal"
+  size="ml">
+
+  <div class="flex flex-col gap-5 pt-1">
+
+    <!-- ── Producto ───────────────────────────────────────────────────────── -->
+    @if (editing(); as p) {
+      <div class="flex items-center gap-3">
+        @if (p.imagenUrl) {
+          <img [src]="p.imagenUrl" alt=""
+               class="w-11 h-11 rounded-xl object-cover shrink-0 ring-1 ring-border" />
+        } @else {
+          <div class="w-11 h-11 rounded-xl shrink-0 ring-1 ring-border
+                      bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+            <i class="pi pi-box text-stone-400"></i>
+          </div>
+        }
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-stone-900 dark:text-stone-100 truncate">{{ p.descripcion }}</p>
+          <p class="text-xs text-stone-400 font-mono mt-0.5">{{ p.sku }}</p>
+        </div>
+        <p-tag
+          [value]="p.estado === 1 ? 'Activo' : 'Inactivo'"
+          [severity]="p.estado === 1 ? 'success' : 'danger'" />
+      </div>
+    }
+
+    <!-- ── Lista de sucursales ────────────────────────────────────────────── -->
+    <div class="flex flex-col gap-2">
+
+      @if (!loading()) {
+        <p class="text-xs text-stone-400 font-medium">
+          {{ rows().length }} {{ rows().length === 1 ? 'sucursal' : 'sucursales' }}
+        </p>
+      }
+
+      @if (loading()) {
+        @for (_ of [1, 2, 3]; track $index) {
+          <div class="flex items-center gap-3 px-4 py-3.5 rounded-xl
+                      border border-border animate-pulse">
+            <div class="w-2 h-2 rounded-full bg-stone-200 dark:bg-stone-700 shrink-0"></div>
+            <div class="h-3.5 w-44 rounded bg-stone-200 dark:bg-stone-700"></div>
+            <div class="ml-auto h-8 w-52 rounded-lg bg-stone-100 dark:bg-stone-800"></div>
+          </div>
+        }
+      } @else if (rows().length === 0) {
+        <div class="flex flex-col items-center gap-2 py-10 text-stone-400">
+          <i class="pi pi-building text-2xl"></i>
+          <p class="text-sm">No hay sucursales disponibles</p>
+        </div>
+      } @else {
+        @for (row of rows(); track row.id) {
+          <div class="flex items-center gap-3 px-4 py-3.5 rounded-xl border transition-colors"
+               [class]="row.estadoBranch === 1
+                 ? 'border-border hover:border-stone-300 dark:hover:border-stone-600 hover:bg-stone-50/60 dark:hover:bg-stone-900/40'
+                 : 'border-border bg-stone-50/40 dark:bg-stone-900/20 opacity-60'">
+
+            <!-- Dot de estado -->
+            <div class="w-2 h-2 rounded-full shrink-0 mt-0.5"
+                 [class]="row.estadoBranch === 1 ? 'bg-emerald-500' : 'bg-stone-300 dark:bg-stone-600'">
+            </div>
+
+            <!-- Nombre -->
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-stone-800 dark:text-stone-200 truncate">
+                {{ row.descripcion }}
+              </p>
+              @if (row.estadoBranch !== 1) {
+                <p class="text-[11px] text-stone-400 leading-tight">Sucursal inactiva</p>
+              }
+            </div>
+
+            <!-- Controles (solo sucursal activa) -->
+            @if (row.estadoBranch === 1) {
+              <div class="flex items-center gap-2.5 shrink-0 px-3 py-1.5
+                          rounded-lg border border-border
+                          bg-white dark:bg-surface-900">
+
+                <!-- Toggle producto activo -->
+                <div class="flex items-center gap-1.5">
+                  <p-toggleswitch
+                    [ngModel]="row.productoActivo"
+                    (ngModelChange)="toggleRow(row)"
+                    size="small" />
+                  <span class="text-xs text-stone-500 w-12 leading-none">
+                    {{ row.productoActivo ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </div>
+
+                <!-- Divisor -->
+                <div class="w-px h-5 bg-border shrink-0"></div>
+
+                <!-- Stock mínimo -->
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[11px] text-stone-400 shrink-0">Stock mín.</span>
+                  <p-inputnumber
+                    [ngModel]="row.stockMin"
+                    (ngModelChange)="updateStockMin(row, $event ?? 0)"
+                    [min]="0" [max]="9999"
+                    inputStyleClass="w-14 text-center text-sm font-mono"
+                    size="small" />
+                </div>
+
+                <!-- Guardar -->
+                <p-button
+                  icon="pi pi-check"
+                  size="small"
+                  [text]="true"
+                  severity="secondary"
+                  [loading]="row.saving"
+                  (onClick)="saveRow(row)" />
+              </div>
+            } @else {
+              <span class="text-xs text-stone-400 shrink-0">No disponible</span>
+            }
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Nota pendiente -->
+    @if (!loading() && rows().length > 0) {
+      <p class="text-[11px] text-stone-400 leading-relaxed">
+        * Datos por sucursal son temporales hasta que el backend tenga los endpoints disponibles.
+      </p>
+    }
+
+  </div>
+
+  <div modal-footer class="flex justify-end pt-1">
+    <p-button label="Cerrar" severity="secondary" [outlined]="true" size="small" (onClick)="close()" />
+  </div>
+
+</app-modal>

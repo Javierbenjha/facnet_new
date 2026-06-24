@@ -4,6 +4,7 @@ import { Button } from 'primeng/button';
 import { InputNumber } from 'primeng/inputnumber';
 import { AppModal } from '../../shared/app-modal/app-modal';
 import { ProductForm } from '../products/product-form/product-form';
+import { Product } from '../../core/models/product.model';
 import { SaleHeader } from './sale-header/sale-header';
 import { SaleInfo } from './sale-info/sale-info';
 import { SaleProducts } from './sale-products/sale-products';
@@ -158,7 +159,7 @@ export class Sale {
   }));
 
   // ── Product creation ───────────────────────────────────────────────────────
-  onProductSaved(p: { id: string; descripcion: string; sku: string; unidad: string; costo: number }) {
+  onProductSaved(p: Product) {
     const nuevo: PosProducto = {
       id:            p.id,
       descripcion:   p.descripcion,

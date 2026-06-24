@@ -10,6 +10,7 @@ import { AutoComplete } from 'primeng/autocomplete';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 import { AppModal } from '../../../shared/app-modal/app-modal';
 import { ProductForm } from '../../products/product-form/product-form';
+import { Product } from '../../../core/models/product.model';
 import { POS_PRODUCTOS, PosProducto } from '../../sale/sale.models';
 import {
   CompraHistorial, PurchaseItem, TIPOS_DOC_COMPRA, TipoDocCompraOption,
@@ -211,10 +212,10 @@ export class PurchaseForm {
     setTimeout(() => { this.selectedProducto = null; });
   }
 
-  onProductSaved(p: { id: string; descripcion: string; sku: string; unidad: string; costo: number }) {
+  onProductSaved(p: Product) {
     this.items.update(list => [...list, {
       id: p.id, nombre: p.descripcion, sku: p.sku,
-      unidad: p.unidad, cantidad: 1, precio: p.costo,
+      unidad: p.unidad ?? '', cantidad: 1, precio: p.costo,
     }]);
     this.showProductForm.set(false);
     this.selectedProducto = null;

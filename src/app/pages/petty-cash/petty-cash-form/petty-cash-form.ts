@@ -11,7 +11,7 @@ import { AppModal } from '../../../shared/app-modal/app-modal';
 import { PettyCashService } from '../../../core/services/petty-cash';
 import { StoresService } from '../../../core/services/stores';
 import { Toaster } from '../../../core/services/toast';
-import { MONEDAS, Moneda, Receipt, Reason, ReceiptType, TIPO_A_RECIBO, TipoMovimiento } from '../../../core/models/petty-cash.model';
+import { MONEDAS, Moneda, Receipt, Reason, ReceiptType, TIPO_A_RECIBO, TipoMovimiento, UpdateReceiptPayload } from '../../../core/models/petty-cash.model';
 
 @Component({
   selector: 'app-petty-cash-form',
@@ -29,7 +29,7 @@ export class PettyCashForm {
   private readonly stores  = inject(StoresService);
   private readonly toaster = inject(Toaster);
 
-  readonly editing = input<'new' | null>(null);
+  readonly editing = input<'new' | Receipt | null>(null);
   readonly closed  = output<void>();
   readonly saved   = output<Receipt>();
   readonly guardandoRecibo = signal(false);
@@ -60,11 +60,13 @@ export class PettyCashForm {
   readonly detalle    = signal('');
 
   // ── Computed ───────────────────────────────────────────────────────────────
-  readonly visible = computed(() => this.editing() !== null);
+  readonly visible  = computed(() => this.editing() !== null);
+  readonly isEdit   = computed(() => !!this.editing() && this.editing() !== 'new');
 
-  readonly modalTitle = computed(() =>
-    this.tipo() === 'INGRESO' ? 'Nuevo Ingreso' : 'Nuevo Egreso'
-  );
+  readonly modalTitle = computed(() => {
+    const prefix = this.isEdit() ? 'Editar' : 'Nuevo';
+    return this.tipo() === 'INGRESO' ? `${prefix} Ingreso` : `${prefix} Egreso`;
+  });
 
   readonly tipoDoc = computed(() =>
     this.receiptTypes().find(rt => rt.id === TIPO_A_RECIBO[this.tipo()])
@@ -87,8 +89,21 @@ export class PettyCashForm {
     this.loadData();
 
     effect(() => {
-      if (this.editing() === 'new') this.resetForm();
-    });
+      const e       = this.editing();
+      const reasons = this.reasons();
+
+      if (e === 'new') { this.resetForm(); return; }
+      if (!e || !reasons.length) return;
+
+      const tipDoc: 77 | 78 = e.tip_doc as 77 | 78;
+      this.tipo.set(tipDoc === 77 ? 'INGRESO' : 'EGRESO');
+      this.motivo.set(reasons.find(m => m.id === e.codigo_motivo) ?? null);
+      this.fecha.set(new Date(e.fecha));
+      this.entregadoA.set(e.entregado);
+      this.moneda.set(MONEDAS.find(m => m.id_moneda === e.tipo_moneda) ?? MONEDAS[0]);
+      this.importe.set(Number(e.importe));
+      this.detalle.set(e.observacion ?? '');
+    }, { allowSignalWrites: true });
   }
 
   // ── Methods ────────────────────────────────────────────────────────────────
@@ -125,30 +140,55 @@ export class PettyCashForm {
   registrar() {
     if (!this.esValido()) return;
 
-    const fecha = this.fecha();
-    const payload = {
-      tip_doc:       TIPO_A_RECIBO[this.tipo()],
-      fecha:         `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}`,
-      entregado:     this.entregadoA(),
-      codigo_motivo: Number(this.motivo()!.id),
-      tipo_moneda:   this.moneda().id_moneda,
-      importe:       this.importe(),
-      observacion:   this.detalle(),
-    };
+    const editing  = this.editing();
+    const fecha    = this.fecha();
+    const fechaStr = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}`;
 
     this.guardandoRecibo.set(true);
-    this.svc.createReceipt(payload).subscribe({
-      next: receipt => {
-        this.toaster.success('Recibo registrado', `N° ${receipt.numero} creado correctamente`);
-        this.saved.emit(receipt);
-        this.closed.emit();
-        this.guardandoRecibo.set(false);
-      },
-      error: () => {
-        this.toaster.error('Error', 'No se pudo registrar el recibo. Verificá los datos.');
-        this.guardandoRecibo.set(false);
-      },
-    });
+
+    if (editing && editing !== 'new') {
+      const payload: UpdateReceiptPayload = {
+        fecha:         fechaStr,
+        entregado:     this.entregadoA(),
+        codigo_motivo: Number(this.motivo()!.id),
+        tipo_moneda:   this.moneda().id_moneda,
+        importe:       this.importe(),
+        observacion:   this.detalle(),
+      };
+      this.svc.updateReceipt(editing.id, payload).subscribe({
+        next: receipt => {
+          this.toaster.success('Recibo actualizado', `N° ${receipt.numero} actualizado correctamente`);
+          this.saved.emit(receipt);
+          this.closed.emit();
+          this.guardandoRecibo.set(false);
+        },
+        error: () => {
+          this.toaster.error('Error', 'No se pudo actualizar el recibo.');
+          this.guardandoRecibo.set(false);
+        },
+      });
+    } else {
+      this.svc.createReceipt({
+        tip_doc:       TIPO_A_RECIBO[this.tipo()],
+        fecha:         fechaStr,
+        entregado:     this.entregadoA(),
+        codigo_motivo: Number(this.motivo()!.id),
+        tipo_moneda:   this.moneda().id_moneda,
+        importe:       this.importe(),
+        observacion:   this.detalle(),
+      }).subscribe({
+        next: receipt => {
+          this.toaster.success('Recibo registrado', `N° ${receipt.numero} creado correctamente`);
+          this.saved.emit(receipt);
+          this.closed.emit();
+          this.guardandoRecibo.set(false);
+        },
+        error: () => {
+          this.toaster.error('Error', 'No se pudo registrar el recibo. Verificá los datos.');
+          this.guardandoRecibo.set(false);
+        },
+      });
+    }
   }
 
   close() { this.closed.emit(); }

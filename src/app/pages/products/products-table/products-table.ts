@@ -8,7 +8,9 @@ import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { Tag } from 'primeng/tag';
 import { Menu } from 'primeng/menu';
-import { CATEGORIES, Producto } from '../products.models';
+import { MenuItem } from 'primeng/api';
+import { Product } from '../../../core/models/product.model';
+import { siglaMoneda } from '../products.models';
 import { DataTable, TableColumn } from '../../../shared/data-table/data-table';
 import { TablePagination } from '../../../shared/table-pagination/table-pagination';
 
@@ -28,17 +30,20 @@ const THUMB_COLORS = [
   imports: [FormsModule, Button, Select, SelectButton, InputText, IconField, InputIcon, Tag, Menu, DataTable, TablePagination],
 })
 export class ProductsTable {
-  products    = input<Producto[]>([]);
-  tipo        = input<'productos' | 'servicios'>('productos');
-  editProduct = output<Producto>();
+  products     = input<Product[]>([]);
+  tipo         = input<'productos' | 'servicios'>('productos');
+  loading      = input(false);
+  editProduct      = output<Product>();
+  toggleEstado     = output<Product>();
+  gestionarSucursal = output<Product>();
 
   readonly query          = signal('');
   readonly debouncedQuery = debounced(this.query, 300);
-  readonly cat    = signal('Todas');
-  readonly status = signal<'todos' | 'activos' | 'inactivos'>('todos');
-  readonly view         = signal<'table' | 'grid'>('table');
-  readonly gridPage     = signal(1);
-  readonly gridPageSize = signal(8);
+  readonly cat            = signal('');
+  readonly status         = signal<'todos' | 'activos' | 'inactivos'>('todos');
+  readonly view           = signal<'table' | 'grid'>('table');
+  readonly gridPage       = signal(1);
+  readonly gridPageSize   = signal(8);
 
   private readonly productoCellTpl  = viewChild.required<TemplateRef<unknown>>('productoCellTpl');
   private readonly skuCellTpl       = viewChild.required<TemplateRef<unknown>>('skuCellTpl');
@@ -60,7 +65,17 @@ export class ProductsTable {
     }, { allowSignalWrites: true });
   }
 
-  readonly categories = CATEGORIES.map(c => ({ label: c, value: c }));
+  readonly categoryOptions = computed(() => {
+    const cats = [...new Set(
+      this.products()
+        .filter(p => p.categoria)
+        .map(p => p.categoria!)
+    )].sort();
+    return [
+      { label: 'Todas', value: '' },
+      ...cats.map(c => ({ label: c, value: c })),
+    ];
+  });
 
   readonly statusOptions = [
     { label: 'Todos',     value: 'todos'     },
@@ -74,12 +89,12 @@ export class ProductsTable {
     const s = this.status();
     const t = this.tipo();
     return this.products().filter(p =>
-      (t === 'productos' ? p.st_producto !== 0 : p.st_producto === 0) &&
-      (t === 'servicios' || c === 'Todas' || p.categoria === c) &&
+      (t === 'productos' ? p.marcaId !== null : p.marcaId === null) &&
+      (t === 'servicios' || !c || p.categoria === c) &&
       (!q || p.descripcion.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)) &&
       (s === 'todos' ||
-       (s === 'activos'   && p.estado === 'ACTIVO') ||
-       (s === 'inactivos' && p.estado === 'INACTIVO'))
+       (s === 'activos'   && p.estado === 1) ||
+       (s === 'inactivos' && p.estado === 2))
     );
   });
 
@@ -102,15 +117,15 @@ export class ProductsTable {
       );
     }
     cols.push(
-      { key: 'costo',          label: 'Costo',      class: 'text-right', cellTemplate: this.costoCellTpl() },
-      { key: 'precio_publico', label: 'P. Público', class: 'text-right', cellTemplate: this.precioPubCellTpl() },
-      { key: 'precio_mayor',   label: 'P. Mayor',   class: 'text-right', cellTemplate: this.precioMayCellTpl() },
-      { key: 'estado',         label: 'Estado',                           cellTemplate: this.estadoCellTpl() },
+      { key: 'costo',         label: 'Costo',      class: 'text-right', cellTemplate: this.costoCellTpl() },
+      { key: 'precioPublico', label: 'P. Público', class: 'text-right', cellTemplate: this.precioPubCellTpl() },
+      { key: 'precioMayor',   label: 'P. Mayor',   class: 'text-right', cellTemplate: this.precioMayCellTpl() },
+      { key: 'estado',        label: 'Estado',                           cellTemplate: this.estadoCellTpl() },
     );
     if (t === 'productos') {
       cols.push(
-        { key: 'stock',     label: 'Stock',      cellTemplate: this.stockCellTpl() },
-        { key: 'stock_min', label: 'Stock Mín.', class: 'text-right', cellTemplate: this.stockMinCellTpl() },
+        { key: 'stock',    label: 'Stock',      cellTemplate: this.stockCellTpl() },
+        { key: 'stockMin', label: 'Stock Mín.', class: 'text-right', cellTemplate: this.stockMinCellTpl() },
       );
     }
     cols.push({ key: '_actions', label: '', class: 'w-16', cellTemplate: this.actionCellTpl() });
@@ -119,24 +134,30 @@ export class ProductsTable {
 
   thumb(i: number)       { return THUMB_COLORS[i % THUMB_COLORS.length]; }
   skuPrefix(sku: string) { return sku.split('-')[0]; }
+  sigla(p: Product)      { return siglaMoneda(p.tipoMoneda); }
 
-  stockSeverity(p: Producto): 'success' | 'warn' | 'danger' | 'secondary' {
-    if (p.stock === 999)        return 'secondary';
-    if (p.stock <= 0)           return 'danger';
-    if (p.stock < p.stock_min)  return 'warn';
+  stockSeverity(p: Product): 'success' | 'warn' | 'danger' | 'secondary' {
+    const stock = p.stock;
+    if (stock == null) return 'secondary';
+    if (stock <= 0)    return 'danger';
+    if (stock < (p.stockMin ?? 0)) return 'warn';
     return 'success';
   }
 
-  getMenuItems(p: Producto) {
-    const isActive = p.st_producto === 1;
-    return [
-      { label: 'Editar',                       icon: 'pi pi-pencil',       command: () => this.editProduct.emit(p) },
-      { label: isActive ? 'Inactivar' : 'Activar', icon: isActive ? 'pi pi-times-circle' : 'pi pi-check-circle' },
+  readonly rowMenuItems = signal<MenuItem[]>([]);
+
+  openRowMenu(event: Event, p: Product, menu: Menu) {
+    const isActive = p.estado === 1;
+    this.rowMenuItems.set([
+      { label: 'Editar',                            icon: 'pi pi-pencil',       command: () => this.editProduct.emit(p) },
+      { label: isActive ? 'Desactivar' : 'Activar', icon: isActive ? 'pi pi-times-circle' : 'pi pi-check-circle',
+        command: () => this.toggleEstado.emit(p) },
       { separator: true },
-      { label: 'Gestionar por Sucursal', icon: 'pi pi-building'  },
+      { label: 'Gestionar por Sucursal', icon: 'pi pi-building', command: () => this.gestionarSucursal.emit(p) },
       { label: 'Ver movimientos',        icon: 'pi pi-chart-bar' },
       { label: 'Historial de compras',   icon: 'pi pi-history'   },
-    ];
+    ]);
+    menu.toggle(event);
   }
 
   onQueryChange(v: string)                              { this.query.set(v);  }
