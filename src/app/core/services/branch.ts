@@ -17,6 +17,10 @@ export class Branch {
     return this.http.post<Sucursal>(`${this.apiUrl}/${ciaId}/branches`, body);
   }
 
+  update(id: string, body: SucursalRequest): Observable<SucursalListItem> {
+    return this.http.patch<SucursalListItem>(`${this.apiUrl}/branches/${id}`, body);
+  }
+
   getBranches(): Observable<Sucursal[]> {
     return this.http.get<Sucursal[]>(`${this.apiUrl}/my-branches`);
   }

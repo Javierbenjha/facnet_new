@@ -94,7 +94,7 @@
       <h4 class="text-sm font-semibold text-stone-800 dark:text-stone-100">Ubicación</h4>
       <!-- El widget arma el ubigeo concatenando dep+prov+dist y lo emite por selectionChange. -->
       @if (visible()) {
-        <app-ubigeo-select (selectionChange)="onUbigeoChange($event)" />
+        <app-ubigeo-select [initial]="ubigeoInitial()" (selectionChange)="onUbigeoChange($event)" />
       }
     </div>
   </div>

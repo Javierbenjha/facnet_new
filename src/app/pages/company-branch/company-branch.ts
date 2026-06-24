@@ -9,8 +9,9 @@ import { BranchForm } from './branch-form/branch-form';
 import { Company } from '../../core/services/company';
 import { Cia, CompanyRequest } from '../../core/models/company.model';
 import { Branch } from '../../core/services/branch';
-import { Sucursal, SucursalRequest, SucursalListItem } from '../../core/models/branch.model';
+import { SucursalRequest, SucursalListItem } from '../../core/models/branch.model';
 import { Toaster } from '../../core/services/toast';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-company-branch',
@@ -45,7 +46,7 @@ export class CompanyBranch {
     { label: 'Sucursales', value: 'sucursal', icon: 'pi pi-shop' },
   ];
   readonly editingEmpresa = signal<Cia | 'new' | null>(null);
-  readonly editingSucursal = signal<Sucursal | 'new' | null>(null);
+  readonly editingSucursal = signal<SucursalListItem | 'new' | null>(null);
 
   openNewEmpresa() {
     this.editingEmpresa.set('new');
@@ -60,7 +61,7 @@ export class CompanyBranch {
   openNewSucursal() {
     this.editingSucursal.set('new');
   }
-  openEditSucursal(s: Sucursal) {
+  openEditSucursal(s: SucursalListItem) {
     this.editingSucursal.set(s);
   }
   closeSucursalForm() {
@@ -86,11 +87,19 @@ export class CompanyBranch {
   }
 
   onSucursalSaved({ ciaId, payload }: { ciaId: string; payload: SucursalRequest }) {
-    if (!ciaId) {
-      this.toast.error('Empresa requerida', 'Seleccioná una empresa para la sucursal.');
-      return;
+    const editing = this.editingSucursal();
+    let request$: Observable<unknown>;
+    if (editing && editing !== 'new') {
+      // Update por id de sucursal; el ciaId no se usa (no se reasigna de empresa).
+      request$ = this.branch.update(editing.id, payload);
+    } else {
+      if (!ciaId) {
+        this.toast.error('Empresa requerida', 'Seleccioná una empresa para la sucursal.');
+        return;
+      }
+      request$ = this.branch.createByCiaID(payload, ciaId);
     }
-    this.branch.createByCiaID(payload, ciaId).subscribe({
+    request$.subscribe({
       next: () => {
         this.loadBranches();
         this.editingSucursal.set(null);

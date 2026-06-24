@@ -4,7 +4,7 @@ import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { AppModal } from '../../../shared/app-modal/app-modal';
-import { Sucursal, SucursalRequest } from '../../../core/models/branch.model';
+import { SucursalListItem, SucursalRequest } from '../../../core/models/branch.model';
 import { Cia } from '../../../core/models/company.model';
 import { UbigeoSelect, UbigeoSelection } from '../../../shared/ubigeo-select/ubigeo-select';
 
@@ -17,7 +17,7 @@ import { UbigeoSelect, UbigeoSelection } from '../../../shared/ubigeo-select/ubi
 export class BranchForm {
   private readonly fb = inject(FormBuilder);
 
-  readonly editing  = input<Sucursal | 'new' | null>(null);
+  readonly editing  = input<SucursalListItem | 'new' | null>(null);
   readonly empresas = input<Cia[]>([]);
   readonly closed   = output<void>();
   // El ciaId va en la URL (no en el body), por eso se emite aparte del payload.
@@ -28,12 +28,19 @@ export class BranchForm {
   readonly modalTitle = computed(() => {
     const e = this.editing();
     if (!e) return '';
-    return e === 'new' ? 'Nueva sucursal' : `Editar · ${(e as Sucursal).descripcion}`;
+    return e === 'new' ? 'Nueva sucursal' : `Editar · ${(e as SucursalListItem).descripcion}`;
   });
 
   readonly empresaOptions = computed(() =>
     this.empresas().map((e) => ({ label: e.descripcion, value: e.id })),
   );
+
+  // Códigos para precargar la cascada de ubigeo al editar; null al crear.
+  readonly ubigeoInitial = computed(() => {
+    const e = this.editing();
+    if (!e || e === 'new') return null;
+    return { departamento: e.codigoDepartamento, provincia: e.codigoProvincia, distrito: e.codigoDistrito };
+  });
 
   readonly form = this.fb.nonNullable.group({
     empresa_id:   [''],
@@ -57,19 +64,19 @@ export class BranchForm {
           descripcion: '', direccion: '', telefono: '', email: '',
           departamento: '', provincia: '', distrito: '', ubigeo: '',
         });
+        this.form.controls.empresa_id.enable();
       } else {
-        const suc = e as Sucursal;
+        const suc = e as SucursalListItem;
         this.form.patchValue({
+          empresa_id: suc.ciaId,
           descripcion: suc.descripcion,
           direccion: suc.direccion,
           // telefono/email pueden venir null; el form es nonNullable, así que coercemos a ''.
           telefono: suc.telefono ?? '',
           email: suc.email ?? '',
-          departamento: suc.departamento,
-          provincia: suc.provincia,
-          distrito: suc.distrito,
-          ubigeo: suc.ubigeo,
         });
+        // La empresa no se reasigna en update; la ubicación la precarga el widget vía [initial].
+        this.form.controls.empresa_id.disable();
       }
     });
   }
