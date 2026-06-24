@@ -10,6 +10,7 @@ import { Empresa, Sucursal, EMPRESAS_MOCK, SUCURSALES_MOCK } from './company-bra
 import { Company } from '../../core/services/company';
 import { Cia } from '../../core/models/company.model';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { Branch } from '../../core/services/branch';
 
 @Component({
   selector: 'app-company-branch',
@@ -19,9 +20,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
 })
 export class CompanyBranch {
   private readonly company = inject(Company);
+  private readonly branch = inject(Branch);
 
   readonly cias = toSignal(this.company.getCompanies(), { initialValue: [] });
-
+  readonly branches = toSignal(this.branch.getAllBranches(), { initialValue: [] });
+  
   readonly tab = signal<'empresa' | 'sucursal'>('empresa');
 
   readonly tabOptions = [
