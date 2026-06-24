@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Select } from 'primeng/select';
 import { Ubigeo } from '../../core/services/ubigeo';
 import { Department, District, Province } from '../../core/models/ubigeo.model';
 
@@ -21,6 +23,7 @@ export interface UbigeoInitial {
   selector: 'app-ubigeo-select',
   templateUrl: './ubigeo-select.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [Select, FormsModule],
 })
 export class UbigeoSelect implements OnInit {
   private readonly ubigeo = inject(Ubigeo);
