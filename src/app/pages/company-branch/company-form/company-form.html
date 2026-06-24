@@ -71,8 +71,9 @@
           </label>
           <div class="flex gap-2">
             <input pInputText pSize="small" [formControl]="form.controls.ruc" placeholder="20123456789"
-                   class="w-full font-mono" maxlength="11" />
-            <p-button icon="pi pi-search" severity="secondary" [outlined]="true" size="small" (onClick)="buscarRuc()" />
+                   class="w-full font-mono" maxlength="11" (keydown)="buscarRuc()" />
+            <p-button icon="pi pi-search" severity="secondary" [outlined]="true" size="small"
+                      [loading]="loadingRuc()" (onClick)="buscarRuc()" />
           </div>
         </div>
 
@@ -81,7 +82,7 @@
             Razón Social
             <span class="ml-2 text-xs font-normal text-stone-400">Auto-completado</span>
           </label>
-          <input pInputText pSize="small" [formControl]="form.controls.razon_social"
+          <input pInputText pSize="small" [formControl]="form.controls.descripcion"
                  placeholder="Se completa desde SUNAT" class="w-full" />
         </div>
 
@@ -130,18 +131,6 @@
                  placeholder="00-000000" class="w-full font-mono" />
         </div>
 
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Client ID</label>
-          <input pInputText pSize="small" [formControl]="form.controls.client_id"
-                 placeholder="client_id" class="w-full font-mono" />
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Client Secret</label>
-          <input pInputText pSize="small" type="password" [formControl]="form.controls.client_secret"
-                 placeholder="••••••••" class="w-full font-mono" />
-        </div>
-
       </div>
     </div>
 
@@ -160,7 +149,7 @@
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Límite retención (S/)</label>
-          <p-inputnumber [formControl]="form.controls.limite_retencion"
+          <p-inputnumber [formControl]="form.controls.limit_ret"
                          mode="decimal" [minFractionDigits]="0" styleClass="w-full" inputStyleClass="!py-[0.375rem] !text-sm w-full" />
         </div>
 

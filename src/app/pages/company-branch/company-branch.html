@@ -105,19 +105,13 @@
             </div>
 
             <!-- Actions -->
-              <div class="flex gap-2 pt-1 border-t border-border">
+            <!-- TODO(sucursal-phase): wire Editar (openEditEmpresa) + toggle estado (DELETE /cia/:id)
+            <div class="flex gap-2 pt-1 border-t border-border">
               <p-button label="Editar" icon="pi pi-pencil" severity="secondary" [outlined]="true"
                         size="small" styleClass="flex-1 justify-center"
-                      /*   (onClick)="openEditEmpresa(e)"  */ />
-              <p-button
-                [icon]="e.estado === 1 ? 'pi pi-ban' : 'pi pi-check-circle'"
-                [label]="e.estado === 1 ? 'Desactivar' : 'Activar'"
-                [severity]="e.estado === 1 ? 'danger' : 'success'"
-                [outlined]="true"
-                size="small"
-                styleClass="flex-1 justify-center"
-                /* (onClick)="toggleEmpresaEstado(e)"*/ />
+                        (onClick)="openEditEmpresa(e)" />
             </div>
+            -->
           </div>
         }
       </div>

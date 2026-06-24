@@ -67,7 +67,7 @@ export interface CompanyRequest {
   stretencion: number;     // Default: false - ¿Aplica retención?
   limit_ret: number;        // Requerido, mín. 0 (default: 700)
   ctedetra: string;        // Opcional - Cuenta de detracción
-  usuario_id: string;       // Requerido - ID del usuario (del JWT)
+  usuario_id?: string;      // Lo resuelve el backend desde el token; no hace falta mandarlo
 }
 
 export interface CompanyResponse {

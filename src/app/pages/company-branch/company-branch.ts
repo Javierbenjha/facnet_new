@@ -8,9 +8,11 @@ import { CompanyForm } from './company-form/company-form';
 import { BranchForm } from './branch-form/branch-form';
 import { Empresa, Sucursal, EMPRESAS_MOCK, SUCURSALES_MOCK } from './company-branch.models';
 import { Company } from '../../core/services/company';
-import { Cia } from '../../core/models/company.model';
+import { Cia, CompanyRequest } from '../../core/models/company.model';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Branch } from '../../core/services/branch';
+import { Toast } from 'primeng/toast';
+import { Toaster } from '../../core/services/toast';
 
 @Component({
   selector: 'app-company-branch',
@@ -21,10 +23,19 @@ import { Branch } from '../../core/services/branch';
 export class CompanyBranch {
   private readonly company = inject(Company);
   private readonly branch = inject(Branch);
-
-  readonly cias = toSignal(this.company.getCompanies(), { initialValue: [] });
+  private readonly toast = inject(Toaster);
+  readonly cias = signal<Cia[]>([]);
   readonly branches = toSignal(this.branch.getAllBranches(), { initialValue: [] });
-  
+
+
+  constructor() {
+    this.loadCompanies();
+  }
+
+  private loadCompanies() {
+    this.company.getCompanies().subscribe((list) => this.cias.set(list));
+  }
+
   readonly tab = signal<'empresa' | 'sucursal'>('empresa');
 
   readonly tabOptions = [
@@ -34,13 +45,13 @@ export class CompanyBranch {
   readonly empresas = signal<Empresa[]>([...EMPRESAS_MOCK]);
   readonly sucursales = signal<Sucursal[]>([...SUCURSALES_MOCK]);
 
-  readonly editingEmpresa = signal<Empresa | 'new' | null>(null);
+  readonly editingEmpresa = signal<Cia | 'new' | null>(null);
   readonly editingSucursal = signal<Sucursal | 'new' | null>(null);
 
   openNewEmpresa() {
     this.editingEmpresa.set('new');
   }
-  openEditEmpresa(e: Empresa) {
+  openEditEmpresa(e: Cia) {
     this.editingEmpresa.set(e);
   }
   closeEmpresaForm() {
@@ -57,10 +68,26 @@ export class CompanyBranch {
     this.editingSucursal.set(null);
   }
 
-  onEmpresaSaved(e: Empresa) {
-    this.empresas.update((list) => {
-      const exists = list.some((x) => x.id === e.id);
-      return exists ? list.map((x) => (x.id === e.id ? e : x)) : [...list, e];
+  onEmpresaSaved(payload: CompanyRequest) {
+    const editing = this.editingEmpresa();
+    const request$ =
+      editing && editing !== 'new'
+        ? this.company.update(payload, editing.id)
+        : this.company.create(payload);
+
+    request$.subscribe({
+      next: (res) => {
+        this.cias.update((list) => {
+          const exists = list.some((c) => c.id === res.company.id);
+          return exists
+            ? list.map((c) => (c.id === res.company.id ? res.company : c))
+            : [...list, res.company];
+        });
+        this.editingEmpresa.set(null);
+      },
+      error: (err) => {
+        this.toast.error('Error al guardar empresa', err.error?.message);
+      }
     });
   }
 
@@ -69,11 +96,6 @@ export class CompanyBranch {
       const exists = list.some((x) => x.id === s.id);
       return exists ? list.map((x) => (x.id === s.id ? s : x)) : [...list, s];
     });
-  }
-
-  toggleEmpresaEstado(e: Empresa) {
-    const updated: Empresa = { ...e, estado: e.estado === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO' };
-    this.empresas.update((list) => list.map((x) => (x.id === e.id ? updated : x)));
   }
 
   toggleSucursalEstado(s: Sucursal) {
