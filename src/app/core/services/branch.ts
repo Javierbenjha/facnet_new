@@ -7,12 +7,17 @@ import { environment } from '../../../environments/environment';
 @Service()
 export class Branch {
   private readonly http = inject(HttpClient);
+  private readonly apiUrl = `${environment.apiUrl}/cia`;
 
   create(body: SucursalRequest): Observable<Sucursal> {
-    return this.http.post<Sucursal>(`${environment.apiUrl}/cia/branches`, body);
+    return this.http.post<Sucursal>(`${this.apiUrl}/branches`, body);
   }
 
   getBranches(): Observable<Sucursal[]> {
-    return this.http.get<Sucursal[]>(`${environment.apiUrl}/cia/my-branches`);
+    return this.http.get<Sucursal[]>(`${this.apiUrl}/my-branches`);
+  }
+
+  getAllBranches(): Observable<Sucursal[]> {
+    return this.http.get<Sucursal[]>(`${this.apiUrl}/all-branches`);
   }
 }
