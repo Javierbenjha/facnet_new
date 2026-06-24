@@ -3,47 +3,54 @@
   (visibleChange)="$event || close()"
   (closed)="close()"
   [title]="modalTitle()"
-  size="md">
-
+  size="md"
+>
   <div class="flex flex-col gap-2 pt-1">
-
-    <!-- ── Información Empresarial ── -->
+    <!-- ── Información de la Sucursal ── -->
     <div class="flex flex-col gap-2">
-      <h4 class="text-sm font-semibold text-stone-800 dark:text-stone-100">Información Empresarial</h4>
+      <h4 class="text-sm font-semibold text-stone-800 dark:text-stone-100">
+        Información de la Sucursal
+      </h4>
 
       <div class="flex flex-col gap-1">
         <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
           Empresa <span class="text-red-400">*</span>
         </label>
-        <p-select size="small" [options]="empresaOptions()" optionLabel="label" optionValue="value"
-                  [formControl]="form.controls.empresa_id" styleClass="w-full"
-                  placeholder="Seleccioná una empresa" />
+        <p-select
+          size="small"
+          [options]="empresaOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [formControl]="form.controls.empresa_id"
+          styleClass="w-full"
+          placeholder="Seleccioná una empresa"
+        />
       </div>
 
-      <div class="grid grid-cols-2 gap-4">
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
-            Nombre de la sucursal <span class="text-red-400">*</span>
-          </label>
-          <input pInputText pSize="small" [formControl]="form.controls.descripcion"
-                 placeholder="Ej: Sucursal Principal" class="w-full" />
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
-            Meta de ventas mensual (S/) <span class="text-red-400">*</span>
-          </label>
-          <p-inputnumber [formControl]="form.controls.meta"
-                         mode="decimal" [minFractionDigits]="2" styleClass="w-full" inputStyleClass="!py-[0.375rem] !text-sm w-full" />
-        </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+          Nombre de la sucursal <span class="text-red-400">*</span>
+        </label>
+        <input
+          pInputText
+          pSize="small"
+          [formControl]="form.controls.descripcion"
+          placeholder="Ej: Sucursal Principal"
+          class="w-full"
+        />
       </div>
 
       <div class="flex flex-col gap-1">
         <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
           Dirección <span class="text-red-400">*</span>
         </label>
-        <input pInputText pSize="small" [formControl]="form.controls.direccion"
-               placeholder="Av. Ejemplo 123, Lima" class="w-full" />
+        <input
+          pInputText
+          pSize="small"
+          [formControl]="form.controls.direccion"
+          placeholder="Av. Ejemplo 123, Lima"
+          class="w-full"
+        />
       </div>
     </div>
 
@@ -51,21 +58,32 @@
 
     <!-- ── Información de Contacto ── -->
     <div class="flex flex-col gap-2">
-      <h4 class="text-sm font-semibold text-stone-800 dark:text-stone-100">Información de Contacto</h4>
+      <h4 class="text-sm font-semibold text-stone-800 dark:text-stone-100">
+        Información de Contacto
+      </h4>
       <div class="grid grid-cols-2 gap-4">
-
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Teléfono</label>
-          <input pInputText pSize="small" [formControl]="form.controls.telefono"
-                 placeholder="01-0000000" class="w-full" />
+          <input
+            pInputText
+            pSize="small"
+            [formControl]="form.controls.telefono"
+            placeholder="01-0000000"
+            class="w-full"
+          />
         </div>
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Email</label>
-          <input pInputText pSize="small" type="email" [formControl]="form.controls.email"
-                 placeholder="sucursal@empresa.pe" class="w-full" />
+          <input
+            pInputText
+            pSize="small"
+            type="email"
+            [formControl]="form.controls.email"
+            placeholder="sucursal@empresa.pe"
+            class="w-full"
+          />
         </div>
-
       </div>
     </div>
 
@@ -74,40 +92,21 @@
     <!-- ── Ubicación ── -->
     <div class="flex flex-col gap-2">
       <h4 class="text-sm font-semibold text-stone-800 dark:text-stone-100">Ubicación</h4>
-      <div class="grid grid-cols-3 gap-4">
-
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
-            Departamento <span class="text-red-400">*</span>
-          </label>
-          <input pInputText pSize="small" [formControl]="form.controls.departamento"
-                 placeholder="Lima" class="w-full" />
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
-            Provincia <span class="text-red-400">*</span>
-          </label>
-          <input pInputText pSize="small" [formControl]="form.controls.provincia"
-                 placeholder="Lima" class="w-full" />
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
-            Distrito <span class="text-red-400">*</span>
-          </label>
-          <input pInputText pSize="small" [formControl]="form.controls.distrito"
-                 placeholder="Cercado de Lima" class="w-full" />
-        </div>
-
-      </div>
+      <!-- El widget arma el ubigeo concatenando dep+prov+dist y lo emite por selectionChange. -->
+      @if (visible()) {
+        <app-ubigeo-select (selectionChange)="onUbigeoChange($event)" />
+      }
     </div>
-
   </div>
 
   <div modal-footer class="flex gap-2 justify-end">
-    <p-button label="Cancelar" severity="secondary" [outlined]="true" size="small" (onClick)="close()" />
+    <p-button
+      label="Cancelar"
+      severity="secondary"
+      [outlined]="true"
+      size="small"
+      (onClick)="close()"
+    />
     <p-button label="Guardar Cambios" icon="pi pi-check" size="small" (onClick)="save()" />
   </div>
-
 </app-modal>

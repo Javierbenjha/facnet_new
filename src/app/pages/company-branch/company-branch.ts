@@ -6,12 +6,10 @@ import { SelectButton } from 'primeng/selectbutton';
 import { PageHeader } from '../../shared/page-header/page-header';
 import { CompanyForm } from './company-form/company-form';
 import { BranchForm } from './branch-form/branch-form';
-import { Empresa, Sucursal, EMPRESAS_MOCK, SUCURSALES_MOCK } from './company-branch.models';
 import { Company } from '../../core/services/company';
 import { Cia, CompanyRequest } from '../../core/models/company.model';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Branch } from '../../core/services/branch';
-import { Toast } from 'primeng/toast';
+import { Sucursal, SucursalRequest } from '../../core/models/branch.model';
 import { Toaster } from '../../core/services/toast';
 
 @Component({
@@ -25,15 +23,19 @@ export class CompanyBranch {
   private readonly branch = inject(Branch);
   private readonly toast = inject(Toaster);
   readonly cias = signal<Cia[]>([]);
-  readonly branches = toSignal(this.branch.getAllBranches(), { initialValue: [] });
-
+  readonly branches = signal<Sucursal[]>([]);
 
   constructor() {
     this.loadCompanies();
+    this.loadBranches();
   }
 
   private loadCompanies() {
     this.company.getCompanies().subscribe((list) => this.cias.set(list));
+  }
+
+  private loadBranches() {
+    this.branch.getAllBranches().subscribe((list) => this.branches.set(list));
   }
 
   readonly tab = signal<'empresa' | 'sucursal'>('empresa');
@@ -42,9 +44,6 @@ export class CompanyBranch {
     { label: 'Empresa', value: 'empresa', icon: 'pi pi-building' },
     { label: 'Sucursales', value: 'sucursal', icon: 'pi pi-shop' },
   ];
-  readonly empresas = signal<Empresa[]>([...EMPRESAS_MOCK]);
-  readonly sucursales = signal<Sucursal[]>([...SUCURSALES_MOCK]);
-
   readonly editingEmpresa = signal<Cia | 'new' | null>(null);
   readonly editingSucursal = signal<Sucursal | 'new' | null>(null);
 
@@ -86,24 +85,24 @@ export class CompanyBranch {
     });
   }
 
-  onSucursalSaved(s: Sucursal) {
-    this.sucursales.update((list) => {
-      const exists = list.some((x) => x.id === s.id);
-      return exists ? list.map((x) => (x.id === s.id ? s : x)) : [...list, s];
+  onSucursalSaved({ ciaId, payload }: { ciaId: string; payload: SucursalRequest }) {
+    if (!ciaId) {
+      this.toast.error('Empresa requerida', 'Seleccioná una empresa para la sucursal.');
+      return;
+    }
+    this.branch.createByCiaID(payload, ciaId).subscribe({
+      next: () => {
+        this.loadBranches();
+        this.editingSucursal.set(null);
+      },
+      error: (err) => {
+        this.toast.error('Error al guardar sucursal', err.error?.message);
+      },
     });
-  }
-
-  toggleSucursalEstado(s: Sucursal) {
-    const updated: Sucursal = { ...s, estado: s.estado === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO' };
-    this.sucursales.update((list) => list.map((x) => (x.id === s.id ? updated : x)));
   }
 
   estadoSev(estado: string): 'success' | 'danger' {
     return estado === 'ACTIVO' ? 'success' : 'danger';
-  }
-
-  fmtMeta(n: number) {
-    return 'S/ ' + n.toLocaleString('es-PE', { minimumFractionDigits: 0 });
   }
 
   initials(name: string) {

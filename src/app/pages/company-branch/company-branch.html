@@ -152,7 +152,7 @@
                 <p class="text-xs text-stone-400 mt-0.5 truncate">{{ s.distrito }}</p>
               </div>
               <p-tag
-                [value]="s.estadoDescripcion!"
+                [value]="s.estado === 1 ? 'ACTIVO' : 'INACTIVO'"
                 [severity]="estadoSev(s.estado === 1 ? 'ACTIVO' : 'INACTIVO')"
                 styleClass="!text-xs"
               />
@@ -179,26 +179,12 @@
             </div>
 
             <!-- Actions -->
+            <!-- TODO(sucursal): falta endpoint de update y toggle estado en el backend
             <div class="flex gap-2 pt-1 border-t border-border">
-              <p-button
-                label="Editar"
-                icon="pi pi-pencil"
-                severity="secondary"
-                [outlined]="true"
-                size="small"
-                styleClass="flex-1 justify-center"
-                //(onClick)="openEditSucursal(s)"
-              />
-              <p-button
-                [icon]="s.estado === 1 ? 'pi pi-ban' : 'pi pi-check-circle'"
-                [label]="s.estado === 1 ? 'Desactivar' : 'Activar'"
-                [severity]="s.estado === 1 ? 'danger' : 'success'"
-                [outlined]="true"
-                size="small"
-                styleClass="flex-1 justify-center"
-              //  (onClick)="toggleSucursalEstado(s)"
-              />
+              <p-button label="Editar" icon="pi pi-pencil" severity="secondary" [outlined]="true"
+                        size="small" styleClass="flex-1 justify-center" (onClick)="openEditSucursal(s)" />
             </div>
+            -->
           </div>
         }
       </div>
@@ -215,7 +201,7 @@
 
 <app-branch-form
   [editing]="editingSucursal()"
-  [empresas]="empresas()"
+  [empresas]="cias()"
   (saved)="onSucursalSaved($event)"
   (closed)="closeSucursalForm()"
 />
