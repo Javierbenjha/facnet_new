@@ -13,6 +13,7 @@ import { InputText } from 'primeng/inputtext';
 import { Password } from 'primeng/password';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 import { CompanyRequest } from '../../../../core/models/company.model';
+import { Sunat } from '../../../../core/services/sunat';
 
 // What the form hands up to its container: everything except usuario_id,
 // which comes from the session (Auth), not from the UI.
@@ -26,11 +27,18 @@ export type CompanyFormData = Omit<CompanyRequest, 'usuario_id'>;
 })
 export class CompanyForm {
   private readonly fb = inject(FormBuilder);
+  private readonly sunat = inject(Sunat);
 
   // The container owns the HTTP call, so it tells the form when to show the spinner.
   readonly loading = input(false);
   // This form is "dumb": it only validates and hands the data up.
   readonly submitted = output<CompanyFormData>();
+
+  // RUC lookup state. sunatDone gates submit: descripcion/direccion/ubigeo are
+  // disabled (filled only by SUNAT), so they fall out of form.valid — we need an
+  // explicit flag to ensure they were actually populated before allowing submit.
+  readonly loadingRuc = signal(false);
+  readonly sunatDone = signal(false);
 
   // Files are not plain text, so they live outside the FormGroup.
   readonly logoVertical = signal<File | null>(null);
@@ -67,6 +75,32 @@ export class CompanyForm {
     ctedetra: ['', [Validators.required]],
   });
 
+  constructor() {
+    // Estos 3 se completan vía SUNAT, no a mano.
+    this.form.controls.descripcion.disable();
+    this.form.controls.direccion.disable();
+    this.form.controls.ubigeo.disable();
+  }
+
+  buscarRuc() {
+    const ruc = this.form.controls.ruc.value;
+    if (ruc.length !== 11) return;
+    this.loadingRuc.set(true);
+    this.sunat.getByRuc(ruc).subscribe({
+      next: (data) => {
+        // SUNAT devuelve la razón social en `razon_social`; en el modelo es `descripcion`.
+        this.form.patchValue({
+          descripcion: data.razon_social,
+          direccion: data.direccion,
+          ubigeo: data.ubigeo,
+        });
+        this.sunatDone.set(true);
+        this.loadingRuc.set(false);
+      },
+      error: () => this.loadingRuc.set(false),
+    });
+  }
+
   onFileSelect(event: Event, slot: 'vertical' | 'horizontal') {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] ?? null;
@@ -77,7 +111,9 @@ export class CompanyForm {
   onSubmit() {
     const vertical = this.logoVertical();
     const horizontal = this.logoHorizontal();
-    if (this.form.invalid || !vertical || !horizontal) return;
+    // sunatDone garantiza que los campos deshabilitados (descripcion/direccion/ubigeo)
+    // se llenaron por SUNAT — form.invalid no los ve porque están disabled.
+    if (this.form.invalid || !vertical || !horizontal || !this.sunatDone()) return;
 
     const v = this.form.getRawValue();
     this.submitted.emit({

@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Select } from 'primeng/select';
 import { Ubigeo } from '../../core/services/ubigeo';
 import { Department, District, Province } from '../../core/models/ubigeo.model';
 
@@ -10,13 +12,24 @@ export interface UbigeoSelection {
   ubigeo: string;
 }
 
+// Códigos para precargar la selección al editar (departamento/provincia/distrito de 2 dígitos).
+export interface UbigeoInitial {
+  departamento: string;
+  provincia: string;
+  distrito: string;
+}
+
 @Component({
   selector: 'app-ubigeo-select',
   templateUrl: './ubigeo-select.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [Select, FormsModule],
 })
 export class UbigeoSelect implements OnInit {
   private readonly ubigeo = inject(Ubigeo);
+
+  // Códigos para precargar (al editar). Null = arranca vacío (al crear).
+  readonly initial = input<UbigeoInitial | null>(null);
 
   // Emits the full selection when dept+prov+dist are all chosen; null while incomplete.
   readonly selectionChange = output<UbigeoSelection | null>();
@@ -30,7 +43,26 @@ export class UbigeoSelect implements OnInit {
   readonly selectedDist = signal('');
 
   ngOnInit() {
-    this.ubigeo.getDepartments().subscribe((list) => this.departments.set(list));
+    this.ubigeo.getDepartments().subscribe((list) => {
+      this.departments.set(list);
+      this.prefill();
+    });
+  }
+
+  // Precarga la cascada desde `initial` sin pasar por los onXChange (que emitirían null a mitad).
+  private prefill() {
+    const init = this.initial();
+    if (!init) return;
+    this.selectedDept.set(init.departamento);
+    this.ubigeo.getProvinces(init.departamento).subscribe((provs) => {
+      this.provinces.set(provs);
+      this.selectedProv.set(init.provincia);
+      this.ubigeo.getDistricts(init.departamento, init.provincia).subscribe((dists) => {
+        this.districts.set(dists);
+        this.selectedDist.set(init.distrito);
+        this.emit();
+      });
+    });
   }
 
   onDeptChange(code: string) {

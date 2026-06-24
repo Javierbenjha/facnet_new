@@ -4,28 +4,34 @@ import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { InputNumber } from 'primeng/inputnumber';
 import { ToggleSwitch } from 'primeng/toggleswitch';
+import { ColorPicker } from 'primeng/colorpicker';
+import { Password } from 'primeng/password';
 import { AppModal } from '../../../shared/app-modal/app-modal';
-import { Empresa } from '../company-branch.models';
+import { Cia, CompanyRequest } from '../../../core/models/company.model';
+import { Sunat } from '../../../core/services/sunat';
 
 @Component({
   selector: 'app-company-form',
   templateUrl: './company-form.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, Button, InputText, InputNumber, ToggleSwitch, AppModal],
+  imports: [ReactiveFormsModule, Button, InputText, InputNumber, ToggleSwitch, ColorPicker, Password, AppModal],
 })
 export class CompanyForm {
   private readonly fb = inject(FormBuilder);
+  private readonly sunat = inject(Sunat);
 
-  readonly editing = input<Empresa | 'new' | null>(null);
+  readonly loadingRuc = signal(false);
+
+  readonly editing = input<Cia | 'new' | null>(null);
   readonly closed  = output<void>();
-  readonly saved   = output<Empresa>();
+  readonly saved   = output<CompanyRequest>();
 
   readonly visible = computed(() => this.editing() !== null);
 
   readonly modalTitle = computed(() => {
     const e = this.editing();
     if (!e) return '';
-    return e === 'new' ? 'Nueva empresa' : `Editar · ${(e as Empresa).razon_social}`;
+    return e === 'new' ? 'Nueva empresa' : `Editar · ${(e as Cia).descripcion}`;
   });
 
   readonly logoVertical          = signal<File | null>(null);
@@ -52,22 +58,24 @@ export class CompanyForm {
     else { this.logoHorizontal.set(null); this.logoHorizontalPreview.set(null); }
   }
 
+  // Azul por defecto. Sin '#' porque el colorpicker maneja el hex sin él; save() agrega el '#'.
+  private readonly defaultColor = '3b82f6';
+
   readonly form = this.fb.nonNullable.group({
-    ruc:               [''],
-    razon_social:      [''],
-    direccion:         [''],
-    ubigeo:            [''],
-    usuario_sol:       [''],
-    clave_sol:         [''],
-    ctedetra:          [''],
-    client_id:         [''],
-    client_secret:     [''],
-    monto700:          [700],
-    limite_retencion:  [1400],
-    monto_mensual:     [0],
-    monto_anual:       [0],
-    stdetraccion:      [false],
-    stretencion:       [false],
+    ruc:           [''],
+    descripcion:   [''],
+    direccion:     [''],
+    ubigeo:        [''],
+    usuario_sol:   [''],
+    clave_sol:     [''],
+    ctedetra:      [''],
+    monto700:      [700],
+    limit_ret:     [700],
+    monto_mensual: [0],
+    monto_anual:   [0],
+    stdetraccion:  [false],
+    stretencion:   [false],
+    color:         [this.defaultColor],
   });
 
   constructor() {
@@ -76,37 +84,37 @@ export class CompanyForm {
       if (!e) return;
       if (e === 'new') {
         this.form.reset({
-          ruc: '', razon_social: '', direccion: '', ubigeo: '',
+          ruc: '', descripcion: '', direccion: '', ubigeo: '',
           usuario_sol: '', clave_sol: '', ctedetra: '',
-          client_id: '', client_secret: '',
-          monto700: 700, limite_retencion: 1400,
+          monto700: 700, limit_ret: 700,
           monto_mensual: 0, monto_anual: 0,
           stdetraccion: false, stretencion: false,
+          color: this.defaultColor,
         });
         this.logoVertical.set(null);
         this.logoHorizontal.set(null);
         this.logoVerticalPreview.set(null);
         this.logoHorizontalPreview.set(null);
-        this.form.controls.razon_social.disable();
+        this.form.controls.descripcion.disable();
         this.form.controls.direccion.disable();
         this.form.controls.ubigeo.disable();
       } else {
-        const emp = e as Empresa;
+        const emp = e as Cia;
         this.form.patchValue({
-          ruc: emp.ruc, razon_social: emp.razon_social,
+          ruc: emp.ruc, descripcion: emp.descripcion,
           direccion: emp.direccion, ubigeo: emp.ubigeo,
           usuario_sol: emp.usuario_sol, clave_sol: emp.clave_sol,
-          ctedetra: emp.ctedetra, client_id: emp.client_id,
-          client_secret: emp.client_secret,
-          monto700: emp.monto700, limite_retencion: emp.limite_retencion,
-          monto_mensual: emp.monto_mensual, monto_anual: emp.monto_anual,
-          stdetraccion: emp.stdetraccion, stretencion: emp.stretencion,
+          ctedetra: emp.ctedetra,
+          monto700: Number(emp.monto700), limit_ret: Number(emp.limit_ret),
+          monto_mensual: Number(emp.monto_mensual), monto_anual: Number(emp.monto_anual),
+          stdetraccion: emp.stdetraccion === 1, stretencion: emp.stretencion === 1,
+          color: (emp.color ?? '').replace(/^#/, ''),
         });
         this.logoVertical.set(null);
         this.logoHorizontal.set(null);
-        this.logoVerticalPreview.set(emp.logo_vertical ?? null);
-        this.logoHorizontalPreview.set(emp.logo_horizontal ?? null);
-        this.form.controls.razon_social.disable();
+        this.logoVerticalPreview.set(emp.logoVertical ?? null);
+        this.logoHorizontalPreview.set(emp.logoHorizontal ?? null);
+        this.form.controls.descripcion.disable();
         this.form.controls.direccion.disable();
         this.form.controls.ubigeo.disable();
       }
@@ -116,44 +124,44 @@ export class CompanyForm {
   buscarRuc() {
     const ruc = this.form.controls.ruc.value;
     if (ruc.length !== 11) return;
-    this.form.controls.razon_social.enable();
-    this.form.controls.direccion.enable();
-    this.form.controls.ubigeo.enable();
-    this.form.patchValue({
-      razon_social: 'EMPRESA DEMO S.A.C.',
-      direccion: 'Av. Ejemplo 123, Lima',
-      ubigeo: '150101',
+    this.loadingRuc.set(true);
+    this.sunat.getByRuc(ruc).subscribe({
+      next: (data) => {
+        // SUNAT devuelve la razón social en `razon_social`; en nuestro modelo es `descripcion`.
+        this.form.patchValue({
+          descripcion: data.razon_social,
+          direccion: data.direccion,
+          ubigeo: data.ubigeo,
+        });
+        this.loadingRuc.set(false);
+      },
+      error: () => this.loadingRuc.set(false),
     });
-    this.form.controls.razon_social.disable();
-    this.form.controls.direccion.disable();
-    this.form.controls.ubigeo.disable();
   }
 
   save() {
     const v = this.form.getRawValue();
-    const existing = this.editing();
-    const empresa: Empresa = {
-      id: existing && existing !== 'new' ? (existing as Empresa).id : crypto.randomUUID(),
+    const payload: CompanyRequest = {
       ruc: v.ruc,
-      razon_social: v.razon_social,
+      descripcion: v.descripcion,
       direccion: v.direccion,
       ubigeo: v.ubigeo,
       usuario_sol: v.usuario_sol,
       clave_sol: v.clave_sol,
       ctedetra: v.ctedetra,
-      client_id: v.client_id,
-      client_secret: v.client_secret,
       monto700: v.monto700,
-      limite_retencion: v.limite_retencion,
+      limit_ret: v.limit_ret,
       monto_mensual: v.monto_mensual,
       monto_anual: v.monto_anual,
-      stdetraccion: v.stdetraccion,
-      stretencion: v.stretencion,
-      logo_vertical:   this.logoVerticalPreview()   ?? undefined,
-      logo_horizontal: this.logoHorizontalPreview() ?? undefined,
-      estado: existing && existing !== 'new' ? (existing as Empresa).estado : 'ACTIVO',
+      stdetraccion: v.stdetraccion ? 1 : 0,
+      stretencion: v.stretencion ? 1 : 0,
+      color: v.color ? `#${v.color.replace(/^#/, '')}` : '',
     };
-    this.saved.emit(empresa);
+    const lv = this.logoVertical();
+    const lh = this.logoHorizontal();
+    if (lv) payload.logo_vertical = lv;
+    if (lh) payload.logo_horizontal = lh;
+    this.saved.emit(payload);
     this.closed.emit();
   }
 

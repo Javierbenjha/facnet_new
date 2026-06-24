@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, input, output } from '@angu
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
+import { InputNumber } from 'primeng/inputnumber';
 import { SucursalRequest } from '../../../../core/models/branch.model';
 import { UbigeoSelect, UbigeoSelection } from '../../../../shared/ubigeo-select/ubigeo-select';
 
@@ -13,7 +14,7 @@ export type BranchFormData = Omit<SucursalRequest, 'ubigeo'>;
   selector: 'app-branch-form',
   templateUrl: './branch-form.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, ButtonModule, InputText, UbigeoSelect],
+  imports: [ReactiveFormsModule, ButtonModule, InputText, InputNumber, UbigeoSelect],
 })
 export class BranchForm {
   private readonly fb = inject(FormBuilder);
@@ -26,6 +27,7 @@ export class BranchForm {
   readonly form = this.fb.nonNullable.group({
     descripcion: ['', [Validators.required]],
     direccion: ['', [Validators.required]],
+    meta: [0, [Validators.required, Validators.min(0)]],
     telefono: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
     // These three are patched by <app-ubigeo-select>, never typed by hand.
@@ -51,6 +53,7 @@ export class BranchForm {
       departamento: v.departamento,
       provincia: v.provincia,
       distrito: v.distrito,
+      meta: v.meta,
       telefono: v.telefono,
       email: v.email,
     });

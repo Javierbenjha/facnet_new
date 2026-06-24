@@ -4,18 +4,32 @@ export interface CompanySummary {
   ruc: string;
 }
 
+
 export interface Cia {
-  id: string;
-  descripcion: string;
-  ruc: string;
-  direccion: string;
-  ubigeo: string;
-  c_igv: number;
-  stPassword: number;
-  logoVertical: string | null;
-  logoHorizontal: string | null;
-  estado: number;
+  id:                string;
+  descripcion:       string;
+  ruc:               string;
+  direccion:         string;
+  ubigeo:            string;
+  usuario_sol:       string;
+  clave_sol:         string;
+  c_igv:             number;
+  monto700:          string;
+  monto_mensual:     string;
+  monto_anual:       string;
+  stPassword:        number;
+  stdetraccion:      number;
+  stretencion:       number;
+  ctedetra:          string;
+  limit_ret:         string;
+  client_id:         string | null;
+  logoVertical:      string | null;
+  logoHorizontal:    string | null;
+  color:             string;
+  estado:            number;
   estadoDescripcion: string | null;
+  created_at:        Date;
+  updated_at:        Date;
 }
 
 export interface CreateCompanyPayload {
@@ -54,7 +68,8 @@ export interface CompanyRequest {
   stretencion: number;     // Default: false - ¿Aplica retención?
   limit_ret: number;        // Requerido, mín. 0 (default: 700)
   ctedetra: string;        // Opcional - Cuenta de detracción
-  usuario_id: string;       // Requerido - ID del usuario (del JWT)
+  color?: string;           // Opcional - Color de marca en hex (con #)
+  usuario_id?: string;      // Lo resuelve el backend desde el token; no hace falta mandarlo
 }
 
 export interface CompanyResponse {
@@ -67,4 +82,20 @@ export interface CompanyResponse {
   activeCompany: CompanySummary;
   sucursalId: null;
   company: Cia;
+}
+
+
+export interface CiaIGVResponse{
+  message: string;
+  company: Cia
+}
+
+export interface CiaIGV{
+  c_igv: number;
+}
+
+export type CiaPasswordResponse = CiaIGVResponse;
+
+export interface CiaPassword{
+  password: string
 }
