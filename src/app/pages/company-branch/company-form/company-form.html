@@ -201,13 +201,14 @@
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Clave SOL</label>
-          <input
-            pInputText
-            pSize="small"
-            type="password"
+          <p-password
             [formControl]="form.controls.clave_sol"
             placeholder="••••••"
-            class="w-full"
+            [feedback]="false"
+            [toggleMask]="true"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+            size="small"
           />
         </div>
 

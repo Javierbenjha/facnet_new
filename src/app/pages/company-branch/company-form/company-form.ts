@@ -5,6 +5,7 @@ import { InputText } from 'primeng/inputtext';
 import { InputNumber } from 'primeng/inputnumber';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 import { ColorPicker } from 'primeng/colorpicker';
+import { Password } from 'primeng/password';
 import { AppModal } from '../../../shared/app-modal/app-modal';
 import { Cia, CompanyRequest } from '../../../core/models/company.model';
 import { Sunat } from '../../../core/services/sunat';
@@ -13,7 +14,7 @@ import { Sunat } from '../../../core/services/sunat';
   selector: 'app-company-form',
   templateUrl: './company-form.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, Button, InputText, InputNumber, ToggleSwitch, ColorPicker, AppModal],
+  imports: [ReactiveFormsModule, Button, InputText, InputNumber, ToggleSwitch, ColorPicker, Password, AppModal],
 })
 export class CompanyForm {
   private readonly fb = inject(FormBuilder);
