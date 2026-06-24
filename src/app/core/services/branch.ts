@@ -13,6 +13,10 @@ export class Branch {
     return this.http.post<Sucursal>(`${this.apiUrl}/branches`, body);
   }
 
+  createByCiaID(body: SucursalRequest, ciaId: string): Observable<Sucursal> {
+    return this.http.post<Sucursal>(`${this.apiUrl}/${ciaId}/branches`, body);
+  }
+
   getBranches(): Observable<Sucursal[]> {
     return this.http.get<Sucursal[]>(`${this.apiUrl}/my-branches`);
   }

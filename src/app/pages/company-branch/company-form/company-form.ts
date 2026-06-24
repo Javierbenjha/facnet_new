@@ -57,6 +57,9 @@ export class CompanyForm {
     else { this.logoHorizontal.set(null); this.logoHorizontalPreview.set(null); }
   }
 
+  // Azul por defecto. Sin '#' porque el colorpicker maneja el hex sin él; save() agrega el '#'.
+  private readonly defaultColor = '3b82f6';
+
   readonly form = this.fb.nonNullable.group({
     ruc:           [''],
     descripcion:   [''],
@@ -71,7 +74,7 @@ export class CompanyForm {
     monto_anual:   [0],
     stdetraccion:  [false],
     stretencion:   [false],
-    color:         [''],
+    color:         [this.defaultColor],
   });
 
   constructor() {
@@ -85,7 +88,7 @@ export class CompanyForm {
           monto700: 700, limit_ret: 700,
           monto_mensual: 0, monto_anual: 0,
           stdetraccion: false, stretencion: false,
-          color: '',
+          color: this.defaultColor,
         });
         this.logoVertical.set(null);
         this.logoHorizontal.set(null);
