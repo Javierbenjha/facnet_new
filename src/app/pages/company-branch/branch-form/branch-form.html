@@ -52,6 +52,20 @@
           class="w-full"
         />
       </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+          Meta de ventas mensual (S/)
+        </label>
+        <p-inputnumber
+          [formControl]="form.controls.meta"
+          mode="decimal"
+          [min]="0"
+          [minFractionDigits]="2"
+          styleClass="w-full"
+          inputStyleClass="!py-[0.375rem] !text-sm w-full"
+        />
+      </div>
     </div>
 
     <div class="border-t border-border"></div>

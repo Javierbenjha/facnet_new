@@ -19,6 +19,7 @@ export interface SucursalRequest {
   distrito: string;         // 2 dígitos
   ubigeo: string;           // 6 dígitos
   direccion: string;
+  meta: number;             // meta de ventas mensual de la sucursal
   telefono?: string;
   email?: string;
 }
@@ -40,6 +41,7 @@ export interface SucursalListItem {
   codigoDistrito: string;
   distrito: string;
   ubigeo: string;
+  meta: number;
   telefono: string | null;
   email: string | null;
   estado: number;

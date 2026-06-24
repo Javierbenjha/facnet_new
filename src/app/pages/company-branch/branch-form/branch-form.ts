@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, input, ou
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
+import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select';
 import { AppModal } from '../../../shared/app-modal/app-modal';
 import { SucursalListItem, SucursalRequest } from '../../../core/models/branch.model';
@@ -12,7 +13,7 @@ import { UbigeoSelect, UbigeoSelection } from '../../../shared/ubigeo-select/ubi
   selector: 'app-branch-form',
   templateUrl: './branch-form.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, Button, InputText, Select, AppModal, UbigeoSelect],
+  imports: [ReactiveFormsModule, Button, InputText, InputNumber, Select, AppModal, UbigeoSelect],
 })
 export class BranchForm {
   private readonly fb = inject(FormBuilder);
@@ -46,6 +47,7 @@ export class BranchForm {
     empresa_id:   [''],
     descripcion:  [''],
     direccion:    [''],
+    meta:         [0],
     telefono:     [''],
     email:        [''],
     departamento: [''],
@@ -71,6 +73,7 @@ export class BranchForm {
           empresa_id: suc.ciaId,
           descripcion: suc.descripcion,
           direccion: suc.direccion,
+          meta: suc.meta,
           // telefono/email pueden venir null; el form es nonNullable, así que coercemos a ''.
           telefono: suc.telefono ?? '',
           email: suc.email ?? '',
@@ -100,6 +103,7 @@ export class BranchForm {
       provincia: v.provincia,
       distrito: v.distrito,
       ubigeo: v.ubigeo,
+      meta: v.meta,
       telefono: v.telefono,
       email: v.email,
     };
