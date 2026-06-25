@@ -34,40 +34,60 @@
         </div>
       </header>
 
-      <!-- Form layout (static markup — reactive wiring comes in Task 3) -->
-      <form class="grid gap-5 sm:grid-cols-2">
+      <!-- Reactive form -->
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="grid gap-5 sm:grid-cols-2">
         <div class="flex flex-col gap-1.5">
           <label class="text-sm text-stone-600 dark:text-stone-400">Nombre Completo</label>
-          <input type="text"
+          <input type="text" formControlName="nombre"
             class="w-full px-3 py-2.5 rounded-lg border border-border bg-surface-card text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-primary/40" />
+          @if (form.controls.nombre.invalid && form.controls.nombre.touched) {
+            <small class="text-red-500">El nombre es obligatorio (máx. 100 caracteres).</small>
+          }
         </div>
 
         <div class="flex flex-col gap-1.5">
           <label class="text-sm text-stone-600 dark:text-stone-400">Apellido Paterno</label>
-          <input type="text"
+          <input type="text" formControlName="apellido_paterno"
             class="w-full px-3 py-2.5 rounded-lg border border-border bg-surface-card text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-primary/40" />
+          @if (form.controls.apellido_paterno.invalid && form.controls.apellido_paterno.touched) {
+            <small class="text-red-500">Máximo 150 caracteres.</small>
+          }
         </div>
 
         <div class="flex flex-col gap-1.5">
           <label class="text-sm text-stone-600 dark:text-stone-400">Apellido Materno</label>
-          <input type="text"
+          <input type="text" formControlName="apellido_materno"
             class="w-full px-3 py-2.5 rounded-lg border border-border bg-surface-card text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-primary/40" />
+          @if (form.controls.apellido_materno.invalid && form.controls.apellido_materno.touched) {
+            <small class="text-red-500">Máximo 150 caracteres.</small>
+          }
         </div>
 
         <div class="flex flex-col gap-1.5">
           <label class="text-sm text-stone-600 dark:text-stone-400">Correo Electrónico</label>
-          <input type="email"
+          <input type="email" formControlName="email"
             class="w-full px-3 py-2.5 rounded-lg border border-border bg-surface-card text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-primary/40" />
+          @if (form.controls.email.invalid && form.controls.email.touched) {
+            <small class="text-red-500">Ingresa un correo electrónico válido.</small>
+          }
         </div>
 
         <div class="flex flex-col gap-1.5 sm:col-span-2">
           <label class="text-sm text-stone-600 dark:text-stone-400">Teléfono</label>
-          <input type="tel"
+          <input type="tel" formControlName="telefono"
             class="w-full px-3 py-2.5 rounded-lg border border-border bg-surface-card text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-primary/40" />
+          @if (form.controls.telefono.invalid && form.controls.telefono.touched) {
+            <small class="text-red-500">El teléfono debe tener exactamente 9 dígitos.</small>
+          }
         </div>
 
         <div class="sm:col-span-2 flex justify-end pt-2">
-          <p-button label="Actualizar Perfil" icon="pi pi-check" [disabled]="true" />
+          <p-button
+            type="submit"
+            label="Actualizar Perfil"
+            icon="pi pi-check"
+            [loading]="loading()"
+            [disabled]="form.invalid || loading()" />
         </div>
       </form>
     </section>
