@@ -115,6 +115,24 @@
   <div
     class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden"
   >
+    <!-- Filtros -->
+    <div class="flex items-center gap-2 p-3.5 border-b border-stone-200 dark:border-stone-700 flex-wrap">
+      <p-iconfield>
+        <p-inputicon><i class="pi pi-search"></i></p-inputicon>
+        <input
+          pInputText
+          pSize="small"
+          type="text"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+          placeholder="Buscar nombre o email…"
+          class="w-64"
+        />
+      </p-iconfield>
+
+      <span class="ml-auto text-xs text-stone-400">{{ total() }} resultados</span>
+    </div>
+
     <app-data-table
       [columns]="columns()"
       [data]="list()"

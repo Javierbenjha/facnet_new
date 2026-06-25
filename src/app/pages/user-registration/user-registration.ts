@@ -3,12 +3,19 @@ import {
   Component,
   TemplateRef,
   computed,
+  debounced,
+  effect,
   inject,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ConfirmationService, MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
+import { InputText } from 'primeng/inputtext';
+import { IconField } from 'primeng/iconfield';
+import { InputIcon } from 'primeng/inputicon';
 import { Users } from '../../core/services/users';
 import { Auth } from '../../core/services/auth';
 import { Toaster } from '../../core/services/toast';
@@ -25,7 +32,19 @@ import { UserForm } from './user-form/user-form';
   templateUrl: './user-registration.html',
   styleUrl: './user-registration.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DataTable, TablePagination, PageHeader, KpiCard, Button, Menu, UserForm],
+  imports: [
+    DataTable,
+    TablePagination,
+    PageHeader,
+    KpiCard,
+    Button,
+    Menu,
+    InputText,
+    IconField,
+    InputIcon,
+    FormsModule,
+    UserForm,
+  ],
 })
 export class UserRegistration {
   private readonly users = inject(Users);
@@ -50,6 +69,10 @@ export class UserRegistration {
   readonly editing = signal<UserDetail | 'new' | null>(null);
   readonly rowMenuItems = signal<MenuItem[]>([]);
 
+  // Filtro server-side (el backend acepta search en GET /user).
+  readonly search = signal('');
+  readonly debouncedSearch = debounced(this.search, 300);
+
   // Templates de celda — se inyectan en las columnas vía computed.
   private readonly userTpl = viewChild<TemplateRef<unknown>>('userTpl');
   private readonly rolesTpl = viewChild<TemplateRef<unknown>>('rolesTpl');
@@ -64,20 +87,35 @@ export class UserRegistration {
   ]);
 
   constructor() {
-    this.load();
     this.loadStats();
+
+    // Recarga la lista cuando cambia la búsqueda (vuelve a la página 1).
+    // El paginado dispara load() directo, por eso el load va en untracked.
+    effect(() => {
+      this.debouncedSearch.value();
+      untracked(() => {
+        this.page.set(1);
+        this.load();
+      });
+    });
   }
 
   load(): void {
     this.loading.set(true);
-    this.users.list({ page: this.page(), limit: this.limit() }).subscribe({
-      next: (res) => {
-        this.list.set(res.data);
-        this.total.set(res.total);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
+    this.users
+      .list({
+        page: this.page(),
+        limit: this.limit(),
+        search: this.debouncedSearch.value() || undefined,
+      })
+      .subscribe({
+        next: (res) => {
+          this.list.set(res.data);
+          this.total.set(res.total);
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
   }
 
   loadStats(): void {
