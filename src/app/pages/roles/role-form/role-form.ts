@@ -58,10 +58,21 @@ export class RoleForm {
 
   toggle(id: string): void {
     this.permError.set(false);
+    const perm = this.permissions().find((p) => p.id === id);
     this.selected.update((current) => {
       const next = { ...current };
-      if (id in next) delete next[id];
-      else next[id] = 'own';
+      if (id in next) {
+        delete next[id];
+      } else {
+        next[id] = 'own';
+        // Regla "crear ⇒ ver": activar una acción de escritura marca el "read" del módulo.
+        if (perm && perm.action !== 'read' && perm.action !== '*') {
+          const read = this.permissions().find(
+            (p) => p.module === perm.module && p.action === 'read',
+          );
+          if (read) next[read.id] ??= 'own';
+        }
+      }
       return next;
     });
   }
