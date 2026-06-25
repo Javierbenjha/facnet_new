@@ -19,7 +19,16 @@ export class Sidebar {
   protected readonly layout = inject(Layout);
   protected readonly sections = NAV_SECTIONS;
   private readonly menu = inject(Menu);
-  protected readonly modules = computed(() => 
+  protected readonly modules = computed(() =>
   [...this.menu.modules().sort((a,b) => a.order - b.order)]
   )
+
+  // Initials fallback when the user has no photo (nombre + apellido_paterno).
+  protected readonly initials = computed(() => {
+    const user = this.currentUser();
+    if (!user) return '';
+    const first = user.nombre?.trim()?.[0] ?? '';
+    const last = user.apellido_paterno?.trim()?.[0] ?? '';
+    return (first + last).toUpperCase() || first.toUpperCase();
+  });
 }
