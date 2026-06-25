@@ -97,7 +97,7 @@ export class Header {
 
   constructor() {
     this.items = [
-      { label: 'Perfil', icon: 'pi pi-user', command: () => this.router.navigate(['/profile']) },
+      { label: 'Perfil', icon: 'pi pi-user', command: () => this.router.navigate(['/user-profile']) },
       { label: 'Cerrar sesión', icon: 'pi pi-sign-out', command: () => this.logout() },
     ];
   }
