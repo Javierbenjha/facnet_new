@@ -17,6 +17,7 @@ import { InputText } from 'primeng/inputtext';
 import { Checkbox } from 'primeng/checkbox';
 import { Select } from 'primeng/select';
 import { Rbac } from '../../../core/services/rbac';
+import { Toaster } from '../../../core/services/toast';
 
 interface PermissionGroup {
   module: string;
@@ -35,6 +36,7 @@ export class RoleForm {
   readonly editing = input<RoleDetail | 'new' | null>(null);
   readonly visible = computed(() => this.editing() !== null);
   private readonly fb = inject(FormBuilder);
+  private readonly toast = inject(Toaster);
   readonly modalTitle = computed(() => (this.editing() === 'new' ? 'Nuevo rol' : 'Editar rol'));
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -43,6 +45,7 @@ export class RoleForm {
   readonly permissions = signal<Permission[]>([]);
   readonly errors = signal<string[]>([]);
   readonly permError = signal(false);
+  
   readonly scopeOptions = [
     { label: 'Propios', value: 'own' },
     { label: 'Sucursal', value: 'branch' },
@@ -193,15 +196,27 @@ export class RoleForm {
     };
 
     const editing = this.editing();
-    const request$ =
-      editing && editing !== 'new'
-        ? this.rbac.update(editing.id, payload)
-        : this.rbac.create(payload);
+    const isUpdate = !!editing && editing !== 'new';
+    const request$ = isUpdate
+      ? this.rbac.update((editing as RoleDetail).id, payload)
+      : this.rbac.create(payload);
 
     request$.subscribe({
-      next: () => this.saved.emit(),
+      next: () => {
+        this.toast.success(
+          isUpdate ? 'Rol actualizado exitosamente.' : 'Rol creado exitosamente.',
+          isUpdate
+            ? 'Los cambios se guardaron correctamente.'
+            : 'El rol se creó correctamente.',
+        );
+        this.saved.emit();
+      },
       error: (e: HttpErrorResponse) => {
         const message = e.error?.message;
+        this.toast.error(
+          isUpdate ? 'Error al actualizar el rol.' : 'Error al crear el rol.',
+          message ?? 'No se pudo guardar el rol. Intentá de nuevo.',
+        );
         this.errors.set(
           Array.isArray(message)
             ? message

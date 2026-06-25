@@ -31,27 +31,17 @@
     />
   </div>
 
-  <!-- Plantilla de la columna de acciones -->
+  <!-- Acciones por fila -->
   <ng-template #actions let-row>
-    <div class="flex items-center justify-end gap-2">
+    <div class="flex justify-end" (click)="$event.stopPropagation()">
       <p-button
-        label="Editar"
-        icon="pi pi-pencil"
+        icon="pi pi-ellipsis-v"
         size="small"
         severity="secondary"
-        [outlined]="true"
-        [disabled]="!row.editable"
-        (onClick)="update(row)"
-      />
-      <p-button
-        label="Eliminar"
-        icon="pi pi-trash"
-        size="small"
-        severity="danger"
         [text]="true"
-        [disabled]="!row.editable"
-        (onClick)="remove(row)"
+        (onClick)="openRowMenu($event, row, rowMenu)"
       />
+      <p-menu #rowMenu [popup]="true" [model]="rowMenuItems()" appendTo="body" />
     </div>
   </ng-template>
 
@@ -60,9 +50,8 @@
     class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden"
   >
     <app-data-table
-      [columns]="columns"
+      [columns]="columns()"
       [data]="roles()"
-      [actionTemplate]="actions"
       emptyMessage="No hay roles para mostrar"
     />
   </div>
