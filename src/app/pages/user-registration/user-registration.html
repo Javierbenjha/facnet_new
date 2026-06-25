@@ -1,4 +1,135 @@
-﻿<div class="p-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm">
-  <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">User Registration</h2>
-  <p class="text-gray-500 dark:text-gray-400 mt-1">View of the User Registration module.</p>
+<div class="p-6 flex flex-col gap-5">
+  <!-- Encabezado -->
+  <app-page-header
+    title="Usuarios"
+    subtitle="{{ total() }} sub-usuarios · Gestiona accesos, roles y sucursales de tu equipo"
+  >
+    <div class="flex items-center gap-2">
+      <p-button
+        label="Exportar Excel"
+        icon="pi pi-file-excel"
+        size="small"
+        severity="secondary"
+        [outlined]="true"
+        [disabled]="!isOwner()"
+        (onClick)="exportExcel()"
+      />
+      @if (isOwner()) {
+        <p-button label="Nuevo usuario" icon="pi pi-plus" size="small" (onClick)="nuevo()" />
+      }
+    </div>
+  </app-page-header>
+
+  <!-- KPIs -->
+  <div class="grid grid-cols-3 gap-3.5">
+    <app-kpi-card
+      label="Total Usuarios"
+      [value]="stats().total.toString()"
+      subtitle="en la empresa"
+      icon="pi-users"
+    />
+    <app-kpi-card
+      label="Activos"
+      [value]="stats().activos.toString()"
+      subtitle="con acceso operativo"
+      icon="pi-check-circle"
+      variant="success"
+    />
+    <app-kpi-card
+      label="Inactivos"
+      [value]="stats().inactivos.toString()"
+      subtitle="deshabilitados"
+      icon="pi-ban"
+      variant="danger"
+    />
+  </div>
+
+  <!-- Celda: Usuario (avatar + nombre + email) -->
+  <ng-template #userTpl let-row>
+    <div class="flex items-center gap-3">
+      @if (row.imagen) {
+        <img [src]="row.imagen" alt="" class="w-9 h-9 rounded-full object-cover" />
+      } @else {
+        <div
+          class="w-9 h-9 rounded-full bg-primary-light text-primary flex items-center justify-center text-sm font-semibold uppercase"
+        >
+          {{ row.nombre.charAt(0) }}
+        </div>
+      }
+      <div class="flex flex-col">
+        <span class="font-medium text-stone-900 dark:text-stone-100">{{ row.nombre }}</span>
+        <span class="text-xs text-stone-500">{{ row.email }}</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Celda: Roles (chips sucursal · rol) -->
+  <ng-template #rolesTpl let-row>
+    @if (row.roles.length) {
+      <div class="flex flex-wrap gap-1.5">
+        @for (a of row.roles; track a.sucursalId + a.roleId) {
+          <span
+            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300"
+          >
+            {{ a.role }} · {{ a.sucursal }}
+          </span>
+        }
+      </div>
+    } @else {
+      <span class="text-xs text-stone-400">Sin asignaciones</span>
+    }
+  </ng-template>
+
+  <!-- Celda: Estado -->
+  <ng-template #estadoTpl let-row>
+    @if (row.estado === 1) {
+      <span
+        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700"
+      >
+        Activo
+      </span>
+    } @else {
+      <span
+        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-stone-200 text-stone-600"
+      >
+        Inactivo
+      </span>
+    }
+  </ng-template>
+
+  <!-- Acciones por fila -->
+  <ng-template #actions let-row>
+    <div class="flex items-center justify-end gap-2">
+      <p-button
+        label="Editar"
+        icon="pi pi-pencil"
+        size="small"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="edit(row)"
+      />
+    </div>
+  </ng-template>
+
+  <!-- Tabla -->
+  <div
+    class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden"
+  >
+    <app-data-table
+      [columns]="columns()"
+      [data]="list()"
+      [loading]="loading()"
+      [actionTemplate]="actions"
+      emptyMessage="No hay usuarios para mostrar"
+    />
+    <app-table-pagination
+      [currentPage]="page()"
+      [totalItems]="total()"
+      [pageSize]="limit()"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+    />
+  </div>
+
+  <!-- Form de alta/edición: se integra en la Tarea 4. -->
 </div>
