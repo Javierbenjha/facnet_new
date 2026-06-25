@@ -131,5 +131,6 @@
     />
   </div>
 
-  <!-- Form de alta/edición: se integra en la Tarea 4. -->
+  <!-- Form de alta/edición -->
+  <app-user-form [editing]="editing()" (closed)="editing.set(null)" (saved)="onSaved()" />
 </div>

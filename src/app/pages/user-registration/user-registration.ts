@@ -16,13 +16,14 @@ import { TablePagination } from '../../shared/table-pagination/table-pagination'
 import { PageHeader } from '../../shared/page-header/page-header';
 import { KpiCard } from '../../shared/kpi-card/kpi-card';
 import { Button } from 'primeng/button';
+import { UserForm } from './user-form/user-form';
 
 @Component({
   selector: 'app-user-registration',
   templateUrl: './user-registration.html',
   styleUrl: './user-registration.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DataTable, TablePagination, PageHeader, KpiCard, Button],
+  imports: [DataTable, TablePagination, PageHeader, KpiCard, Button, UserForm],
 })
 export class UserRegistration {
   private readonly users = inject(Users);
@@ -111,5 +112,11 @@ export class UserRegistration {
 
   edit(row: UserListItem): void {
     this.users.get(row.id).subscribe((detail) => this.editing.set(detail));
+  }
+
+  onSaved(): void {
+    this.editing.set(null);
+    this.load();
+    this.loadStats();
   }
 }

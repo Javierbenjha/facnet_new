@@ -1,0 +1,162 @@
+<app-modal
+  [visible]="visible()"
+  (visibleChange)="$event || close()"
+  (closed)="close()"
+  [title]="modalTitle()"
+  size="ml"
+>
+  <div class="flex flex-col gap-4 pt-1">
+    <!-- Foto -->
+    <div class="flex items-center gap-4">
+      @if (preview()) {
+        <img [src]="preview()" alt="" class="w-16 h-16 rounded-full object-cover" />
+      } @else {
+        <div
+          class="w-16 h-16 rounded-full bg-primary-light text-primary flex items-center justify-center text-xl font-semibold uppercase"
+        >
+          {{ form.controls.nombre.value.charAt(0) || '?' }}
+        </div>
+      }
+      <label
+        class="text-sm text-primary cursor-pointer hover:underline"
+      >
+        Cambiar foto
+        <input type="file" accept="image/*" class="hidden" (change)="onFile($event)" />
+      </label>
+    </div>
+
+    <!-- Datos básicos -->
+    <div class="grid grid-cols-2 gap-3">
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-stone-600 dark:text-stone-400"
+          >Nombre <span class="text-red-400">*</span></label
+        >
+        <input pInputText [formControl]="form.controls.nombre" placeholder="Ej: Tomás" />
+        @if (form.controls.nombre.invalid && form.controls.nombre.touched) {
+          <small class="text-red-500">El nombre es requerido</small>
+        }
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-stone-600 dark:text-stone-400"
+          >Teléfono</label
+        >
+        <input pInputText [formControl]="form.controls.telefono" placeholder="987654321" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-stone-600 dark:text-stone-400"
+          >Apellido paterno <span class="text-red-400">*</span></label
+        >
+        <input pInputText [formControl]="form.controls.apellido_paterno" placeholder="Pérez" />
+        @if (form.controls.apellido_paterno.invalid && form.controls.apellido_paterno.touched) {
+          <small class="text-red-500">Requerido</small>
+        }
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-stone-600 dark:text-stone-400"
+          >Apellido materno <span class="text-red-400">*</span></label
+        >
+        <input pInputText [formControl]="form.controls.apellido_materno" placeholder="Gómez" />
+        @if (form.controls.apellido_materno.invalid && form.controls.apellido_materno.touched) {
+          <small class="text-red-500">Requerido</small>
+        }
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label class="text-sm font-medium text-stone-600 dark:text-stone-400"
+        >Email <span class="text-red-400">*</span></label
+      >
+      <input pInputText type="email" [formControl]="form.controls.email" placeholder="tomas@x.com" />
+      @if (form.controls.email.invalid && form.controls.email.touched) {
+        <small class="text-red-500">Email inválido</small>
+      } @else if (!isNew()) {
+        <small class="text-stone-400">El email no se puede modificar</small>
+      }
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label class="text-sm font-medium text-stone-600 dark:text-stone-400">
+        Contraseña
+        @if (isNew()) {
+          <span class="text-red-400">*</span>
+        } @else {
+          <span class="text-stone-400 font-normal">(dejar vacío para no cambiarla)</span>
+        }
+      </label>
+      <input
+        pInputText
+        type="password"
+        [formControl]="form.controls.password"
+        placeholder="Mínimo 6 caracteres"
+        autocomplete="new-password"
+      />
+      @if (form.controls.password.invalid && form.controls.password.touched) {
+        <small class="text-red-500">La contraseña debe tener al menos 6 caracteres</small>
+      }
+    </div>
+
+    <!-- Asignaciones (solo dueño) -->
+    @if (isOwner()) {
+      <div class="flex flex-col gap-2 border-t border-stone-200 dark:border-stone-700 pt-3">
+        <div class="flex items-center justify-between">
+          <h4 class="text-sm font-semibold uppercase text-stone-500">Sucursales y roles</h4>
+          <p-button
+            label="Agregar"
+            icon="pi pi-plus"
+            size="small"
+            severity="secondary"
+            [text]="true"
+            (onClick)="addRow()"
+          />
+        </div>
+
+        @for (row of assignments(); track $index) {
+          <div class="flex items-center gap-2">
+            <p-select
+              class="flex-1"
+              styleClass="w-full"
+              [options]="sucursales()"
+              optionLabel="descripcion"
+              optionValue="id"
+              [ngModel]="row.sucursalId"
+              (ngModelChange)="setSucursal($index, $event)"
+              filterBy="descripcion"
+              filterMatchMode="contains"
+              placeholder="Sucursal..."
+              appendTo="body"
+            />
+
+            <p-select
+              class="flex-1"
+              styleClass="w-full"
+              [options]="roles()"
+              optionLabel="name"
+              optionValue="id"
+              [ngModel]="row.roleId"
+              (ngModelChange)="setRol($index, $event)"
+              placeholder="Rol..."
+              appendTo="body"
+            />
+
+            <p-button
+              icon="pi pi-trash"
+              size="small"
+              severity="danger"
+              [text]="true"
+              (onClick)="removeRow($index)"
+            />
+          </div>
+        }
+
+        @if (!assignments().length) {
+          <small class="text-stone-400">Agregá al menos una sucursal con su rol.</small>
+        }
+      </div>
+    }
+  </div>
+
+  <div modal-footer>
+    <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="close()" />
+    <p-button label="Guardar" [loading]="saving()" (onClick)="save()" />
+  </div>
+</app-modal>
