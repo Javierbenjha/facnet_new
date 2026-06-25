@@ -54,11 +54,13 @@ export class UserRegistration {
   private readonly userTpl = viewChild<TemplateRef<unknown>>('userTpl');
   private readonly rolesTpl = viewChild<TemplateRef<unknown>>('rolesTpl');
   private readonly estadoTpl = viewChild<TemplateRef<unknown>>('estadoTpl');
+  private readonly actionsTpl = viewChild<TemplateRef<unknown>>('actions');
 
   readonly columns = computed<TableColumn[]>(() => [
     { key: 'nombre', label: 'Usuario', cellTemplate: this.userTpl() },
     { key: 'roles', label: 'Roles', cellTemplate: this.rolesTpl() },
     { key: 'estado', label: 'Estado', class: 'w-32', cellTemplate: this.estadoTpl() },
+    { key: '_actions', label: '', class: 'w-16 text-right', cellTemplate: this.actionsTpl() },
   ]);
 
   constructor() {
@@ -114,7 +116,11 @@ export class UserRegistration {
   }
 
   edit(row: UserListItem): void {
-    this.users.get(row.id).subscribe((detail) => this.editing.set(detail));
+    this.users.get(row.id).subscribe({
+      next: (detail) => this.editing.set(detail),
+      error: (err) =>
+        this.toaster.error('Error', err.error?.message ?? 'No se pudo cargar el usuario'),
+    });
   }
 
   openRowMenu(event: Event, row: UserListItem, menu: Menu): void {
