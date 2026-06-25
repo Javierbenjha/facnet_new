@@ -48,25 +48,33 @@ export const TIPOS_DOC: TipoDocOption[] = [
 ];
 
 export interface SaleInfoSummary {
-  tipoDocLabel: string;
-  serie: string;
-  fechaLabel: string;
-  cliente: string;
-  moneda: Moneda;
-  formaPago: FormaPago;
-  descuento: number;
-  cartLength: number;
+  tipoDocLabel:   string;
+  serie:          string;
+  fechaLabel:     string;
+  cliente:        string;
+  moneda:         Moneda;
+  sigla:          string;
+  formaPago:      FormaPago;
+  igvPorcentaje:  number;
+  igvIncluido:    boolean;
+  monto700:       number;
+  limitRetencion: number;
+  tipoCambio:     number;
+  descuento:      number;
+  cartLength:     number;
 }
 
 export interface CartTotals {
-  subtotal: number;
-  brutoGravado: number;
-  inafecto: number;
-  igv: number;
-  total: number;
-  gratuito: number;
-  descuentoMonto: number;
-  descuento: number;
+  subtotal:            number;
+  brutoGravado:        number;
+  inafecto:            number;
+  igv:                 number;
+  igvPorcentaje:       number;
+  total:               number;
+  totalAntesDescuento: number;
+  gratuito:            number;
+  descuentoMonto:      number;
+  descuentoPct:        number;
 }
 
 export interface DetraccionConcepto {

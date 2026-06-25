@@ -78,16 +78,30 @@
       </div>
     </div>
 
+    <div class="shrink-0">
+      <label class="text-[10px] font-semibold text-stone-400 uppercase tracking-wide">IGV Incluido</label>
+      <div class="flex gap-1 mt-1">
+        <p-button label="Sí" size="small"
+          [outlined]="!igvIncluido()"
+          [severity]="!igvIncluido() ? 'secondary' : undefined"
+          (onClick)="igvIncluidoChange.emit(true)" />
+        <p-button label="No" size="small"
+          [outlined]="igvIncluido()"
+          [severity]="igvIncluido() ? 'secondary' : undefined"
+          (onClick)="igvIncluidoChange.emit(false)" />
+      </div>
+    </div>
+
     <div class="w-40 shrink-0">
       <div class="flex justify-between items-center">
         <label class="text-[10px] font-semibold text-stone-400 uppercase tracking-wide">Descuento</label>
-        @if (descuentoMonto() > 0) {
-          <span class="text-[10px] font-bold text-red-500 tabular-nums">-{{ fmt(descuentoMonto()) }}</span>
+        @if (descuento() > 0) {
+          <span class="text-[10px] font-bold text-red-400 tabular-nums">{{ descuentoPct().toFixed(1) }}% del total</span>
         }
       </div>
       <p-inputnumber [ngModel]="descuento()" (ngModelChange)="descuentoChange.emit($event ?? 0)"
-        [min]="0" [max]="100" [minFractionDigits]="0" [maxFractionDigits]="2"
-        suffix="%" styleClass="w-full mt-1" inputStyleClass="!py-[0.375rem] !text-sm text-right w-full" />
+        [min]="0" [minFractionDigits]="2" [maxFractionDigits]="2"
+        [prefix]="sigla() + ' '" styleClass="w-full mt-1" inputStyleClass="!py-[0.375rem] !text-sm text-right w-full" />
     </div>
 
     <div class="shrink-0 self-end mb-0.5">
@@ -101,7 +115,25 @@
 
   </div>
 
-  <!-- Row 3: Detracción / Retención (colapsable) -->
+  <!-- Row 3 (condicional): Fecha de vencimiento para crédito -->
+  @if (formaPago() === 'credito') {
+    <div class="flex items-end gap-3 pt-1 border-t border-dashed border-border">
+      <div class="w-44 shrink-0">
+        <label class="text-[10px] font-semibold text-stone-400 uppercase tracking-wide">Fecha Vencimiento</label>
+        <p-datepicker
+          [ngModel]="fechaVencimiento()"
+          (ngModelChange)="fechaVencimientoChange.emit($event)"
+          [iconDisplay]="'input'"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          appendTo="body"
+          styleClass="w-full mt-1"
+          inputStyleClass="!py-[0.375rem] !text-sm" />
+      </div>
+    </div>
+  }
+
+  <!-- Row 4: Detracción / Retención (colapsable) -->
   @if (showDetRet()) {
     <div class="flex items-end gap-3 pt-1 border-t border-dashed border-border">
 

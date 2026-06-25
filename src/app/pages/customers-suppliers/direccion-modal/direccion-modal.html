@@ -32,7 +32,9 @@
             Departamento <span class="text-red-400">*</span>
           </label>
           <p-select
-            [options]="depOpts"
+            [options]="departamentos()"
+            optionLabel="nombre"
+            optionValue="codigo"
             [ngModel]="fDep()"
             (ngModelChange)="setDep($event)"
             placeholder="Seleccionar"
@@ -47,7 +49,9 @@
             Provincia <span class="text-red-400">*</span>
           </label>
           <p-select
-            [options]="provOpts()"
+            [options]="provincias()"
+            optionLabel="nombre"
+            optionValue="codigo"
             [ngModel]="fProv()"
             (ngModelChange)="setProv($event)"
             placeholder="Seleccionar"
@@ -63,7 +67,9 @@
             Distrito <span class="text-red-400">*</span>
           </label>
           <p-select
-            [options]="distOpts()"
+            [options]="distritos()"
+            optionLabel="nombre"
+            optionValue="codigo"
             [ngModel]="fDist()"
             (ngModelChange)="fDist.set($event)"
             placeholder="Seleccionar"
@@ -76,33 +82,22 @@
 
       </div>
 
-      <!-- Checkbox + Botones en la misma fila -->
-      <div class="flex items-center justify-between gap-3">
-        <div class="flex items-center gap-2">
-          <p-checkbox
-            [ngModel]="fPrincipal()"
-            (ngModelChange)="fPrincipal.set($event)"
-            [binary]="true"
-            inputId="cb-principal" />
-          <label for="cb-principal" class="text-sm text-stone-600 dark:text-stone-400 cursor-pointer select-none">
-            Dirección principal
-          </label>
-        </div>
-        <div class="flex items-center gap-2">
+      <!-- Botones -->
+      <div class="flex items-center justify-end gap-2">
+        <p-button
+          [label]="isEditing() ? 'Guardar cambios' : 'Agregar dirección'"
+          [icon]="isEditing() ? 'pi pi-check' : 'pi pi-plus'"
+          size="small"
+          [loading]="saving()"
+          (onClick)="guardar()" />
+        @if (isEditing()) {
           <p-button
-            [label]="isEditing() ? 'Guardar cambios' : 'Agregar dirección'"
-            [icon]="isEditing() ? 'pi pi-check' : 'pi pi-plus'"
+            label="Cancelar"
+            severity="secondary"
+            [outlined]="true"
             size="small"
-            (onClick)="guardar()" />
-          @if (isEditing()) {
-            <p-button
-              label="Cancelar"
-              severity="secondary"
-              [outlined]="true"
-              size="small"
-              (onClick)="cancelEdit()" />
-          }
-        </div>
+            (onClick)="cancelEdit()" />
+        }
       </div>
 
     </div>
@@ -110,7 +105,9 @@
     <!-- ── Divisor ── -->
     <p-divider>
       <span class="text-xs text-stone-400 px-2">
-        @if (direcciones().length > 0) {
+        @if (loadingAddresses()) {
+          Cargando...
+        } @else if (direcciones().length > 0) {
           {{ direcciones().length }} dirección{{ direcciones().length !== 1 ? 'es' : '' }} registrada{{ direcciones().length !== 1 ? 's' : '' }}
         } @else {
           Sin direcciones
@@ -121,7 +118,7 @@
     <!-- ── Lista ── -->
     @if (direcciones().length > 0) {
       <div class="flex flex-col gap-1.5 max-h-56 overflow-y-auto pr-0.5">
-        @for (d of direcciones(); track d.id; let i = $index) {
+        @for (d of direcciones(); track d.id ?? d.source; let i = $index) {
           <div class="flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors"
                [class.border-amber-300]="d.es_principal"
                [class.bg-amber-50]="d.es_principal"
@@ -129,13 +126,9 @@
                [class.border-stone-200]="!d.es_principal"
                [class.dark:border-stone-700]="!d.es_principal">
 
-            <p-button
-              [icon]="d.es_principal ? 'pi pi-star-fill' : 'pi pi-star'"
-              [text]="true"
-              [severity]="d.es_principal ? 'warn' : 'secondary'"
-              size="small"
-              [pTooltip]="d.es_principal ? 'Dirección principal' : 'Marcar como principal'"
-              (onClick)="setPrincipal(i)" />
+            @if (d.es_principal) {
+              <i class="pi pi-star-fill text-amber-400 text-sm shrink-0 ml-1"></i>
+            }
 
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 flex-wrap">
@@ -147,11 +140,20 @@
                 }
               </div>
               <p class="text-xs text-stone-400 mt-0.5">
-                {{ d.distrito }}, {{ d.provincia }}, {{ d.departamento }}
+                {{ d.dist_nombre }}, {{ d.prov_nombre }}, {{ d.dep_nombre }}
               </p>
             </div>
 
             <div class="flex items-center gap-1 shrink-0">
+              @if (d.source === 'secondary') {
+                <p-button
+                  icon="pi pi-star"
+                  [text]="true"
+                  severity="warn"
+                  size="small"
+                  pTooltip="Establecer como principal"
+                  (onClick)="setPrincipal(i)" />
+              }
               <p-button
                 icon="pi pi-pencil"
                 [text]="true"
@@ -159,19 +161,21 @@
                 size="small"
                 pTooltip="Editar"
                 (onClick)="editar(i)" />
-              <p-button
-                icon="pi pi-trash"
-                [text]="true"
-                severity="danger"
-                size="small"
-                pTooltip="Eliminar"
-                (onClick)="eliminar(i)" />
+              @if (d.source === 'secondary') {
+                <p-button
+                  icon="pi pi-trash"
+                  [text]="true"
+                  severity="danger"
+                  size="small"
+                  pTooltip="Eliminar"
+                  (onClick)="eliminar(i)" />
+              }
             </div>
 
           </div>
         }
       </div>
-    } @else {
+    } @else if (!loadingAddresses()) {
       <div class="flex flex-col items-center gap-2 py-4">
         <i class="pi pi-map-marker text-3xl text-stone-200"></i>
         <p class="text-sm text-stone-400">No hay direcciones registradas aún</p>

@@ -1,41 +1,47 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { switchMap } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { InputGroup } from 'primeng/inputgroup';
 import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { Select } from 'primeng/select';
-import { Checkbox } from 'primeng/checkbox';
 import { Divider } from 'primeng/divider';
 import { Tag } from 'primeng/tag';
 import { Tooltip } from 'primeng/tooltip';
 import { AppModal } from '../../../shared/app-modal/app-modal';
-import { DEPARTAMENTOS, getProvincias, getDistritos } from '../../../shared/ubigeo.data';
-import { Direccion, Persona } from '../customers-suppliers.models';
+import { Ubigeo } from '../../../core/services/ubigeo';
+import { Department, Province, District } from '../../../core/models/ubigeo.model';
+import { Direccion, mapAddressToDireccion } from '../customers-suppliers.models';
+import { ClientsService } from '../../../core/services/clients';
+import { Toaster } from '../../../core/services/toast';
 
 @Component({
   selector: 'app-direccion-modal',
   templateUrl: './direccion-modal.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, Button, InputText, InputGroup, InputGroupAddon, Select, Checkbox, Divider, Tag, Tooltip, AppModal],
+  imports: [FormsModule, Button, InputText, InputGroup, InputGroupAddon, Select, Divider, Tag, Tooltip, AppModal],
 })
 export class DireccionModal {
-  readonly persona = input<Persona | null>(null);
-  readonly closed  = output<Persona>();
+  readonly clientDoc  = input<string | null>(null);
+  readonly clientName = input<string>('');
+  readonly closed     = output<void>();
 
-  readonly visible = computed(() => this.persona() !== null);
+  private readonly clientsSvc = inject(ClientsService);
+  private readonly ubiSvc     = inject(Ubigeo);
+  private readonly toast      = inject(Toaster);
+
+  readonly visible = computed(() => this.clientDoc() !== null);
 
   readonly modalTitle = computed(() => {
-    const p = this.persona();
-    if (!p) return '';
-    const nombre = p.tipo_documento === 'RUC'
-      ? p.nombre
-      : [p.nombre, p.apellido_paterno].filter(Boolean).join(' ');
-    const accion = this.isEditing() ? 'Editar dirección' : 'Añadir dirección';
-    return `${accion} — ${nombre}`;
+    const name   = this.clientName();
+    const action = this.isEditing() ? 'Editar dirección' : 'Añadir dirección';
+    return name ? `${action} — ${name}` : action;
   });
 
-  readonly direcciones = signal<Direccion[]>([]);
+  readonly direcciones     = signal<Direccion[]>([]);
+  readonly loadingAddresses = signal(false);
+  readonly saving           = signal(false);
 
   // Form state
   readonly fDesc      = signal('');
@@ -47,28 +53,49 @@ export class DireccionModal {
 
   readonly isEditing = computed(() => this.editIdx() >= 0);
 
-  // Ubigeo cascading options
-  readonly depOpts  = DEPARTAMENTOS;
-  readonly provOpts = computed(() => getProvincias(this.fDep()));
-  readonly distOpts = computed(() => getDistritos(this.fDep(), this.fProv()));
+  readonly departamentos = signal<Department[]>([]);
+  readonly provincias    = signal<Province[]>([]);
+  readonly distritos     = signal<District[]>([]);
 
   constructor() {
+    this.ubiSvc.getDepartments().subscribe(d => this.departamentos.set(d));
+
     effect(() => {
-      const p = this.persona();
-      this.direcciones.set(p?.direcciones ? [...p.direcciones] : []);
-      this.resetForm();
+      const doc = this.clientDoc();
+      if (!doc) {
+        this.direcciones.set([]);
+        this.resetForm();
+        return;
+      }
+      this.loadingAddresses.set(true);
+      this.clientsSvc.findAllAddresses(doc).subscribe({
+        next: addrs => {
+          this.direcciones.set(addrs.map(mapAddressToDireccion));
+          this.loadingAddresses.set(false);
+        },
+        error: () => this.loadingAddresses.set(false),
+      });
     });
   }
 
-  setDep(dep: string) {
-    this.fDep.set(dep);
+  setDep(codigo: string) {
+    this.fDep.set(codigo);
     this.fProv.set('');
     this.fDist.set('');
+    this.provincias.set([]);
+    this.distritos.set([]);
+    if (codigo) {
+      this.ubiSvc.getProvinces(codigo).subscribe(p => this.provincias.set(p));
+    }
   }
 
-  setProv(prov: string) {
-    this.fProv.set(prov);
+  setProv(codigo: string) {
+    this.fProv.set(codigo);
     this.fDist.set('');
+    this.distritos.set([]);
+    if (this.fDep() && codigo) {
+      this.ubiSvc.getDistricts(this.fDep(), codigo).subscribe(d => this.distritos.set(d));
+    }
   }
 
   guardar() {
@@ -76,64 +103,125 @@ export class DireccionModal {
     const dep  = this.fDep();
     const prov = this.fProv();
     const dist = this.fDist();
-    if (!desc || !dep || !prov || !dist) return;
+    const doc  = this.clientDoc();
+    if (!desc || !dep || !prov || !dist || !doc || this.saving()) return;
 
-    const item: Direccion = {
-      id:           this.isEditing() ? this.direcciones()[this.editIdx()].id : crypto.randomUUID(),
-      descripcion:  desc,
-      departamento: dep,
-      provincia:    prov,
-      distrito:     dist,
-      es_principal: this.fPrincipal(),
-    };
+    this.saving.set(true);
+    const payload = { descripcion: desc, departamento: dep, provincia: prov, distrito: dist };
 
-    let list = [...this.direcciones()];
-    if (item.es_principal) {
-      list = list.map(d => ({ ...d, es_principal: false }));
-    }
     if (this.isEditing()) {
-      list[this.editIdx()] = item;
-    } else {
-      if (list.length === 0) item.es_principal = true;
-      list.push(item);
-    }
+      const editing    = this.direcciones()[this.editIdx()];
+      const idx        = this.editIdx();
+      const depNombre  = this.departamentos().find(d => d.codigo === dep)?.nombre ?? dep;
+      const provNombre = this.provincias().find(p => p.codigo === prov)?.nombre ?? prov;
+      const distNombre = this.distritos().find(d => d.codigo === dist)?.nombre ?? dist;
 
-    this.direcciones.set(list);
-    this.resetForm();
+      const onOk = () => {
+        this.saving.set(false);
+        this.toast.success('Actualizado', 'Dirección actualizada correctamente.');
+        this.direcciones.update(list =>
+          list.map((d, i) => i === idx
+            ? { ...d, descripcion: desc, departamento: dep, provincia: prov, distrito: dist,
+                dep_nombre: depNombre, prov_nombre: provNombre, dist_nombre: distNombre }
+            : d
+          )
+        );
+        this.resetForm();
+      };
+      const onErr = () => { this.saving.set(false); this.toast.error('Error', 'No se pudo actualizar la dirección.'); };
+
+      if (editing.source === 'primary') {
+        this.clientsSvc.update(doc, { direccion: desc, departamento: dep, provincia: prov, distrito: dist })
+          .subscribe({ next: onOk, error: onErr });
+      } else if (editing.id) {
+        this.clientsSvc.updateAddress(doc, editing.id, payload)
+          .subscribe({ next: onOk, error: onErr });
+      } else {
+        this.saving.set(false);
+      }
+    } else {
+      this.clientsSvc.createAddress(doc, payload).subscribe({
+        next: () => {
+          this.saving.set(false);
+          this.toast.success('Agregado', 'Dirección agregada correctamente.');
+          this.reload();
+          this.resetForm();
+        },
+        error: () => {
+          this.saving.set(false);
+          this.toast.error('Error', 'No se pudo agregar la dirección.');
+        },
+      });
+    }
   }
 
   editar(index: number) {
-    const d = this.direcciones()[index];
+    const d    = this.direcciones()[index];
+    const dep  = d.departamento ?? '';
+    const prov = d.provincia ?? '';
     this.fDesc.set(d.descripcion);
-    this.fDep.set(d.departamento);
-    this.fProv.set(d.provincia);
-    this.fDist.set(d.distrito);
+    this.fDep.set(dep);
+    this.fProv.set(prov);
+    this.fDist.set(d.distrito ?? '');
     this.fPrincipal.set(d.es_principal);
     this.editIdx.set(index);
-  }
-
-  eliminar(index: number) {
-    const wasPrincipal = this.direcciones()[index].es_principal;
-    let list = this.direcciones().filter((_, i) => i !== index);
-    if (wasPrincipal && list.length > 0) {
-      list = [{ ...list[0], es_principal: true }, ...list.slice(1)];
+    if (dep) {
+      this.ubiSvc.getProvinces(dep).subscribe(p => {
+        this.provincias.set(p);
+        if (prov) {
+          this.ubiSvc.getDistricts(dep, prov).subscribe(ds => this.distritos.set(ds));
+        }
+      });
     }
-    this.direcciones.set(list);
-    if (this.editIdx() === index) this.resetForm();
   }
 
   setPrincipal(index: number) {
-    this.direcciones.set(
-      this.direcciones().map((d, i) => ({ ...d, es_principal: i === index }))
-    );
+    const d   = this.direcciones()[index];
+    const doc = this.clientDoc();
+    if (!doc || d.source === 'primary' || !d.id) return;
+
+    this.clientsSvc.update(doc, {
+      direccion:    d.descripcion,
+      departamento: d.departamento ?? undefined,
+      provincia:    d.provincia ?? undefined,
+      distrito:     d.distrito ?? undefined,
+    }).pipe(
+      switchMap(() => this.clientsSvc.removeAddress(doc, d.id!)),
+    ).subscribe({
+      next: () => {
+        this.toast.success('Dirección principal actualizada', `"${d.descripcion}" es ahora la dirección principal.`);
+        this.reload();
+      },
+      error: () => this.toast.error('Error', 'No se pudo establecer como dirección principal.'),
+    });
   }
 
-  close() {
-    const p = this.persona();
-    if (p) this.closed.emit({ ...p, direcciones: this.direcciones() });
+  eliminar(index: number) {
+    const d   = this.direcciones()[index];
+    const doc = this.clientDoc();
+    if (!doc || !d.id || d.source === 'primary') return;
+
+    this.clientsSvc.removeAddress(doc, d.id).subscribe({
+      next: () => {
+        this.toast.success('Eliminado', 'Dirección eliminada correctamente.');
+        this.reload();
+        if (this.editIdx() === index) this.resetForm();
+      },
+      error: () => this.toast.error('Error', 'No se pudo eliminar la dirección.'),
+    });
   }
+
+  close() { this.closed.emit(); }
 
   cancelEdit() { this.resetForm(); }
+
+  private reload() {
+    const doc = this.clientDoc();
+    if (!doc) return;
+    this.clientsSvc.findAllAddresses(doc).subscribe({
+      next: addrs => this.direcciones.set(addrs.map(mapAddressToDireccion)),
+    });
+  }
 
   private resetForm() {
     this.fDesc.set('');
@@ -141,6 +229,8 @@ export class DireccionModal {
     this.fProv.set('');
     this.fDist.set('');
     this.fPrincipal.set(false);
+    this.provincias.set([]);
+    this.distritos.set([]);
     this.editIdx.set(-1);
   }
 }
