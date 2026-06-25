@@ -16,19 +16,40 @@
         <!-- Avatar + change photo -->
         <div class="relative">
           <div class="w-24 h-24 rounded-full bg-border flex items-center justify-center overflow-hidden">
-            <i class="pi pi-user text-4xl text-stone-400"></i>
+            @if (avatarUrl()) {
+              <img [src]="avatarUrl()" alt="Foto de perfil" class="w-full h-full object-cover" />
+            } @else {
+              <i class="pi pi-user text-4xl text-stone-400"></i>
+            }
+            @if (uploadingPhoto()) {
+              <div class="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
+                <i class="pi pi-spin pi-spinner text-white text-xl"></i>
+              </div>
+            }
           </div>
           <button
             type="button"
-            class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shadow-md hover:brightness-110 transition">
+            (click)="photoInput.click()"
+            [disabled]="uploadingPhoto()"
+            class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shadow-md hover:brightness-110 transition disabled:opacity-50">
             <i class="pi pi-plus text-xs"></i>
           </button>
+          <input
+            #photoInput
+            type="file"
+            class="hidden"
+            accept="image/jpeg,image/png,image/avif,image/webp,image/gif"
+            (change)="onPhotoSelected($event)" />
         </div>
 
         <div class="min-w-0">
           <h1 class="text-2xl font-bold text-stone-800 dark:text-stone-100">Información Personal</h1>
           <p class="text-sm text-stone-500 mt-1">Mantén tus datos actualizados para una mejor experiencia</p>
-          <button type="button" class="text-sm text-primary font-medium mt-2 hover:underline">
+          <button
+            type="button"
+            (click)="photoInput.click()"
+            [disabled]="uploadingPhoto()"
+            class="text-sm text-primary font-medium mt-2 hover:underline disabled:opacity-50">
             Cambiar foto
           </button>
         </div>

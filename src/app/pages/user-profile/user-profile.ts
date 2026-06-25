@@ -1,4 +1,11 @@
-import { Component, ChangeDetectionStrategy, inject, signal, effect } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  signal,
+  computed,
+  effect,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -26,6 +33,21 @@ export class UserProfile {
   private readonly toast = inject(Toaster);
 
   readonly loading = signal(false);
+
+  // Photo upload state. Allowed types + size mirror PATCH /auth/profile (auth.md).
+  private readonly allowedPhotoTypes = [
+    'image/jpeg',
+    'image/png',
+    'image/avif',
+    'image/webp',
+    'image/gif',
+  ];
+  private readonly maxPhotoBytes = 6 * 1024 * 1024;
+  readonly uploadingPhoto = signal(false);
+  private readonly previewUrl = signal<string | null>(null);
+
+  // Preview wins while a local file is chosen, otherwise the saved photo.
+  readonly avatarUrl = computed(() => this.previewUrl() ?? this.auth.currentUser()?.imagen_url ?? null);
 
   // Validations mirror PATCH /auth/profile (auth.md):
   // nombre máx 100, apellidos máx 150, email válido, teléfono exactamente 9 dígitos.
@@ -72,6 +94,52 @@ export class UserProfile {
         error: (err) =>
           this.toast.error('No se pudo actualizar el perfil', this.errorMessage(err)),
       });
+  }
+
+  onPhotoSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (!this.allowedPhotoTypes.includes(file.type)) {
+      this.toast.warning('Imagen no válida', 'Formatos permitidos: JPG, PNG, AVIF, WEBP o GIF.');
+      input.value = '';
+      return;
+    }
+    if (file.size > this.maxPhotoBytes) {
+      this.toast.warning('Imagen muy pesada', 'El tamaño máximo permitido es 6 MB.');
+      input.value = '';
+      return;
+    }
+
+    this.setPreview(URL.createObjectURL(file));
+
+    const fd = new FormData();
+    fd.append('imagen', file);
+    this.uploadingPhoto.set(true);
+    this.auth
+      .updateProfileWithPhoto(fd)
+      .pipe(
+        finalize(() => {
+          this.uploadingPhoto.set(false);
+          input.value = '';
+        }),
+      )
+      .subscribe({
+        next: () =>
+          this.toast.success('Foto actualizada', 'Tu foto de perfil se actualizó correctamente.'),
+        error: (err) => {
+          this.setPreview(null); // revert to the saved photo on failure
+          this.toast.error('No se pudo subir la foto', this.errorMessage(err));
+        },
+      });
+  }
+
+  // Swap the local preview, revoking the previous blob URL to avoid leaks.
+  private setPreview(url: string | null) {
+    const previous = this.previewUrl();
+    if (previous) URL.revokeObjectURL(previous);
+    this.previewUrl.set(url);
   }
 
   // PATCH /auth/profile returns 400 with message[] and 409 with a single string.
