@@ -18,6 +18,7 @@ export class SaleProducts {
   readonly categorias = input.required<string[]>();
   readonly productos  = input.required<PosProducto[]>();
   readonly sigla      = input.required<string>();
+  readonly loading    = input(false);
 
   readonly queryChange     = output<string>();
   readonly catActivaChange = output<string>();

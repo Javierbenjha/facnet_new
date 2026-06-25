@@ -21,6 +21,14 @@
 
 <!-- Product grid -->
 <div class="flex-1 overflow-y-auto px-5 pb-5">
+
+  @if (loading()) {
+    <div class="h-full flex items-center justify-center text-stone-300">
+      <i class="pi pi-spin pi-spinner text-4xl"></i>
+    </div>
+  }
+
+  @if (!loading()) {
   <div class="grid gap-2.5" style="grid-template-columns: repeat(auto-fill, minmax(148px, 1fr))">
 
     @for (p of productos(); track p.id) {
@@ -54,4 +62,5 @@
     }
 
   </div>
+  } <!-- /!loading -->
 </div>

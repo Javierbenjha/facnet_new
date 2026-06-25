@@ -13,7 +13,7 @@ import {
   GuiaRemision, ModalidadTransporte, MOTIVOS_GUIA, TIPOS_DOC_REF,
 } from '../referral-guide.models';
 import { VentaHistorial, VENTAS_MOCK } from '../../sale-list/sale-list.models';
-import { Persona, PERSONAS_MOCK } from '../../customers-suppliers/customers-suppliers.models';
+import { Persona } from '../../customers-suppliers/customers-suppliers.models';
 
 interface DetalleRow {
   _id: number;
@@ -54,12 +54,7 @@ export class ReferralGuideForm {
       value: v,
     }));
 
-  readonly clienteOpts = PERSONAS_MOCK
-    .filter(p => p.tipo === 'CLIENTE' && p.estado === 'ACTIVO')
-    .map(p => ({
-      label: [p.nombre, p.apellido_paterno, p.apellido_materno].filter(Boolean).join(' '),
-      value: p,
-    }));
+  readonly clienteOpts: { label: string; value: Persona }[] = [];
 
   // ── Form state ─────────────────────────────────────────────────────────────
   readonly modalidad          = signal<ModalidadTransporte>('PUBLICO');
@@ -86,7 +81,7 @@ export class ReferralGuideForm {
   readonly selectedVenta    = signal<VentaHistorial | null>(null);
   readonly selectedCliente  = signal<Persona | null>(null);
 
-  readonly clienteAddresses = computed(() => this.selectedCliente()?.direcciones ?? []);
+  readonly clienteAddresses = computed(() => [] as { descripcion: string; es_principal: boolean }[]);
 
   // ── Computed ───────────────────────────────────────────────────────────────
   readonly visible        = computed(() => this.editing() !== null);
@@ -145,8 +140,7 @@ export class ReferralGuideForm {
     );
     this.rucCliente.set(p.numero_documento);
 
-    const dir = p.direcciones?.find(d => d.es_principal) ?? p.direcciones?.[0];
-    if (dir) this.destinoDireccion.set(dir.descripcion);
+    if (p.direccion) this.destinoDireccion.set(p.direccion);
   }
 
   // ── Methods ────────────────────────────────────────────────────────────────

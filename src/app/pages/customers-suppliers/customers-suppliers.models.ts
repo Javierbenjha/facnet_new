@@ -1,12 +1,18 @@
+import { ClientAddress, ClientSupplier } from '../../core/models/client.model';
+
 export type TipoDocumento = 'DNI' | 'RUC' | 'CE';
 export type TipoPersona  = 'CLIENTE' | 'PROVEEDOR';
 
 export interface Direccion {
-  id:           string;
+  id:           string | null;
+  source:       'primary' | 'secondary';
   descripcion:  string;
-  departamento: string;
-  provincia:    string;
-  distrito:     string;
+  departamento: string | null;  // ubigeo code — used by form selects
+  provincia:    string | null;  // ubigeo code
+  distrito:     string | null;  // ubigeo code
+  dep_nombre:   string | null;  // human-readable name for display
+  prov_nombre:  string | null;
+  dist_nombre:  string | null;
   es_principal: boolean;
 }
 
@@ -25,66 +31,42 @@ export interface Persona {
   provincia:        string;
   distrito:         string;
   estado:           'ACTIVO' | 'INACTIVO';
-  direcciones?:     Direccion[];
+  _raw:             ClientSupplier;
 }
 
-export const PERSONAS_MOCK: Persona[] = [
-  {
-    id: '1', tipo: 'CLIENTE', tipo_documento: 'DNI', numero_documento: '76329484',
-    nombre: 'Juan Carlos', apellido_paterno: 'García', apellido_materno: 'López',
-    telefono: '987654321', email: 'juan.garcia@gmail.com',
-    direccion: 'Av. Los Incas 123', departamento: 'Lima', provincia: 'Lima', distrito: 'Miraflores',
-    estado: 'ACTIVO',
-    direcciones: [
-      { id: 'd1-1', descripcion: 'Av. Los Incas 123', departamento: 'Lima', provincia: 'Lima', distrito: 'Miraflores', es_principal: true },
-      { id: 'd1-2', descripcion: 'Jr. Las Flores 456, Dpto. 302', departamento: 'Lima', provincia: 'Lima', distrito: 'San Borja', es_principal: false },
-    ],
-  },
-  {
-    id: '2', tipo: 'CLIENTE', tipo_documento: 'RUC', numero_documento: '20749652321',
-    nombre: 'COMERCIAL LOS ANDES S.A.C.',
-    telefono: '01-4234567', email: 'ventas@losandes.pe',
-    direccion: 'Jr. Ucayali 456', departamento: 'Lima', provincia: 'Lima', distrito: 'Cercado de Lima',
-    estado: 'ACTIVO',
-    direcciones: [
-      { id: 'd2-1', descripcion: 'Jr. Ucayali 456 - Oficina principal', departamento: 'Lima', provincia: 'Lima', distrito: 'Cercado de Lima', es_principal: true },
-      { id: 'd2-2', descripcion: 'Av. Colonial 1800 - Almacén', departamento: 'Lima', provincia: 'Lima', distrito: 'Breña', es_principal: false },
-      { id: 'd2-3', descripcion: 'Parque Industrial Ate s/n', departamento: 'Lima', provincia: 'Lima', distrito: 'Ate', es_principal: false },
-    ],
-  },
-  {
-    id: '3', tipo: 'CLIENTE', tipo_documento: 'DNI', numero_documento: '45123678',
-    nombre: 'María', apellido_paterno: 'Rodríguez', apellido_materno: 'Vega',
-    telefono: '999123456', email: 'maria.rodriguez@hotmail.com',
-    direccion: 'Calle Los Pinos 789', departamento: 'Lima', provincia: 'Lima', distrito: 'San Isidro',
-    estado: 'INACTIVO',
-  },
-  {
-    id: '4', tipo: 'CLIENTE', tipo_documento: 'CE', numero_documento: 'CE-000123456',
-    nombre: 'Carlos', apellido_paterno: 'Martínez',
-    telefono: '998765432', email: 'cmartinez@empresa.com',
-    direccion: 'Av. Arequipa 1200', departamento: 'Lima', provincia: 'Lima', distrito: 'Lince',
-    estado: 'ACTIVO',
-  },
-  {
-    id: '5', tipo: 'PROVEEDOR', tipo_documento: 'RUC', numero_documento: '20123456789',
-    nombre: 'IMPORTACIONES DEL NORTE S.R.L.',
-    telefono: '01-6543210', email: 'contacto@impnorte.pe',
-    direccion: 'Av. Industrial 1200', departamento: 'Lima', provincia: 'Lima', distrito: 'Ate',
-    estado: 'ACTIVO',
-  },
-  {
-    id: '6', tipo: 'PROVEEDOR', tipo_documento: 'RUC', numero_documento: '20987654321',
-    nombre: 'TECH SUPPLIES PERU E.I.R.L.',
-    telefono: '01-3456789', email: 'ventas@techsupplies.pe',
-    direccion: 'Jr. Camaná 567', departamento: 'Lima', provincia: 'Lima', distrito: 'Cercado de Lima',
-    estado: 'ACTIVO',
-  },
-  {
-    id: '7', tipo: 'PROVEEDOR', tipo_documento: 'RUC', numero_documento: '20555444333',
-    nombre: 'DISTRIBUIDORA CENTRAL S.A.',
-    telefono: '01-7891234', email: 'info@distcentral.pe',
-    direccion: 'Av. Venezuela 890', departamento: 'Lima', provincia: 'Lima', distrito: 'Breña',
-    estado: 'INACTIVO',
-  },
-];
+export function mapClientToPersona(c: ClientSupplier): Persona {
+  const sigla = (c.documento_descripcion ?? '').toUpperCase();
+  const tipoDoc: TipoDocumento = sigla.includes('RUC') ? 'RUC' : (sigla.includes('EXTRANJERIA') || sigla === 'CE' ? 'CE' : 'DNI');
+  return {
+    id:               c.numero_documento,
+    tipo:             c.tipo_persona === 2 ? 'PROVEEDOR' : 'CLIENTE',
+    tipo_documento:   tipoDoc,
+    numero_documento: c.numero_documento,
+    nombre:           c.display_name,
+    apellido_paterno: c.apellido_paterno ?? undefined,
+    apellido_materno: c.apellido_materno ?? undefined,
+    telefono:         c.telefono ?? '',
+    email:            c.email ?? '',
+    direccion:        c.direccion ?? '',
+    departamento:     c.departamento_nombre ?? c.departamento ?? '',
+    provincia:        c.provincia_nombre ?? c.provincia ?? '',
+    distrito:         c.distrito_nombre ?? c.distrito ?? '',
+    estado:           c.estado === 1 ? 'ACTIVO' : 'INACTIVO',
+    _raw:             c,
+  };
+}
+
+export function mapAddressToDireccion(a: ClientAddress): Direccion {
+  return {
+    id:           a.id,
+    source:       a.source,
+    descripcion:  a.descripcion,
+    departamento: a.departamento,
+    provincia:    a.provincia,
+    distrito:     a.distrito,
+    dep_nombre:   a.departamento_nombre ?? a.departamento,
+    prov_nombre:  a.provincia_nombre ?? a.provincia,
+    dist_nombre:  a.distrito_nombre ?? a.distrito,
+    es_principal: a.source === 'primary',
+  };
+}

@@ -37,9 +37,13 @@
                    class="font-mono" />
             <p-inputGroupAddon>
               <p-button icon="pi pi-search" severity="secondary" [text]="true" size="small"
+                        [loading]="searching()"
                         (onClick)="buscarDocumento()" />
             </p-inputGroupAddon>
           </p-inputgroup>
+          @if (searchError()) {
+            <span class="text-xs text-red-500">{{ searchError() }}</span>
+          }
         </div>
 
       </div>
@@ -125,20 +129,49 @@
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Departamento</label>
-          <input pInputText pSize="small" [formField]="form.departamento"
-                 placeholder="Lima" class="w-full" />
+          <p-select
+            [options]="departamentos()"
+            optionLabel="nombre"
+            optionValue="codigo"
+            [ngModel]="model().departamento"
+            (ngModelChange)="setDep($event)"
+            placeholder="Seleccionar"
+            [filter]="true"
+            filterPlaceholder="Buscar..."
+            appendTo="body"
+            styleClass="w-full" />
         </div>
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Provincia</label>
-          <input pInputText pSize="small" [formField]="form.provincia"
-                 placeholder="Lima" class="w-full" />
+          <p-select
+            [options]="provincias()"
+            optionLabel="nombre"
+            optionValue="codigo"
+            [ngModel]="model().provincia"
+            (ngModelChange)="setProv($event)"
+            placeholder="Seleccionar"
+            [filter]="true"
+            filterPlaceholder="Buscar..."
+            [disabled]="!model().departamento"
+            appendTo="body"
+            styleClass="w-full" />
         </div>
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-stone-600 dark:text-stone-400">Distrito</label>
-          <input pInputText pSize="small" [formField]="form.distrito"
-                 placeholder="Miraflores" class="w-full" />
+          <p-select
+            [options]="distritos()"
+            optionLabel="nombre"
+            optionValue="codigo"
+            [ngModel]="model().distrito"
+            (ngModelChange)="model.update(m => ({ ...m, distrito: $event }))"
+            placeholder="Seleccionar"
+            [filter]="true"
+            filterPlaceholder="Buscar..."
+            [disabled]="!model().provincia"
+            appendTo="body"
+            styleClass="w-full" />
         </div>
 
       </div>
@@ -148,7 +181,7 @@
 
   <div modal-footer class="flex gap-2 justify-end">
     <p-button label="Cancelar" severity="secondary" [outlined]="true" size="small" (onClick)="close()" />
-    <p-button label="Guardar" icon="pi pi-check" size="small" (onClick)="save()" />
+    <p-button label="Guardar" icon="pi pi-check" size="small" [loading]="saving()" (onClick)="save()" />
   </div>
 
 </app-modal>

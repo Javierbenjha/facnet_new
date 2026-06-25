@@ -15,8 +15,11 @@
       [fechaEmision]="fechaEmision()"   (fechaEmisionChange)="fechaEmision.set($event)"
       [moneda]="moneda()"               (monedaChange)="moneda.set($event)"
       [formaPago]="formaPago()"         (formaPagoChange)="formaPago.set($event)"
+      [fechaVencimiento]="fechaVencimiento()"  (fechaVencimientoChange)="fechaVencimiento.set($event)"
+      [igvIncluido]="igvIncluido()"     (igvIncluidoChange)="igvIncluido.set($event)"
       [descuento]="descuento()"         (descuentoChange)="descuento.set($event)"
       [descuentoMonto]="descuentoMonto()"
+      [descuentoPct]="descuentoPct()"
       [tiposDoc]="tiposDoc"
       [sigla]="sigla()"
       [showDetRet]="showDetRet()"       (showDetRetChange)="showDetRet.set($event)"
@@ -33,6 +36,7 @@
       [categorias]="categorias()"
       [productos]="filteredProductos()"
       [sigla]="sigla()"
+      [loading]="loadingProductos()"
       (productClick)="addToCart($event)"
       (createProduct)="showProductForm.set(true)" />
   </div>

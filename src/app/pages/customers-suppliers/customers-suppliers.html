@@ -19,13 +19,13 @@
       variant="info" />
     <app-kpi-card
       label="Activos"
-      [value]="stats().activos.toString()"
+      [value]="stats().active.toString()"
       subtitle="habilitados"
       icon="pi-check-circle"
       variant="success" />
     <app-kpi-card
       label="Inactivos"
-      [value]="stats().inactivos.toString()"
+      [value]="stats().inactive.toString()"
       subtitle="deshabilitados"
       icon="pi-times-circle"
       variant="danger" />
@@ -42,11 +42,12 @@
 </div>
 
 <app-direccion-modal
-  [persona]="editingDireccion()"
-  (closed)="onCloseDireccion($event)" />
+  [clientDoc]="editingDireccion()?.doc ?? null"
+  [clientName]="editingDireccion()?.name ?? ''"
+  (closed)="editingDireccion.set(null)" />
 
 <app-customer-form
   [editing]="editing()"
   [tipoPersona]="tab()"
   (closed)="close()"
-  (saved)="onSaved($event)" />
+  (saved)="onSaved()" />
