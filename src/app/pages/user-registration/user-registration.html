@@ -108,6 +108,27 @@
         [outlined]="true"
         (onClick)="edit(row)"
       />
+      @if (isOwner()) {
+        @if (row.estado === 1) {
+          <p-button
+            label="Desactivar"
+            icon="pi pi-ban"
+            size="small"
+            severity="danger"
+            [text]="true"
+            (onClick)="toggleActive(row)"
+          />
+        } @else {
+          <p-button
+            label="Activar"
+            icon="pi pi-check"
+            size="small"
+            severity="success"
+            [text]="true"
+            (onClick)="toggleActive(row)"
+          />
+        }
+      }
     </div>
   </ng-template>
 

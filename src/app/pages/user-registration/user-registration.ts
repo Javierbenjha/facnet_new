@@ -7,6 +7,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { ConfirmationService } from 'primeng/api';
 import { Users } from '../../core/services/users';
 import { Auth } from '../../core/services/auth';
 import { Toaster } from '../../core/services/toast';
@@ -29,6 +30,7 @@ export class UserRegistration {
   private readonly users = inject(Users);
   private readonly auth = inject(Auth);
   private readonly toaster = inject(Toaster);
+  private readonly confirm = inject(ConfirmationService);
 
   // Solo el dueño (role=1) puede crear sub-usuarios y reasignar roles.
   readonly isOwner = computed(() => this.auth.currentUser()?.role === 1);
@@ -118,5 +120,37 @@ export class UserRegistration {
     this.editing.set(null);
     this.load();
     this.loadStats();
+  }
+
+  toggleActive(row: UserListItem): void {
+    const desactivar = row.estado === 1;
+    this.confirm.confirm({
+      header: desactivar ? 'Desactivar usuario' : 'Activar usuario',
+      message: desactivar
+        ? `¿Desactivar a "${row.nombre}"? Se cerrarán sus sesiones y perderá el acceso.`
+        : `¿Activar a "${row.nombre}"?`,
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí',
+      rejectLabel: 'Cancelar',
+      rejectButtonProps: { severity: 'secondary', outlined: true },
+      accept: () => {
+        this.users.toggleActive(row.id).subscribe({
+          next: (res) => {
+            this.load();
+            this.loadStats();
+            this.toaster.success('Listo', res.message);
+            // Al reactivar, el backend deja al usuario sin asignaciones: hay que reasignar.
+            if (!desactivar) {
+              this.toaster.info(
+                'Reasigná sus accesos',
+                'El usuario quedó sin sucursal ni rol. Editalo para reasignarle accesos antes de que pueda operar.',
+              );
+            }
+          },
+          error: (err) =>
+            this.toaster.error('Error', err.error?.message ?? 'No se pudo cambiar el estado'),
+        });
+      },
+    });
   }
 }
