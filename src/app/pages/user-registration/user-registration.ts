@@ -7,7 +7,8 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { ConfirmationService } from 'primeng/api';
+import { ConfirmationService, MenuItem } from 'primeng/api';
+import { Menu } from 'primeng/menu';
 import { Users } from '../../core/services/users';
 import { Auth } from '../../core/services/auth';
 import { Toaster } from '../../core/services/toast';
@@ -24,7 +25,7 @@ import { UserForm } from './user-form/user-form';
   templateUrl: './user-registration.html',
   styleUrl: './user-registration.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DataTable, TablePagination, PageHeader, KpiCard, Button, UserForm],
+  imports: [DataTable, TablePagination, PageHeader, KpiCard, Button, Menu, UserForm],
 })
 export class UserRegistration {
   private readonly users = inject(Users);
@@ -46,8 +47,8 @@ export class UserRegistration {
     inactivos: 0,
   });
 
-  // El form de alta/edición se integra en la Tarea 4.
   readonly editing = signal<UserDetail | 'new' | null>(null);
+  readonly rowMenuItems = signal<MenuItem[]>([]);
 
   // Templates de celda — se inyectan en las columnas vía computed.
   private readonly userTpl = viewChild<TemplateRef<unknown>>('userTpl');
@@ -114,6 +115,22 @@ export class UserRegistration {
 
   edit(row: UserListItem): void {
     this.users.get(row.id).subscribe((detail) => this.editing.set(detail));
+  }
+
+  openRowMenu(event: Event, row: UserListItem, menu: Menu): void {
+    const activo = row.estado === 1;
+    const items: MenuItem[] = [
+      { label: 'Editar', icon: 'pi pi-pencil', command: () => this.edit(row) },
+    ];
+    if (this.isOwner()) {
+      items.push({
+        label: activo ? 'Desactivar' : 'Activar',
+        icon: activo ? 'pi pi-ban' : 'pi pi-check-circle',
+        command: () => this.toggleActive(row),
+      });
+    }
+    this.rowMenuItems.set(items);
+    menu.toggle(event);
   }
 
   onSaved(): void {
