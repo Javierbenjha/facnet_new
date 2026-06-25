@@ -21,27 +21,65 @@
     </div>
 
     @for (group of grouped(); track group.module) {
-      <div class="flex flex-col gap-1">
+      <div class="flex flex-col gap-2">
         <h4 class="text-sm font-semibold uppercase text-stone-500">{{ group.module }}</h4>
+
+        @if (group.wildcard) {
+          <div class="flex items-center justify-between gap-2 border-b border-stone-100 pb-2">
+            <label class="flex items-center gap-2 text-sm font-medium text-stone-700">
+              <p-checkbox
+                [binary]="true"
+                [ngModel]="allChecked(group.items)"
+                [indeterminate]="someChecked(group.items) && !allChecked(group.items)"
+                (onChange)="toggleAll(group.items)"
+              />
+              {{ group.wildcard.description }}
+            </label>
+            <p-select
+              [options]="scopeOptions"
+              optionLabel="label"
+              optionValue="value"
+              [ngModel]="commonScope(group.items)"
+              [disabled]="!someChecked(group.items)"
+              (onChange)="setScopeAll(group.items, $event.value)"
+              appendTo="body"
+              styleClass="w-32"
+            />
+          </div>
+        }
+
         @for (perm of group.items; track perm.id) {
-          <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center justify-between gap-2 pl-6">
             <label class="flex items-center gap-2 text-sm">
-              <input type="checkbox" [checked]="isChecked(perm.id)" (change)="toggle(perm.id)" />
+              <p-checkbox
+                [binary]="true"
+                [ngModel]="isChecked(perm.id)"
+                (onChange)="toggle(perm.id)"
+              />
               {{ perm.description }}
             </label>
-
-            <select
-              class="text-sm border border-stone-200 rounded px-2 py-1 disabled:opacity-40"
+            <p-select
+              [options]="scopeOptions"
+              optionLabel="label"
+              optionValue="value"
+              [ngModel]="scopeOf(perm.id)"
               [disabled]="!isChecked(perm.id)"
-              (change)="setScope(perm.id, $any($event.target).value)"
-            >
-              @for (opt of scopeOptions; track opt.value) {
-                <option [value]="opt.value" [selected]="scopeOf(perm.id) === opt.value">
-                  {{ opt.label }}
-                </option>
-              }
-            </select>
+              (onChange)="setScope(perm.id, $event.value)"
+              appendTo="body"
+              styleClass="w-32"
+            />
           </div>
+        }
+      </div>
+    }
+
+    @if (permError()) {
+      <small class="text-red-500">Seleccioná al menos un permiso para el rol.</small>
+    }
+    @if (errors().length) {
+      <div class="flex flex-col gap-1 rounded bg-red-50 p-2">
+        @for (e of errors(); track e) {
+          <small class="text-red-600">{{ e }}</small>
         }
       </div>
     }
