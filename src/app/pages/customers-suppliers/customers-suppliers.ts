@@ -99,6 +99,8 @@ export class CustomersSuppliers {
     this.editingDireccion.set({ doc: p.numero_documento, name: p.nombre });
   }
 
+  onDireccionSaved() { this.reload(); }
+
   edit(persona: Persona) { this.editing.set(persona); }
   addNew()               { this.editing.set('new'); }
   close()                { this.editing.set(null); }

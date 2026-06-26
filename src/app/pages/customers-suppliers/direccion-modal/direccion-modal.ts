@@ -26,6 +26,7 @@ export class DireccionModal {
   readonly clientDoc  = input<string | null>(null);
   readonly clientName = input<string>('');
   readonly closed     = output<void>();
+  readonly saved      = output<void>();
 
   private readonly clientsSvc = inject(ClientsService);
   private readonly ubiSvc     = inject(Ubigeo);
@@ -126,6 +127,7 @@ export class DireccionModal {
             : d
           )
         );
+        this.saved.emit();
         this.resetForm();
       };
       const onErr = () => { this.saving.set(false); this.toast.error('Error', 'No se pudo actualizar la dirección.'); };
@@ -144,6 +146,7 @@ export class DireccionModal {
         next: () => {
           this.saving.set(false);
           this.toast.success('Agregado', 'Dirección agregada correctamente.');
+          this.saved.emit();
           this.reload();
           this.resetForm();
         },
@@ -190,6 +193,7 @@ export class DireccionModal {
     ).subscribe({
       next: () => {
         this.toast.success('Dirección principal actualizada', `"${d.descripcion}" es ahora la dirección principal.`);
+        this.saved.emit();
         this.reload();
       },
       error: () => this.toast.error('Error', 'No se pudo establecer como dirección principal.'),
@@ -204,6 +208,7 @@ export class DireccionModal {
     this.clientsSvc.removeAddress(doc, d.id).subscribe({
       next: () => {
         this.toast.success('Eliminado', 'Dirección eliminada correctamente.');
+        this.saved.emit();
         this.reload();
         if (this.editIdx() === index) this.resetForm();
       },

@@ -93,6 +93,15 @@ export interface DocumentType {
   sigla: string;
 }
 
+export interface DocumentTypeWithStatus extends DocumentType {
+  st: number;
+}
+
+export interface ToggleDocumentTypeResponse {
+  message: string;
+  document_type: DocumentTypeWithStatus;
+}
+
 export interface ClientListResponse {
   data: ClientSupplier[];
   total: number;

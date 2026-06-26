@@ -12,6 +12,8 @@ import {
   ExpressClientPayload,
   ClientStats,
   DocumentType,
+  DocumentTypeWithStatus,
+  ToggleDocumentTypeResponse,
   ClientListResponse,
 } from '../models/client.model';
 
@@ -34,6 +36,17 @@ export class ClientsService {
 
   getDocumentTypes(): Observable<DocumentType[]> {
     return this.http.get<DocumentType[]>(`${this.base}/document-types`);
+  }
+
+  getAllDocumentTypes(): Observable<DocumentTypeWithStatus[]> {
+    return this.http.get<DocumentTypeWithStatus[]>(`${this.base}/document-types/all`);
+  }
+
+  toggleDocumentType(documentoId: string): Observable<ToggleDocumentTypeResponse> {
+    return this.http.patch<ToggleDocumentTypeResponse>(
+      `${this.base}/document-types/${documentoId}/toggle`,
+      {},
+    );
   }
 
   exportToExcel(params?: { tipo_persona?: number }): Observable<Blob> {
@@ -95,6 +108,13 @@ export class ClientsService {
   ): Observable<{ message: string; direccion: ClientAddress }> {
     return this.http.delete<{ message: string; direccion: ClientAddress }>(
       `${this.base}/${numeroDocumento}/addresses/${addressId}`,
+    );
+  }
+
+  setPrimaryAddress(numeroDocumento: string, addressId: string): Observable<ClientAddress[]> {
+    return this.http.patch<ClientAddress[]>(
+      `${this.base}/${numeroDocumento}/addresses/${addressId}/set-primary`,
+      {},
     );
   }
 }

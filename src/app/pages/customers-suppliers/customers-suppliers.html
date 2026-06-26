@@ -44,7 +44,8 @@
 <app-direccion-modal
   [clientDoc]="editingDireccion()?.doc ?? null"
   [clientName]="editingDireccion()?.name ?? ''"
-  (closed)="editingDireccion.set(null)" />
+  (closed)="editingDireccion.set(null)"
+  (saved)="onDireccionSaved()" />
 
 <app-customer-form
   [editing]="editing()"

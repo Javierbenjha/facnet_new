@@ -1,0 +1,50 @@
+<app-modal
+  [(visible)]="visible"
+  title="Documentos de emisión"
+  icon="pi pi-receipt"
+  iconColor="info"
+  size="md">
+
+  <p-table
+    [value]="rows()"
+    [loading]="loading()"
+    dataKey="id"
+    styleClass="p-datatable-sm">
+
+    <ng-template pTemplate="header">
+      <tr class="text-sm">
+        <th class="w-10">#</th>
+        <th>Descripción</th>
+        <th class="w-24">Sigla</th>
+        <th class="w-28 text-center">Estado</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-row let-rowIndex="rowIndex">
+      <tr>
+        <td class="text-stone-400 text-xs">{{ rowIndex + 1 }}</td>
+        <td class="font-medium text-sm">{{ row.descripcion }}</td>
+        <td>
+          <p-tag [value]="row.sigla" severity="secondary" />
+        </td>
+        <td class="text-center">
+          <p-toggleswitch
+            [ngModel]="row.active"
+            [disabled]="row.toggling"
+            (ngModelChange)="toggle(row)"
+          />
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="4" class="text-center py-8 text-stone-400 text-sm">
+          No hay documentos registrados
+        </td>
+      </tr>
+    </ng-template>
+
+  </p-table>
+
+</app-modal>

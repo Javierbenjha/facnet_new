@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { Button } from 'primeng/button';
 import { Card } from 'primeng/card';
 import { PageHeader } from '../../shared/page-header/page-header';
+import { DocumentsModal } from './documents-modal';
 
 interface SettingAction {
   label: string;
@@ -244,12 +245,17 @@ const SECTIONS: SettingSection[] = [
   selector: 'app-settings',
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
-  imports: [Button, Card, PageHeader],
+  imports: [Button, Card, PageHeader, DocumentsModal],
 })
 export class Settings {
   readonly sections = SECTIONS;
-  readonly activeSection = signal(SECTIONS[0].id);
+  readonly activeSection    = signal(SECTIONS[0].id);
+  readonly documentsVisible = signal(false);
 
   readonly currentSection = () =>
     this.sections.find(s => s.id === this.activeSection()) ?? this.sections[0];
+
+  handleAction(moduleId: string) {
+    if (moduleId === 'documento') this.documentsVisible.set(true);
+  }
 }

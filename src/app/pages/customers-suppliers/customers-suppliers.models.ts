@@ -35,8 +35,10 @@ export interface Persona {
 }
 
 export function mapClientToPersona(c: ClientSupplier): Persona {
-  const sigla = (c.documento_descripcion ?? '').toUpperCase();
-  const tipoDoc: TipoDocumento = sigla.includes('RUC') ? 'RUC' : (sigla.includes('EXTRANJERIA') || sigla === 'CE' ? 'CE' : 'DNI');
+  const desc = (c.documento_descripcion ?? '').toUpperCase();
+  const tipoDoc: TipoDocumento =
+    (desc === 'RUC' || desc.includes('CONTRIBUYENTE')) ? 'RUC' :
+    (desc === 'CEX' || desc.includes('EXTRANJERIA'))   ? 'CE'  : 'DNI';
   return {
     id:               c.numero_documento,
     tipo:             c.tipo_persona === 2 ? 'PROVEEDOR' : 'CLIENTE',

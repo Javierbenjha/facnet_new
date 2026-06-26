@@ -8,8 +8,6 @@ import { Select } from 'primeng/select';
 import { InputGroup } from 'primeng/inputgroup';
 import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { AppModal } from '../../../shared/app-modal/app-modal';
-import { Ubigeo } from '../../../core/services/ubigeo';
-import { Department, Province, District } from '../../../core/models/ubigeo.model';
 import { Persona, TipoDocumento, TipoPersona } from '../customers-suppliers.models';
 import { ClientsService } from '../../../core/services/clients';
 import { Toaster } from '../../../core/services/toast';
@@ -28,7 +26,6 @@ export class CustomerForm {
   readonly saved       = output<void>();
 
   private readonly clientsSvc = inject(ClientsService);
-  private readonly ubiSvc     = inject(Ubigeo);
   private readonly toast      = inject(Toaster);
 
   readonly visible = computed(() => this.editing() !== null);
@@ -40,16 +37,16 @@ export class CustomerForm {
     return e === 'new' ? `Nuevo ${tipo}` : `Editar ${tipo}`;
   });
 
-  readonly documentTypes = signal<DocumentType[]>([
-    { id_documento: '1', descripcion: 'DOCUMENTO NACIONAL DE IDENTIDAD', sigla: 'DNI' },
-    { id_documento: '2', descripcion: 'RUC', sigla: 'RUC' },
-  ]);
+  readonly documentTypes   = signal<DocumentType[]>([]);
+  readonly loadingDocTypes = signal(true);
 
-  readonly tipoDocOptions = [
-    { label: 'DNI',          value: 'DNI' },
-    { label: 'RUC',          value: 'RUC' },
-    { label: 'Carnet Ext.',  value: 'CE'  },
-  ];
+  readonly tipoDocOptions = computed(() => {
+    const types = this.documentTypes();
+    const filtered = this.tipoPersona() === 'PROVEEDOR'
+      ? types.filter(d => d.sigla === 'RUC')
+      : types;
+    return filtered.map(d => ({ label: d.sigla, value: d.sigla }));
+  });
 
   readonly searching     = signal(false);
   readonly saving        = signal(false);
@@ -64,10 +61,6 @@ export class CustomerForm {
     apellido_materno: '',
     telefono:         '',
     email:            '',
-    direccion:        '',
-    departamento:     '',
-    provincia:        '',
-    distrito:         '',
   });
 
   readonly form = form(this.model);
@@ -82,35 +75,35 @@ export class CustomerForm {
     return 'CE-000000000';
   });
 
-  readonly departamentos = signal<Department[]>([]);
-  readonly provincias    = signal<Province[]>([]);
-  readonly distritos     = signal<District[]>([]);
-
   constructor() {
-    this.clientsSvc.getDocumentTypes().pipe(takeUntilDestroyed()).subscribe(types => {
-      if (types.length) this.documentTypes.set(types);
+    this.clientsSvc.getDocumentTypes().pipe(takeUntilDestroyed()).subscribe({
+      next: types => {
+        this.documentTypes.set(types);
+        this.loadingDocTypes.set(false);
+        const opts = this.tipoDocOptions();
+        const current = this.model().tipo_documento;
+        if (!opts.find(o => o.value === current) && opts.length) {
+          this.model.update(m => ({ ...m, tipo_documento: opts[0].value as TipoDocumento }));
+        }
+      },
+      error: () => this.loadingDocTypes.set(false),
     });
-    this.ubiSvc.getDepartments().pipe(takeUntilDestroyed()).subscribe(d => this.departamentos.set(d));
 
     effect(() => {
       const e = this.editing();
       if (!e) return;
       this.expressResult.set(null);
       this.searchError.set('');
-      this.provincias.set([]);
-      this.distritos.set([]);
       if (e === 'new') {
+        const defaultDoc = (this.tipoDocOptions()[0]?.value ?? 'DNI') as TipoDocumento;
         this.model.set({
-          tipo_documento: 'DNI', numero_documento: '',
+          tipo_documento: defaultDoc, numero_documento: '',
           nombre: '', apellido_paterno: '', apellido_materno: '',
-          telefono: '', email: '', direccion: '',
-          departamento: '', provincia: '', distrito: '',
+          telefono: '', email: '',
         });
       } else {
         const raw = (e as Persona)._raw;
         const p   = e as Persona;
-        const dep  = raw.departamento ?? '';
-        const prov = raw.provincia ?? '';
         this.model.set({
           tipo_documento:   p.tipo_documento,
           numero_documento: p.numero_documento,
@@ -119,37 +112,9 @@ export class CustomerForm {
           apellido_materno: raw.apellido_materno ?? '',
           telefono:         raw.telefono ?? '',
           email:            raw.email ?? '',
-          direccion:        raw.direccion ?? '',
-          departamento:     dep,
-          provincia:        prov,
-          distrito:         raw.distrito ?? '',
         });
-        if (dep) {
-          this.ubiSvc.getProvinces(dep).subscribe(ps => {
-            this.provincias.set(ps);
-            if (prov) this.ubiSvc.getDistricts(dep, prov).subscribe(ds => this.distritos.set(ds));
-          });
-        }
       }
     });
-  }
-
-  setDep(codigo: string) {
-    this.model.update(m => ({ ...m, departamento: codigo, provincia: '', distrito: '' }));
-    this.provincias.set([]);
-    this.distritos.set([]);
-    if (codigo) {
-      this.ubiSvc.getProvinces(codigo).subscribe(p => this.provincias.set(p));
-    }
-  }
-
-  setProv(codigo: string) {
-    this.model.update(m => ({ ...m, provincia: codigo, distrito: '' }));
-    this.distritos.set([]);
-    const dep = this.model().departamento;
-    if (dep && codigo) {
-      this.ubiSvc.getDistricts(dep, codigo).subscribe(d => this.distritos.set(d));
-    }
   }
 
   buscarDocumento() {
@@ -205,10 +170,6 @@ export class CustomerForm {
       razon_social:     this.isRuc() ? (v.nombre || undefined) : undefined,
       telefono:         v.telefono || undefined,
       email:            v.email || undefined,
-      direccion:        v.direccion || undefined,
-      departamento:     v.departamento || undefined,
-      provincia:        v.provincia || undefined,
-      distrito:         v.distrito || undefined,
     };
 
     const tipo  = this.tipoPersona() === 'CLIENTE' ? 'Cliente' : 'Proveedor';
@@ -241,27 +202,23 @@ export class CustomerForm {
   }
 
   private fillFromClient(c: ClientSupplier) {
-    const isRuc = (c.documento_descripcion ?? '').toUpperCase().includes('RUC');
-    const dep   = c.departamento ?? '';
-    const prov  = c.provincia ?? '';
+    const sigla = this.documentTypes().find(d => d.id_documento === c.documento_id_documento)?.sigla?.toUpperCase();
+    const desc  = (c.documento_descripcion ?? '').toUpperCase();
+    const resolved = sigla ?? desc;
+    const tipoDoc: TipoDocumento =
+      (resolved === 'RUC' || desc.includes('CONTRIBUYENTE')) ? 'RUC' :
+      (resolved === 'CEX' || desc.includes('EXTRANJERIA'))   ? 'CE'  : 'DNI';
+    const isRuc = tipoDoc === 'RUC';
+
     this.model.update(m => ({
       ...m,
+      tipo_documento:   tipoDoc,
       nombre:           isRuc ? (c.razon_social ?? '') : (c.nombre ?? ''),
-      apellido_paterno: c.apellido_paterno ?? '',
-      apellido_materno: c.apellido_materno ?? '',
+      apellido_paterno: isRuc ? '' : (c.apellido_paterno ?? ''),
+      apellido_materno: isRuc ? '' : (c.apellido_materno ?? ''),
       telefono:         c.telefono ?? '',
       email:            c.email ?? '',
-      direccion:        c.direccion ?? '',
-      departamento:     dep,
-      provincia:        prov,
-      distrito:         c.distrito ?? '',
     }));
-    if (dep) {
-      this.ubiSvc.getProvinces(dep).subscribe(ps => {
-        this.provincias.set(ps);
-        if (prov) this.ubiSvc.getDistricts(dep, prov).subscribe(ds => this.distritos.set(ds));
-      });
-    }
   }
 
   close() { this.closed.emit(); }
