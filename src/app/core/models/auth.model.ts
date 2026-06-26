@@ -8,9 +8,11 @@ export interface LoginRequest {
 export interface User {
   id: string;
   nombre: string;
-  apellido_paterno?: string;
-  apellido_materno?: string;
+  apellido_paterno?: string | null;
+  apellido_materno?: string | null;
   email: string;
+  telefono?: string | null;
+  imagen_url?: string | null;
   role: number;
   ciaId?: string;
   sucursalId?: string;
@@ -54,4 +56,25 @@ export interface SessionResponse {
   companies?: CompanySummary[];
   sucursalId?: string | null;
   permissions?: Record<string, string>
+}
+
+// PATCH /auth/profile — all fields optional, only sent ones are updated.
+export interface UpdateProfileRequest {
+  nombre?: string;
+  apellido_paterno?: string;
+  apellido_materno?: string;
+  email?: string;
+  telefono?: string;
+}
+
+// PATCH /auth/profile returns the updated user (subset of fields).
+export interface UpdateProfileResponse {
+  id: string;
+  nombre: string;
+  apellido_paterno?: string | null;
+  apellido_materno?: string | null;
+  email: string;
+  telefono?: string | null;
+  imagen_url?: string | null;
+  role: number;
 }

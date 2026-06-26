@@ -7,6 +7,8 @@ import {
   RegisterRequest,
   RegisterResponse,
   SessionResponse,
+  UpdateProfileRequest,
+  UpdateProfileResponse,
   User,
 } from '../models/auth.model';
 import { CompanySummary } from '../models/company.model';
@@ -77,8 +79,31 @@ export class Auth {
       .pipe(tap((res) => this.setSession({ user: res.user, activeCompany: res.activeCompany, sucursalId: res.sucursalId })));
   }
 
+  /** Edit own profile (text only). Target comes from the token — no id in URL. */
+  updateProfile(payload: UpdateProfileRequest): Observable<UpdateProfileResponse> {
+    return this.http
+      .patch<UpdateProfileResponse>(`${environment.apiUrl}/auth/profile`, payload)
+      .pipe(tap((res) => this.patchCurrentUser(res)));
+  }
+
+  /** Edit own profile with photo (or text + photo). FormData uses field `imagen`. */
+  updateProfileWithPhoto(fd: FormData): Observable<UpdateProfileResponse> {
+    return this.http
+      .patch<UpdateProfileResponse>(`${environment.apiUrl}/auth/profile`, fd)
+      .pipe(tap((res) => this.patchCurrentUser(res)));
+  }
+
   setSucursal(sucursalId: string) {
     this._sucursalId.set(sucursalId);
+  }
+
+  /**
+   * Merge the PATCH /auth/profile response into the current user signal.
+   * The response is a subset (no ciaId/sucursalId), so we spread over the
+   * existing user instead of replacing it to avoid dropping session context.
+   */
+  private patchCurrentUser(res: UpdateProfileResponse) {
+    this._currentUser.update((user) => (user ? { ...user, ...res } : user));
   }
 
   clearSession() {

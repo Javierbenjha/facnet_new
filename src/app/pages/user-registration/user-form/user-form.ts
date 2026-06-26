@@ -110,7 +110,7 @@ export class UserForm {
         });
         email.disable();
         this.assignments.set(
-          e.assignments.map((a) => ({ sucursalId: a.sucursalId, roleId: a.roleId })),
+          (e.assignments ?? []).map((a) => ({ sucursalId: a.sucursalId, roleId: a.roleId })),
         );
         this.imagen.set(null);
         this.preview.set(e.imagen);

@@ -3,11 +3,19 @@ import {
   Component,
   TemplateRef,
   computed,
+  debounced,
+  effect,
   inject,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
-import { ConfirmationService } from 'primeng/api';
+import { FormsModule } from '@angular/forms';
+import { ConfirmationService, MenuItem } from 'primeng/api';
+import { Menu } from 'primeng/menu';
+import { InputText } from 'primeng/inputtext';
+import { IconField } from 'primeng/iconfield';
+import { InputIcon } from 'primeng/inputicon';
 import { Users } from '../../core/services/users';
 import { Auth } from '../../core/services/auth';
 import { Toaster } from '../../core/services/toast';
@@ -24,7 +32,19 @@ import { UserForm } from './user-form/user-form';
   templateUrl: './user-registration.html',
   styleUrl: './user-registration.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DataTable, TablePagination, PageHeader, KpiCard, Button, UserForm],
+  imports: [
+    DataTable,
+    TablePagination,
+    PageHeader,
+    KpiCard,
+    Button,
+    Menu,
+    InputText,
+    IconField,
+    InputIcon,
+    FormsModule,
+    UserForm,
+  ],
 })
 export class UserRegistration {
   private readonly users = inject(Users);
@@ -46,35 +66,56 @@ export class UserRegistration {
     inactivos: 0,
   });
 
-  // El form de alta/edición se integra en la Tarea 4.
   readonly editing = signal<UserDetail | 'new' | null>(null);
+  readonly rowMenuItems = signal<MenuItem[]>([]);
+
+  // Filtro server-side (el backend acepta search en GET /user).
+  readonly search = signal('');
+  readonly debouncedSearch = debounced(this.search, 300);
 
   // Templates de celda — se inyectan en las columnas vía computed.
   private readonly userTpl = viewChild<TemplateRef<unknown>>('userTpl');
   private readonly rolesTpl = viewChild<TemplateRef<unknown>>('rolesTpl');
   private readonly estadoTpl = viewChild<TemplateRef<unknown>>('estadoTpl');
+  private readonly actionsTpl = viewChild<TemplateRef<unknown>>('actions');
 
   readonly columns = computed<TableColumn[]>(() => [
     { key: 'nombre', label: 'Usuario', cellTemplate: this.userTpl() },
     { key: 'roles', label: 'Roles', cellTemplate: this.rolesTpl() },
     { key: 'estado', label: 'Estado', class: 'w-32', cellTemplate: this.estadoTpl() },
+    { key: '_actions', label: '', class: 'w-16 text-right', cellTemplate: this.actionsTpl() },
   ]);
 
   constructor() {
-    this.load();
     this.loadStats();
+
+    // Recarga la lista cuando cambia la búsqueda (vuelve a la página 1).
+    // El paginado dispara load() directo, por eso el load va en untracked.
+    effect(() => {
+      this.debouncedSearch.value();
+      untracked(() => {
+        this.page.set(1);
+        this.load();
+      });
+    });
   }
 
   load(): void {
     this.loading.set(true);
-    this.users.list({ page: this.page(), limit: this.limit() }).subscribe({
-      next: (res) => {
-        this.list.set(res.data);
-        this.total.set(res.total);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
+    this.users
+      .list({
+        page: this.page(),
+        limit: this.limit(),
+        search: this.debouncedSearch.value() || undefined,
+      })
+      .subscribe({
+        next: (res) => {
+          this.list.set(res.data);
+          this.total.set(res.total);
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
   }
 
   loadStats(): void {
@@ -113,7 +154,27 @@ export class UserRegistration {
   }
 
   edit(row: UserListItem): void {
-    this.users.get(row.id).subscribe((detail) => this.editing.set(detail));
+    this.users.get(row.id).subscribe({
+      next: (detail) => this.editing.set(detail),
+      error: (err) =>
+        this.toaster.error('Error', err.error?.message ?? 'No se pudo cargar el usuario'),
+    });
+  }
+
+  openRowMenu(event: Event, row: UserListItem, menu: Menu): void {
+    const activo = row.estado === 1;
+    const items: MenuItem[] = [
+      { label: 'Editar', icon: 'pi pi-pencil', command: () => this.edit(row) },
+    ];
+    if (this.isOwner()) {
+      items.push({
+        label: activo ? 'Desactivar' : 'Activar',
+        icon: activo ? 'pi pi-ban' : 'pi pi-check-circle',
+        command: () => this.toggleActive(row),
+      });
+    }
+    this.rowMenuItems.set(items);
+    menu.toggle(event);
   }
 
   onSaved(): void {
