@@ -1,0 +1,147 @@
+<app-modal
+  [(visible)]="visible"
+  title="Unidades de medida"
+  icon="pi pi-calculator"
+  iconColor="warning"
+  size="ml">
+
+  <div class="flex items-center justify-between mb-3">
+    <span class="text-sm text-stone-400">{{ rows().length }} unidad{{ rows().length !== 1 ? 'es' : '' }}</span>
+    @if (!adding()) {
+      <p-button
+        label="Nueva unidad"
+        icon="pi pi-plus"
+        size="small"
+        (onClick)="startAdd()" />
+    }
+  </div>
+
+  @if (adding()) {
+    <div class="flex gap-2 mb-3 items-center p-3 bg-surface-ground rounded-lg border border-border">
+      <input
+        pInputText
+        class="flex-1 text-sm"
+        placeholder="Descripción (ej. Kilogramos)"
+        [ngModel]="addBuf().descripcion"
+        (ngModelChange)="setAddDesc($event)"
+        (keydown.escape)="cancelAdd()"
+        autofocus />
+      <input
+        pInputText
+        class="w-24 text-sm uppercase"
+        placeholder="Siglas"
+        [ngModel]="addBuf().siglas"
+        (ngModelChange)="setAddSiglas($event)"
+        (keydown.enter)="saveAdd()"
+        (keydown.escape)="cancelAdd()" />
+      <p-button
+        icon="pi pi-check"
+        size="small"
+        severity="success"
+        [loading]="saving()"
+        (onClick)="saveAdd()" />
+      <p-button
+        icon="pi pi-times"
+        size="small"
+        severity="secondary"
+        [text]="true"
+        (onClick)="cancelAdd()" />
+    </div>
+  }
+
+  <p-table
+    [value]="rows()"
+    [loading]="loading()"
+    dataKey="id"
+    styleClass="p-datatable-sm">
+
+    <ng-template pTemplate="header">
+      <tr class="text-sm">
+        <th class="w-10">#</th>
+        <th>Descripción</th>
+        <th class="w-28">Siglas</th>
+        <th class="w-24"></th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-row let-rowIndex="rowIndex">
+      <tr>
+        <td class="text-stone-400 text-xs">{{ rowIndex + 1 }}</td>
+
+        @if (editingId() === row.id) {
+          <td>
+            <input
+              pInputText
+              class="w-full text-sm"
+              [ngModel]="editBuf().descripcion"
+              (ngModelChange)="setEditDesc($event)"
+              (keydown.escape)="cancelEdit()"
+              autofocus />
+          </td>
+          <td>
+            <input
+              pInputText
+              class="w-full text-sm uppercase"
+              [ngModel]="editBuf().siglas"
+              (ngModelChange)="setEditSiglas($event)"
+              (keydown.enter)="saveEdit(row)"
+              (keydown.escape)="cancelEdit()" />
+          </td>
+        } @else {
+          <td class="font-medium text-sm">{{ row.descripcion }}</td>
+          <td>
+            <span class="text-xs font-mono bg-surface-ground px-2 py-0.5 rounded">{{ row.siglas }}</span>
+          </td>
+        }
+
+        <td class="text-right">
+          @if (editingId() === row.id) {
+            <div class="flex gap-1 justify-end">
+              <p-button
+                icon="pi pi-check"
+                size="small"
+                severity="success"
+                [text]="true"
+                [loading]="saving()"
+                (onClick)="saveEdit(row)" />
+              <p-button
+                icon="pi pi-times"
+                size="small"
+                severity="secondary"
+                [text]="true"
+                (onClick)="cancelEdit()" />
+            </div>
+          } @else {
+            <div class="flex gap-1 justify-end">
+              <p-button
+                icon="pi pi-pencil"
+                size="small"
+                severity="secondary"
+                [text]="true"
+                [disabled]="!!editingId() || adding()"
+                (onClick)="startEdit(row)" />
+              <p-button
+                icon="pi pi-trash"
+                size="small"
+                severity="danger"
+                [text]="true"
+                [loading]="row.deleting"
+                [disabled]="!!editingId() || adding()"
+                (onClick)="delete(row)" />
+            </div>
+          }
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="4" class="text-center py-8 text-stone-400 text-sm">
+          No hay unidades de medida registradas
+        </td>
+      </tr>
+    </ng-template>
+
+  </p-table>
+
+</app-modal>
