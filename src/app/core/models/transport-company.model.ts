@@ -8,7 +8,7 @@ export interface TransportCompany {
   razon_social: string;
   direccion: string;
   nro_reg_mtc: string;          // MTC registration number
-  estado: number;               // 1 = active, 0 = inactive (NOTE: not 2, unlike unit/bank)
+  estado: number;               // 1 = active, 0 = inactive (NOTE: not 2, unlike unit/brand)
   cia_id_cia: string;           // bigint serialized as string in JSON
 }
 
@@ -19,17 +19,3 @@ export interface CreateTransportCompanyPayload {
   direccion: string;            // required, max 255 chars
   nro_reg_mtc: string;          // required, max 50 chars
 }
-
-/** Estado values for a transport company. */
-export const TRANSPORT_COMPANY_ESTADO = {
-  ACTIVE: 1,
-  INACTIVE: 0,
-} as const;
-
-/** Field constraints enforced by the API. */
-export const TRANSPORT_COMPANY_LIMITS = {
-  RUC_LENGTH: 11,
-  RAZON_SOCIAL_MAX: 255,
-  DIRECCION_MAX: 255,
-  NRO_REG_MTC_MAX: 50,
-} as const;
