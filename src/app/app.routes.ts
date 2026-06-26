@@ -2,27 +2,33 @@ import { Routes } from '@angular/router';
 import { MainLayout } from './layout/main-layout/main-layout';
 import { authGuard } from './core/guards/auth-guard';
 import { companySetupGuard } from './core/guards/company-setup-guard';
+import { guestGuard } from './core/guards/guest-guard';
 
 export const routes: Routes = [
   // ─── Auth Pages (Without Sidenav/Header Shell) ─────────────────────────
   {
     path: 'login',
+    canActivate: [guestGuard],
     loadComponent: () => import('./pages/auth/login/login').then(m => m.Login)
   },
   {
     path: 'register',
+    canActivate: [guestGuard],
     loadComponent: () => import('./pages/auth/register/register').then(m => m.Register)
   },
   {
     path: 'forgot-password',
+    canActivate: [guestGuard],
     loadComponent: () => import('./pages/auth/forgot-password/forgot-password').then(m => m.ForgotPassword)
   },
   {
     path: 'sms-verification',
+    canActivate: [guestGuard],
     loadComponent: () => import('./pages/auth/sms-verification/sms-verification').then(m => m.SmsVerification)
   },
   {
     path: 'confirm-password',
+    canActivate: [guestGuard],
     loadComponent: () => import('./pages/auth/confirm-password/confirm-password').then(m => m.ConfirmPassword)
   },
   {
