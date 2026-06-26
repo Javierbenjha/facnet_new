@@ -1,0 +1,126 @@
+<app-modal
+  [(visible)]="visible"
+  title="Marcas"
+  icon="pi pi-verified"
+  iconColor="info"
+  size="md">
+
+  <div class="flex items-center justify-between mb-3">
+    <span class="text-sm text-stone-400">{{ rows().length }} marca{{ rows().length !== 1 ? 's' : '' }}</span>
+    @if (!adding()) {
+      <p-button
+        label="Nueva marca"
+        icon="pi pi-plus"
+        size="small"
+        (onClick)="startAdd()" />
+    }
+  </div>
+
+  @if (adding()) {
+    <div class="flex gap-2 mb-3 items-center p-3 bg-surface-ground rounded-lg border border-border">
+      <input
+        pInputText
+        class="flex-1 text-sm"
+        placeholder="Nombre de la marca"
+        [ngModel]="addBuf()"
+        (ngModelChange)="addBuf.set($event)"
+        (keydown.enter)="saveAdd()"
+        (keydown.escape)="cancelAdd()"
+        autofocus />
+      <p-button
+        icon="pi pi-check"
+        size="small"
+        severity="success"
+        [loading]="saving()"
+        (onClick)="saveAdd()" />
+      <p-button
+        icon="pi pi-times"
+        size="small"
+        severity="secondary"
+        [text]="true"
+        (onClick)="cancelAdd()" />
+    </div>
+  }
+
+  <p-table
+    [value]="rows()"
+    [loading]="loading()"
+    dataKey="id"
+    styleClass="p-datatable-sm">
+
+    <ng-template pTemplate="header">
+      <tr class="text-sm">
+        <th class="w-10">#</th>
+        <th>Nombre</th>
+        <th class="w-28 text-center">Estado</th>
+        <th class="w-20"></th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-row let-rowIndex="rowIndex">
+      <tr>
+        <td class="text-stone-400 text-xs">{{ rowIndex + 1 }}</td>
+
+        @if (editingId() === row.id) {
+          <td>
+            <input
+              pInputText
+              class="w-full text-sm"
+              [ngModel]="editBuf()"
+              (ngModelChange)="editBuf.set($event)"
+              (keydown.enter)="saveEdit(row)"
+              (keydown.escape)="cancelEdit()"
+              autofocus />
+          </td>
+        } @else {
+          <td class="font-medium text-sm">{{ row.descripcion }}</td>
+        }
+
+        <td class="text-center">
+          <p-toggleswitch
+            [ngModel]="row.active"
+            [disabled]="row.toggling || editingId() === row.id"
+            (ngModelChange)="toggle(row)" />
+        </td>
+
+        <td class="text-right">
+          @if (editingId() === row.id) {
+            <div class="flex gap-1 justify-end">
+              <p-button
+                icon="pi pi-check"
+                size="small"
+                severity="success"
+                [text]="true"
+                [loading]="saving()"
+                (onClick)="saveEdit(row)" />
+              <p-button
+                icon="pi pi-times"
+                size="small"
+                severity="secondary"
+                [text]="true"
+                (onClick)="cancelEdit()" />
+            </div>
+          } @else {
+            <p-button
+              icon="pi pi-pencil"
+              size="small"
+              severity="secondary"
+              [text]="true"
+              [disabled]="!!editingId() || adding()"
+              (onClick)="startEdit(row)" />
+          }
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="4" class="text-center py-8 text-stone-400 text-sm">
+          No hay marcas registradas
+        </td>
+      </tr>
+    </ng-template>
+
+  </p-table>
+
+</app-modal>

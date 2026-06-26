@@ -3,6 +3,9 @@ import { Button } from 'primeng/button';
 import { Card } from 'primeng/card';
 import { PageHeader } from '../../shared/page-header/page-header';
 import { DocumentsModal } from './documents-modal';
+import { CategoriesModal } from './categories-modal';
+import { BrandsModal } from './brands-modal';
+import { UnitsModal } from './units-modal';
 
 interface SettingAction {
   label: string;
@@ -245,17 +248,23 @@ const SECTIONS: SettingSection[] = [
   selector: 'app-settings',
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
-  imports: [Button, Card, PageHeader, DocumentsModal],
+  imports: [Button, Card, PageHeader, DocumentsModal, CategoriesModal, BrandsModal, UnitsModal],
 })
 export class Settings {
   readonly sections = SECTIONS;
-  readonly activeSection    = signal(SECTIONS[0].id);
-  readonly documentsVisible = signal(false);
+  readonly activeSection      = signal(SECTIONS[0].id);
+  readonly documentsVisible   = signal(false);
+  readonly categoriesVisible  = signal(false);
+  readonly brandsVisible      = signal(false);
+  readonly unitsVisible       = signal(false);
 
   readonly currentSection = () =>
     this.sections.find(s => s.id === this.activeSection()) ?? this.sections[0];
 
   handleAction(moduleId: string) {
-    if (moduleId === 'documento') this.documentsVisible.set(true);
+    if (moduleId === 'documento')  this.documentsVisible.set(true);
+    if (moduleId === 'categoria')  this.categoriesVisible.set(true);
+    if (moduleId === 'marca')      this.brandsVisible.set(true);
+    if (moduleId === 'unidad')     this.unitsVisible.set(true);
   }
 }
