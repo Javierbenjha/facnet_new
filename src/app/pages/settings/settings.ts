@@ -6,6 +6,7 @@ import { DocumentsModal } from './documents-modal/documents-modal';
 import { CategoriesModal } from './categories-modal/categories-modal';
 import { BrandsModal } from './brands-modal/brands-modal';
 import { UnitsModal } from './units-modal/units-modal';
+import { TransportCompanyModal } from "./transport-company-modal/transport-company-modal";
 
 interface SettingAction {
   label: string;
@@ -181,8 +182,7 @@ const SECTIONS: SettingSection[] = [
         description: 'Gestionar las empresas y personas de transporte.',
         icon: 'pi pi-truck',
         actions: [
-          { label: 'Crear transportista',   icon: 'pi pi-plus' },
-          { label: 'Listar transportistas', icon: 'pi pi-list' },
+          { label: 'Administrar transportistas', icon: 'pi pi-sliders-h' },
         ],
       },
     ],
@@ -245,7 +245,7 @@ const SECTIONS: SettingSection[] = [
   selector: 'app-settings',
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
-  imports: [Button, Card, PageHeader, DocumentsModal, CategoriesModal, BrandsModal, UnitsModal],
+  imports: [Button, Card, PageHeader, DocumentsModal, CategoriesModal, BrandsModal, UnitsModal, TransportCompanyModal],
 })
 export class Settings {
   readonly sections = SECTIONS;
@@ -254,7 +254,7 @@ export class Settings {
   readonly categoriesVisible  = signal(false);
   readonly brandsVisible      = signal(false);
   readonly unitsVisible       = signal(false);
-
+  readonly transportCompanyVisible = signal(false);
   readonly currentSection = () =>
     this.sections.find(s => s.id === this.activeSection()) ?? this.sections[0];
 
@@ -263,5 +263,6 @@ export class Settings {
     if (moduleId === 'categoria')  this.categoriesVisible.set(true);
     if (moduleId === 'marca')      this.brandsVisible.set(true);
     if (moduleId === 'unidad')     this.unitsVisible.set(true);
+    if (moduleId === 'transportista') this.transportCompanyVisible.set(true);
   }
 }
