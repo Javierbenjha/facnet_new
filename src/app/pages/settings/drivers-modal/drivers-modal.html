@@ -9,7 +9,110 @@
     <span class="text-sm text-stone-400">
       {{ rows().length }} conductor{{ rows().length !== 1 ? 'es' : '' }} registrado{{ rows().length !== 1 ? 's' : '' }}
     </span>
+    @if (!showForm()) {
+      <p-button
+        label="Nuevo conductor"
+        icon="pi pi-plus"
+        size="small"
+        (onClick)="startCreate()" />
+    }
   </div>
+
+  @if (showForm()) {
+    <div class="mb-4 p-4 bg-surface-ground rounded-lg border border-border flex flex-col gap-3">
+      <span class="text-sm font-medium text-stone-600 dark:text-stone-300">
+        {{ editingId() === null ? 'Nuevo conductor' : 'Editar conductor' }}
+      </span>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium text-stone-500">Tipo de documento <span class="text-red-400">*</span></label>
+          <p-select
+            [options]="docOptions()"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Seleccioná un tipo"
+            appendTo="body"
+            styleClass="w-full"
+            [ngModel]="form().tipo_documento"
+            (ngModelChange)="setTipoDoc($event)" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium text-stone-500">N° de documento <span class="text-red-400">*</span></label>
+          <input
+            pInputText
+            class="text-sm font-mono"
+            placeholder="12345678"
+            maxlength="15"
+            [ngModel]="form().numero_documento"
+            (ngModelChange)="setNumeroDoc($event)" />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-medium text-stone-500">N° de licencia <span class="text-red-400">*</span></label>
+        <input
+          pInputText
+          class="text-sm font-mono"
+          placeholder="Q12345678"
+          maxlength="15"
+          [ngModel]="form().licencia"
+          (ngModelChange)="setLicencia($event)" />
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-medium text-stone-500">Nombre <span class="text-red-400">*</span></label>
+        <input
+          pInputText
+          class="text-sm"
+          placeholder="JUAN CARLOS"
+          maxlength="100"
+          [ngModel]="form().nombre"
+          (ngModelChange)="setNombre($event)" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium text-stone-500">Apellido paterno <span class="text-red-400">*</span></label>
+          <input
+            pInputText
+            class="text-sm"
+            placeholder="PÉREZ"
+            maxlength="100"
+            [ngModel]="form().apellido_paterno"
+            (ngModelChange)="setApPaterno($event)" />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium text-stone-500">Apellido materno <span class="text-red-400">*</span></label>
+          <input
+            pInputText
+            class="text-sm"
+            placeholder="GÓMEZ"
+            maxlength="100"
+            [ngModel]="form().apellido_materno"
+            (ngModelChange)="setApMaterno($event)" />
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-1">
+        <p-button
+          label="Cancelar"
+          size="small"
+          severity="secondary"
+          [text]="true"
+          (onClick)="cancelForm()" />
+        <p-button
+          [label]="editingId() === null ? 'Crear' : 'Guardar'"
+          icon="pi pi-check"
+          size="small"
+          severity="success"
+          [loading]="saving()"
+          (onClick)="save()" />
+      </div>
+    </div>
+  }
 
   <p-table
     [value]="rows()"
@@ -24,6 +127,7 @@
         <th class="w-32">Licencia</th>
         <th>Nombre completo</th>
         <th class="w-28 text-center">Estado</th>
+        <th class="w-16"></th>
       </tr>
     </ng-template>
 
@@ -41,12 +145,21 @@
             [value]="row.active ? 'Activo' : 'Inactivo'"
             [severity]="row.active ? 'success' : 'danger'" />
         </td>
+        <td class="text-right">
+          <p-button
+            icon="pi pi-pencil"
+            size="small"
+            severity="secondary"
+            [text]="true"
+            [disabled]="showForm()"
+            (onClick)="startEdit(row)" />
+        </td>
       </tr>
     </ng-template>
 
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td colspan="5" class="text-center py-8 text-stone-400 text-sm">
+        <td colspan="6" class="text-center py-8 text-stone-400 text-sm">
           No hay conductores registrados
         </td>
       </tr>
