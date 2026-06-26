@@ -186,10 +186,11 @@ export class TransportCompanyModal {
       list.map(r => r.id === row.id ? { ...r, toggling: true } : r)
     );
     this.svc.toggle(row.id).subscribe({
-      // DELETE returns only a message, so we flip the state locally.
+      // DELETE returns the updated record, so we read the real estado (no local guessing).
       next: res => {
+        const active = res.data.estado === ESTADO_ACTIVE;
         this.rows.update(list =>
-          list.map(r => r.id === row.id ? { ...r, active: !r.active, toggling: false } : r)
+          list.map(r => r.id === row.id ? { ...r, active, toggling: false } : r)
         );
         this.toast.success('Estado actualizado', res.message);
       },
