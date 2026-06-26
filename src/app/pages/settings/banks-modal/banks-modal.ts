@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { filter, switchMap } from 'rxjs';
 import { TableModule } from 'primeng/table';
 import { Tag } from 'primeng/tag';
+import { ToggleSwitch } from 'primeng/toggleswitch';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
@@ -51,7 +52,7 @@ function listToRow(b: BankListItem): BankRow {
   selector: 'app-banks-modal',
   templateUrl: './banks-modal.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, AppModal, TableModule, Tag, Button, InputText, Select],
+  imports: [FormsModule, AppModal, TableModule, Tag, ToggleSwitch, Button, InputText, Select],
 })
 export class BanksModal {
   visible = model(false);
@@ -193,6 +194,28 @@ export class BanksModal {
         this.toast.error('Error', id === null
           ? 'No se pudo crear la cuenta bancaria'
           : 'No se pudo actualizar la cuenta bancaria');
+      },
+    });
+  }
+
+  toggle(row: BankRow) {
+    if (row.toggling) return;
+    this.rows.update(list =>
+      list.map(r => r.id_banco === row.id_banco ? { ...r, toggling: true } : r)
+    );
+    this.svc.toggle(row.id_banco).subscribe({
+      // DELETE returns only a message (no entity), so we flip the state locally.
+      next: res => {
+        this.rows.update(list =>
+          list.map(r => r.id_banco === row.id_banco ? { ...r, active: !r.active, toggling: false } : r)
+        );
+        this.toast.success('Estado actualizado', res.message);
+      },
+      error: () => {
+        this.rows.update(list =>
+          list.map(r => r.id_banco === row.id_banco ? { ...r, toggling: false } : r)
+        );
+        this.toast.error('Error', 'No se pudo actualizar el estado de la cuenta');
       },
     });
   }
