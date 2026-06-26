@@ -10,6 +10,7 @@ import { TransportCompanyModal } from "./transport-company-modal/transport-compa
 import { CurrenciesModal } from './currencies-modal/currencies-modal';
 import { BanksModal } from './banks-modal/banks-modal';
 import { DriversModal } from './drivers-modal/drivers-modal';
+import { IgvModal } from './igv-modal/igv-modal';
 
 interface SettingAction {
   label: string;
@@ -248,7 +249,7 @@ const SECTIONS: SettingSection[] = [
   selector: 'app-settings',
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
-  imports: [Button, Card, PageHeader, DocumentsModal, CategoriesModal, BrandsModal, UnitsModal, TransportCompanyModal, CurrenciesModal, BanksModal, DriversModal],
+  imports: [Button, Card, PageHeader, DocumentsModal, CategoriesModal, BrandsModal, UnitsModal, TransportCompanyModal, CurrenciesModal, BanksModal, DriversModal, IgvModal],
 })
 export class Settings {
   readonly sections = SECTIONS;
@@ -261,6 +262,7 @@ export class Settings {
   readonly currenciesVisible  = signal(false);
   readonly banksVisible       = signal(false);
   readonly driversVisible     = signal(false);
+  readonly igvVisible         = signal(false);
   readonly currentSection = () =>
     this.sections.find(s => s.id === this.activeSection()) ?? this.sections[0];
 
@@ -273,5 +275,6 @@ export class Settings {
     if (moduleId === 'moneda')     this.currenciesVisible.set(true);
     if (moduleId === 'banco')      this.banksVisible.set(true);
     if (moduleId === 'conductor')  this.driversVisible.set(true);
+    if (moduleId === 'igv')        this.igvVisible.set(true);
   }
 }
