@@ -28,8 +28,8 @@ export class TransportCompanyService {
     return this.http.patch<TransportCompany>(`${this.base}/${id}`, payload);
   }
 
-  // Deactivates (estado -> 0). Not a toggle; returns the company with estado: 0.
-  remove(id: number) {
-    return this.http.delete<TransportCompany>(`${this.base}/${id}`);
+  // Toggles estado between active (2) and inactive (1). Returns only a message, no entity.
+  toggle(id: number) {
+    return this.http.delete<{ message: string }>(`${this.base}/${id}`);
   }
 }

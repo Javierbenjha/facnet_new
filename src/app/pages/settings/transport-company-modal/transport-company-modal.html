@@ -7,7 +7,7 @@
 
   <div class="flex items-center justify-between mb-3">
     <span class="text-sm text-stone-400">
-      {{ rows().length }} empresa{{ rows().length !== 1 ? 's' : '' }} activa{{ rows().length !== 1 ? 's' : '' }}
+      {{ rows().length }} empresa{{ rows().length !== 1 ? 's' : '' }} registrada{{ rows().length !== 1 ? 's' : '' }}
     </span>
     @if (!showForm()) {
       <p-button
@@ -106,6 +106,7 @@
         <th>Razón social</th>
         <th>Dirección</th>
         <th class="w-32">Reg. MTC</th>
+        <th class="w-24 text-center">Estado</th>
         <th class="w-16"></th>
       </tr>
     </ng-template>
@@ -117,13 +118,19 @@
         <td class="font-medium text-sm">{{ row.razon_social }}</td>
         <td class="text-sm text-stone-500">{{ row.direccion }}</td>
         <td class="font-mono text-xs text-stone-500">{{ row.nro_reg_mtc }}</td>
+        <td class="text-center">
+          <p-toggleswitch
+            [ngModel]="row.active"
+            [disabled]="row.toggling || showForm()"
+            (ngModelChange)="toggle(row)" />
+        </td>
         <td class="text-right">
           <p-button
             icon="pi pi-pencil"
             size="small"
             severity="secondary"
             [text]="true"
-            [disabled]="showForm()"
+            [disabled]="showForm() || row.toggling"
             (onClick)="startEdit(row)" />
         </td>
       </tr>
@@ -131,7 +138,7 @@
 
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td colspan="6" class="text-center py-8 text-stone-400 text-sm">
+        <td colspan="7" class="text-center py-8 text-stone-400 text-sm">
           No hay empresas de transporte registradas
         </td>
       </tr>

@@ -8,7 +8,7 @@ export interface TransportCompany {
   razon_social: string;
   direccion: string;
   nro_reg_mtc: string;          // MTC registration number
-  estado: number;               // 1 = active, 0 = inactive (NOTE: not 2, unlike unit/brand)
+  estado: 1 | 2;                // WARNING: INVERTED — 2 = active, 1 = inactive (opposite of unit/brand)
   cia_id_cia: string;           // bigint serialized as string in JSON
 }
 

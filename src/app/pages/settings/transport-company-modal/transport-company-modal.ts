@@ -3,6 +3,7 @@ import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { filter, switchMap } from 'rxjs';
 import { TableModule } from 'primeng/table';
+import { ToggleSwitch } from 'primeng/toggleswitch';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { AppModal } from '../../../shared/app-modal/app-modal';
@@ -10,13 +11,17 @@ import { Toaster } from '../../../core/services/toast';
 import { TransportCompanyService } from '../../../core/services/transport-company';
 import { TransportCompany } from '../../../core/models/transport-company.model';
 
+// WARNING: transport-company estado is INVERTED — 2 = active, 1 = inactive.
+const ESTADO_ACTIVE = 2;
+
 interface TransportRow {
   id: number;
   ruc: string;
   razon_social: string;
   direccion: string;
   nro_reg_mtc: string;
-  deleting: boolean;
+  active: boolean;
+  toggling: boolean;
 }
 
 interface FormBuffer {
@@ -43,7 +48,8 @@ function toRow(c: TransportCompany): TransportRow {
     razon_social: c.razon_social,
     direccion:   c.direccion,
     nro_reg_mtc: c.nro_reg_mtc,
-    deleting:    false,
+    active:      c.estado === ESTADO_ACTIVE,
+    toggling:    false,
   };
 }
 
@@ -51,7 +57,7 @@ function toRow(c: TransportCompany): TransportRow {
   selector: 'app-transport-company-modal',
   templateUrl: './transport-company-modal.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, AppModal, TableModule, Button, InputText],
+  imports: [FormsModule, AppModal, TableModule, ToggleSwitch, Button, InputText],
 })
 export class TransportCompanyModal {
   visible = model(false);
@@ -170,6 +176,28 @@ export class TransportCompanyModal {
         this.toast.error('Error', id === null
           ? 'No se pudo crear la empresa de transporte'
           : 'No se pudo actualizar la empresa de transporte');
+      },
+    });
+  }
+
+  toggle(row: TransportRow) {
+    if (row.toggling) return;
+    this.rows.update(list =>
+      list.map(r => r.id === row.id ? { ...r, toggling: true } : r)
+    );
+    this.svc.toggle(row.id).subscribe({
+      // DELETE returns only a message, so we flip the state locally.
+      next: res => {
+        this.rows.update(list =>
+          list.map(r => r.id === row.id ? { ...r, active: !r.active, toggling: false } : r)
+        );
+        this.toast.success('Estado actualizado', res.message);
+      },
+      error: () => {
+        this.rows.update(list =>
+          list.map(r => r.id === row.id ? { ...r, toggling: false } : r)
+        );
+        this.toast.error('Error', 'No se pudo actualizar el estado');
       },
     });
   }
