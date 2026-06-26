@@ -9,6 +9,7 @@ import { UnitsModal } from './units-modal/units-modal';
 import { TransportCompanyModal } from "./transport-company-modal/transport-company-modal";
 import { CurrenciesModal } from './currencies-modal/currencies-modal';
 import { BanksModal } from './banks-modal/banks-modal';
+import { DriversModal } from './drivers-modal/drivers-modal';
 
 interface SettingAction {
   label: string;
@@ -174,8 +175,8 @@ const SECTIONS: SettingSection[] = [
         description: 'Gestionar los conductores registrados en el sistema.',
         icon: 'pi pi-id-card',
         actions: [
-          { label: 'Crear conductor',   icon: 'pi pi-plus' },
-          { label: 'Listar conductores', icon: 'pi pi-list' },
+          
+          { label: 'Administrar conductores', icon: 'pi pi-list' },
         ],
       },
       {
@@ -247,7 +248,7 @@ const SECTIONS: SettingSection[] = [
   selector: 'app-settings',
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
-  imports: [Button, Card, PageHeader, DocumentsModal, CategoriesModal, BrandsModal, UnitsModal, TransportCompanyModal, CurrenciesModal, BanksModal],
+  imports: [Button, Card, PageHeader, DocumentsModal, CategoriesModal, BrandsModal, UnitsModal, TransportCompanyModal, CurrenciesModal, BanksModal, DriversModal],
 })
 export class Settings {
   readonly sections = SECTIONS;
@@ -259,6 +260,7 @@ export class Settings {
   readonly transportCompanyVisible = signal(false);
   readonly currenciesVisible  = signal(false);
   readonly banksVisible       = signal(false);
+  readonly driversVisible     = signal(false);
   readonly currentSection = () =>
     this.sections.find(s => s.id === this.activeSection()) ?? this.sections[0];
 
@@ -270,5 +272,6 @@ export class Settings {
     if (moduleId === 'transportista') this.transportCompanyVisible.set(true);
     if (moduleId === 'moneda')     this.currenciesVisible.set(true);
     if (moduleId === 'banco')      this.banksVisible.set(true);
+    if (moduleId === 'conductor')  this.driversVisible.set(true);
   }
 }

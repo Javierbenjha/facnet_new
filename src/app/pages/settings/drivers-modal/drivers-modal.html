@@ -141,9 +141,10 @@
         <td class="font-mono text-sm text-stone-500">{{ row.licencia }}</td>
         <td class="font-medium text-sm">{{ row.nombreCompleto }}</td>
         <td class="text-center">
-          <p-tag
-            [value]="row.active ? 'Activo' : 'Inactivo'"
-            [severity]="row.active ? 'success' : 'danger'" />
+          <p-toggleswitch
+            [ngModel]="row.active"
+            [disabled]="row.toggling || showForm()"
+            (ngModelChange)="toggle(row)" />
         </td>
         <td class="text-right">
           <p-button
@@ -151,7 +152,7 @@
             size="small"
             severity="secondary"
             [text]="true"
-            [disabled]="showForm()"
+            [disabled]="showForm() || row.toggling"
             (onClick)="startEdit(row)" />
         </td>
       </tr>

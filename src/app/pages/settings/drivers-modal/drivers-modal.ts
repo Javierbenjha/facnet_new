@@ -3,7 +3,7 @@ import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { filter, switchMap } from 'rxjs';
 import { TableModule } from 'primeng/table';
-import { Tag } from 'primeng/tag';
+import { ToggleSwitch } from 'primeng/toggleswitch';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
@@ -65,7 +65,7 @@ function toRow(d: Driver): DriverRow {
   selector: 'app-drivers-modal',
   templateUrl: './drivers-modal.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, AppModal, TableModule, Tag, Button, InputText, Select],
+  imports: [FormsModule, AppModal, TableModule, ToggleSwitch, Button, InputText, Select],
 })
 export class DriversModal {
   visible = model(false);
@@ -225,6 +225,33 @@ export class DriversModal {
         this.toast.error('Error', id === null
           ? 'No se pudo crear el conductor'
           : 'No se pudo actualizar el conductor');
+      },
+    });
+  }
+
+  toggle(row: DriverRow) {
+    if (row.toggling) return;
+    this.rows.update(list =>
+      list.map(r => r.id === row.id ? { ...r, toggling: true } : r)
+    );
+    this.svc.toggle(row.id).subscribe({
+      // DELETE returns no entity and its message always says "eliminado" even on
+      // reactivate — so flip locally and build our own message from the new state.
+      next: () => {
+        const nextActive = !row.active;
+        this.rows.update(list =>
+          list.map(r => r.id === row.id ? { ...r, active: nextActive, toggling: false } : r)
+        );
+        this.toast.success(
+          nextActive ? 'Conductor activado' : 'Conductor desactivado',
+          row.nombreCompleto,
+        );
+      },
+      error: () => {
+        this.rows.update(list =>
+          list.map(r => r.id === row.id ? { ...r, toggling: false } : r)
+        );
+        this.toast.error('Error', 'No se pudo actualizar el estado del conductor');
       },
     });
   }
