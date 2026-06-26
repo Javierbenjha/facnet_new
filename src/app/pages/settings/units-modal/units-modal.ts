@@ -5,9 +5,9 @@ import { filter, switchMap } from 'rxjs';
 import { TableModule } from 'primeng/table';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
-import { AppModal } from '../../shared/app-modal/app-modal';
-import { Toaster } from '../../core/services/toast';
-import { UnitService } from '../../core/services/unit';
+import { AppModal } from '../../../shared/app-modal/app-modal';
+import { Toaster } from '../../../core/services/toast';
+import { UnitService } from '../../../core/services/unit';
 
 interface UnitRow {
   id: string;

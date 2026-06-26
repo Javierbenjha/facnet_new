@@ -1,15 +1,20 @@
 <app-modal
   [(visible)]="visible"
-  title="Categorías"
-  icon="pi pi-tag"
-  iconColor="success"
+  title="Marcas"
+  icon="pi pi-verified"
+  iconColor="info"
   size="md">
 
-  <div class="flex items-center justify-between mb-3">
-    <span class="text-sm text-stone-400">{{ rows().length }} categoría{{ rows().length !== 1 ? 's' : '' }}</span>
+  <div class="flex items-center gap-2 mb-3">
+    <input
+      pInputText
+      class="flex-1 text-sm"
+      placeholder="Buscar marca..."
+      [ngModel]="query()"
+      (ngModelChange)="onQueryChange($event)" />
     @if (!adding()) {
       <p-button
-        label="Nueva categoría"
+        label="Nueva"
         icon="pi pi-plus"
         size="small"
         (onClick)="startAdd()" />
@@ -21,7 +26,7 @@
       <input
         pInputText
         class="flex-1 text-sm"
-        placeholder="Descripción de la categoría"
+        placeholder="Nombre de la marca"
         [ngModel]="addBuf()"
         (ngModelChange)="addBuf.set($event)"
         (keydown.enter)="saveAdd()"
@@ -43,7 +48,7 @@
   }
 
   <p-table
-    [value]="rows()"
+    [value]="paged()"
     [loading]="loading()"
     dataKey="id"
     styleClass="p-datatable-sm">
@@ -51,7 +56,7 @@
     <ng-template pTemplate="header">
       <tr class="text-sm">
         <th class="w-10">#</th>
-        <th>Descripción</th>
+        <th>Nombre</th>
         <th class="w-28 text-center">Estado</th>
         <th class="w-20"></th>
       </tr>
@@ -59,7 +64,7 @@
 
     <ng-template pTemplate="body" let-row let-rowIndex="rowIndex">
       <tr>
-        <td class="text-stone-400 text-xs">{{ rowIndex + 1 }}</td>
+        <td class="text-stone-400 text-xs">{{ (currentPage() - 1) * 5 + rowIndex + 1 }}</td>
 
         @if (editingId() === row.id) {
           <td>
@@ -116,11 +121,18 @@
     <ng-template pTemplate="emptymessage">
       <tr>
         <td colspan="4" class="text-center py-8 text-stone-400 text-sm">
-          No hay categorías registradas
+          {{ query() ? 'Sin resultados para "' + query() + '"' : 'No hay marcas registradas' }}
         </td>
       </tr>
     </ng-template>
 
   </p-table>
+
+  <app-table-pagination
+    [currentPage]="currentPage()"
+    [totalItems]="filtered().length"
+    [pageSize]="5"
+    [pageSizeOptions]="[]"
+    (pageChange)="currentPage.set($event)" />
 
 </app-modal>

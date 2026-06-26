@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, model, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, model, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { filter, switchMap } from 'rxjs';
@@ -6,9 +6,10 @@ import { TableModule } from 'primeng/table';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
-import { AppModal } from '../../shared/app-modal/app-modal';
-import { Toaster } from '../../core/services/toast';
-import { CategoryService } from '../../core/services/category';
+import { AppModal } from '../../../shared/app-modal/app-modal';
+import { TablePagination } from '../../../shared/table-pagination/table-pagination';
+import { Toaster } from '../../../core/services/toast';
+import { CategoryService } from '../../../core/services/category';
 
 interface CatalogRow {
   id: string;
@@ -21,7 +22,7 @@ interface CatalogRow {
   selector: 'app-categories-modal',
   templateUrl: './categories-modal.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, AppModal, TableModule, ToggleSwitch, Button, InputText],
+  imports: [FormsModule, AppModal, TableModule, ToggleSwitch, Button, InputText, TablePagination],
 })
 export class CategoriesModal {
   visible = model(false);
@@ -29,13 +30,27 @@ export class CategoriesModal {
   private readonly svc   = inject(CategoryService);
   private readonly toast = inject(Toaster);
 
-  readonly loading   = signal(false);
-  readonly rows      = signal<CatalogRow[]>([]);
-  readonly adding    = signal(false);
-  readonly addBuf    = signal('');
-  readonly editingId = signal<string | null>(null);
-  readonly editBuf   = signal('');
-  readonly saving    = signal(false);
+  private readonly PAGE_SIZE = 5;
+
+  readonly loading     = signal(false);
+  readonly rows        = signal<CatalogRow[]>([]);
+  readonly query       = signal('');
+  readonly currentPage = signal(1);
+  readonly adding      = signal(false);
+  readonly addBuf      = signal('');
+  readonly editingId   = signal<string | null>(null);
+  readonly editBuf     = signal('');
+  readonly saving      = signal(false);
+
+  readonly filtered = computed(() => {
+    const q = this.query().toLowerCase().trim();
+    return q ? this.rows().filter(r => r.descripcion.toLowerCase().includes(q)) : this.rows();
+  });
+
+  readonly paged = computed(() => {
+    const start = (this.currentPage() - 1) * this.PAGE_SIZE;
+    return this.filtered().slice(start, start + this.PAGE_SIZE);
+  });
 
   constructor() {
     toObservable(this.visible).pipe(
@@ -44,6 +59,8 @@ export class CategoriesModal {
       switchMap(() => {
         this.loading.set(true);
         this.rows.set([]);
+        this.query.set('');
+        this.currentPage.set(1);
         this.cancelAdd();
         this.cancelEdit();
         return this.svc.getAll();
@@ -128,6 +145,11 @@ export class CategoriesModal {
         this.toast.error('Error', 'No se pudo actualizar la categoría');
       },
     });
+  }
+
+  onQueryChange(v: string) {
+    this.query.set(v);
+    this.currentPage.set(1);
   }
 
   toggle(row: CatalogRow) {
