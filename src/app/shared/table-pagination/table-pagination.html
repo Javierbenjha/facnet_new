@@ -2,5 +2,5 @@
   [first]="first()"
   [rows]="pageSize()"
   [totalRecords]="totalItems()"
-  [rowsPerPageOptions]="pageSizeOptions()"
+  [rowsPerPageOptions]="pageSizeOptions().length ? pageSizeOptions() : undefined"
   (onPageChange)="onPageChange($event)" />

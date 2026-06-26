@@ -5,9 +5,9 @@ import { filter, switchMap } from 'rxjs';
 import { TableModule } from 'primeng/table';
 import { ToggleSwitch } from 'primeng/toggleswitch';
 import { Tag } from 'primeng/tag';
-import { AppModal } from '../../shared/app-modal/app-modal';
-import { Toaster } from '../../core/services/toast';
-import { ClientsService } from '../../core/services/clients';
+import { AppModal } from '../../../shared/app-modal/app-modal';
+import { Toaster } from '../../../core/services/toast';
+import { ClientsService } from '../../../core/services/clients';
 
 interface DocRow {
   id: string;

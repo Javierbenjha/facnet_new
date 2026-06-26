@@ -2,10 +2,10 @@ import { Component, signal } from '@angular/core';
 import { Button } from 'primeng/button';
 import { Card } from 'primeng/card';
 import { PageHeader } from '../../shared/page-header/page-header';
-import { DocumentsModal } from './documents-modal';
-import { CategoriesModal } from './categories-modal';
-import { BrandsModal } from './brands-modal';
-import { UnitsModal } from './units-modal';
+import { DocumentsModal } from './documents-modal/documents-modal';
+import { CategoriesModal } from './categories-modal/categories-modal';
+import { BrandsModal } from './brands-modal/brands-modal';
+import { UnitsModal } from './units-modal/units-modal';
 
 interface SettingAction {
   label: string;
@@ -48,8 +48,7 @@ const SECTIONS: SettingSection[] = [
         description: 'Organizar los productos por categorías.',
         icon: 'pi pi-tag',
         actions: [
-          { label: 'Crear categoría',   icon: 'pi pi-plus'  },
-          { label: 'Listar categorías', icon: 'pi pi-list'  },
+          { label: 'Administrar categorías', icon: 'pi pi-sliders-h' },
         ],
       },
       {
@@ -58,8 +57,7 @@ const SECTIONS: SettingSection[] = [
         description: 'Gestionar las marcas de los productos.',
         icon: 'pi pi-verified',
         actions: [
-          { label: 'Crear marca',   icon: 'pi pi-plus' },
-          { label: 'Listar marcas', icon: 'pi pi-list' },
+          { label: 'Administrar marcas', icon: 'pi pi-sliders-h' },
         ],
       },
       {
@@ -68,8 +66,7 @@ const SECTIONS: SettingSection[] = [
         description: 'Configurar las unidades con las que se trabajan los productos.',
         icon: 'pi pi-calculator',
         actions: [
-          { label: 'Crear unidad',   icon: 'pi pi-plus' },
-          { label: 'Listar unidades', icon: 'pi pi-list' },
+          { label: 'Administrar unidades', icon: 'pi pi-sliders-h' },
         ],
       },
     ],
