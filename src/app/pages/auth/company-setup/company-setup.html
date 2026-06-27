@@ -1,4 +1,4 @@
-<div class="min-h-screen w-full mx-auto bg-surface-50 dark:bg-surface-950 py-6 sm:py-8 px-4 container">
+<div class="min-h-screen w-full bg-surface-50 dark:bg-surface-950 py-6 sm:py-8 px-4">
   <div class="mx-auto flex w-full  flex-col gap-6">
     <!-- Header -->
     <div class="flex flex-col gap-1">
@@ -7,34 +7,51 @@
     </div>
 
     <!-- Stepper -->
-    <div class="flex items-center justify-center gap-4">
-      <div class="flex items-center gap-2 " [class.opacity-50]="step() !== 1">
-        <span
-          class="flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold"
-          [ngClass]="
-            step() === 1
-              ? 'bg-primary text-primary-contrast'
-              : 'bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-200'
-          "
-          >1</span
-        >
-        <span class="text-surface-900 dark:text-surface-0 font-medium">Empresa</span>
+    <div class="flex flex-col items-center gap-3">
+      <div class="flex items-start justify-center gap-3">
+        <!-- Step 1 -->
+        <div class="flex w-24 flex-col items-center gap-2">
+          <span
+            class="flex h-12 w-12 items-center justify-center rounded-full text-base font-semibold"
+            [ngClass]="
+              step() >= 1
+                ? 'bg-primary text-primary-contrast'
+                : 'border-2 border-surface-300 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 text-surface-400'
+            "
+          >
+            @if (step() > 1) {
+              <i class="pi pi-check"></i>
+            } @else {
+              1
+            }
+          </span>
+          <span class="text-surface-900 dark:text-surface-0 text-sm font-medium">Empresa</span>
+        </div>
+
+        <!-- Connector -->
+        <div class="flex h-12 items-center">
+          <div
+            class="h-px w-16"
+            [ngClass]="step() >= 2 ? 'bg-primary' : 'bg-surface-300 dark:bg-surface-700'"
+          ></div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="flex w-24 flex-col items-center gap-2" [class.opacity-50]="step() < 2">
+          <span
+            class="flex h-12 w-12 items-center justify-center rounded-full text-base font-semibold"
+            [ngClass]="
+              step() >= 2
+                ? 'bg-primary text-primary-contrast'
+                : 'border-2 border-surface-300 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 text-surface-400'
+            "
+            >2</span
+          >
+          <span class="text-surface-700 dark:text-surface-200 text-sm font-medium">Sucursal</span>
+        </div>
       </div>
 
-      <div class="h-px w-16 bg-surface-300 dark:bg-surface-700"></div>
-
-      <div class="flex items-center gap-2" [class.opacity-50]="step() !== 2">
-        <span
-          class="flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold"
-          [ngClass]="
-            step() === 2
-              ? 'bg-primary text-primary-contrast'
-              : 'bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-200'
-          "
-          >2</span
-        >
-        <span class="text-surface-700 dark:text-surface-200 font-medium">Sucursal</span>
-      </div>
+      <span class="text-surface-500 dark:text-surface-300 text-sm">Paso {{ step() }} de 2</span>
     </div>
 
     <!-- Step content -->
