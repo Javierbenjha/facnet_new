@@ -130,6 +130,7 @@
         <div class="space-y-3">
           @for (option of accountOptions; track option.id) {
             <button type="button"
+              (click)="onAccountOption(option.id)"
               class="group w-full flex items-center gap-4 p-4 rounded-xl appearance-none bg-transparent cursor-pointer border border-border hover:border-primary/30 hover:bg-primary/5 transition-all">
               <span class="w-10 h-10 rounded-lg bg-stone-50 dark:bg-stone-800 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
                 <i [class]="option.icon + ' text-stone-400 group-hover:text-primary transition-colors'"></i>
@@ -158,4 +159,6 @@
       </button>
     </div>
   </div>
+
+  <app-sales-password-modal [(visible)]="salesPasswordOpen" />
 </div>
