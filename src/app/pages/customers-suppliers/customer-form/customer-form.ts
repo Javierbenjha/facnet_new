@@ -10,6 +10,8 @@ import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { AppModal } from '../../../shared/app-modal/app-modal';
 import { Persona, TipoDocumento, TipoPersona } from '../customers-suppliers.models';
 import { ClientsService } from '../../../core/services/clients';
+import { Reniec } from '../../../core/services/reniec';
+import { Sunat } from '../../../core/services/sunat';
 import { Toaster } from '../../../core/services/toast';
 import { ClientSupplier, DocumentType } from '../../../core/models/client.model';
 
@@ -26,6 +28,8 @@ export class CustomerForm {
   readonly saved       = output<void>();
 
   private readonly clientsSvc = inject(ClientsService);
+  private readonly reniecSvc  = inject(Reniec);
+  private readonly sunatSvc   = inject(Sunat);
   private readonly toast      = inject(Toaster);
 
   readonly visible = computed(() => this.editing() !== null);
@@ -52,6 +56,7 @@ export class CustomerForm {
   readonly saving        = signal(false);
   readonly searchError   = signal('');
   readonly expressResult = signal<ClientSupplier | null>(null);
+  readonly existsInDb    = signal(false);
 
   readonly model = signal({
     tipo_documento:   'DNI' as TipoDocumento,
@@ -93,6 +98,7 @@ export class CustomerForm {
       const e = this.editing();
       if (!e) return;
       this.expressResult.set(null);
+      this.existsInDb.set(false);
       this.searchError.set('');
       if (e === 'new') {
         const defaultDoc = (this.tipoDocOptions()[0]?.value ?? 'DNI') as TipoDocumento;
@@ -123,37 +129,64 @@ export class CustomerForm {
 
     this.searching.set(true);
     this.searchError.set('');
+    this.expressResult.set(null);
+    this.existsInDb.set(false);
 
-    this.clientsSvc.expressCreate({
-      numero_documento: doc,
-      tipo_persona: this.tipoPersona() === 'CLIENTE' ? 1 : 2,
-    }).subscribe({
+    // Check DB first — if exists, load and avoid any external call
+    this.clientsSvc.findOne(doc).subscribe({
       next: client => {
         this.expressResult.set(client);
+        this.existsInDb.set(true);
         this.fillFromClient(client);
         this.searching.set(false);
-        this.toast.success('Encontrado', `Datos de ${client.display_name} cargados correctamente.`);
+        this.toast.success('Encontrado', `${client.display_name} ya está registrado.`);
       },
       error: err => {
-        this.searching.set(false);
-        if (err.status === 409) {
-          this.toast.info('Ya registrado', 'El documento ya existe. Cargando datos...');
-          this.clientsSvc.findOne(doc).subscribe({
-            next: client => {
-              this.expressResult.set(client);
-              this.fillFromClient(client);
-            },
-            error: () => {
-              this.searchError.set('No se pudo cargar el registro existente.');
-              this.toast.error('Error', 'No se pudo cargar el registro existente.');
-            },
-          });
-        } else {
-          this.searchError.set('No se encontró información para este documento.');
-          this.toast.error('Sin resultados', 'No se encontró información para este documento.');
+        if (err.status !== 404) {
+          this.searching.set(false);
+          this.searchError.set('Error al consultar el registro.');
+          this.toast.error('Error', 'No se pudo consultar el registro.');
+          return;
         }
+        // Not in DB → consult RENIEC or SUNAT (read-only, no creation)
+        this.lookupExternal(doc);
       },
     });
+  }
+
+  private lookupExternal(doc: string) {
+    if (this.isRuc()) {
+      this.sunatSvc.getByRuc(doc).subscribe({
+        next: data => {
+          this.model.update(m => ({ ...m, nombre: data.razon_social }));
+          this.searching.set(false);
+          this.toast.success('SUNAT', `${data.razon_social} encontrado.`);
+        },
+        error: () => {
+          this.searching.set(false);
+          this.searchError.set('RUC no encontrado en SUNAT.');
+          this.toast.error('Sin resultados', 'RUC no encontrado en SUNAT.');
+        },
+      });
+    } else {
+      this.reniecSvc.getByDni(doc).subscribe({
+        next: data => {
+          this.model.update(m => ({
+            ...m,
+            nombre:           data.nombres,
+            apellido_paterno: data.apellido_paterno,
+            apellido_materno: data.apellido_materno,
+          }));
+          this.searching.set(false);
+          this.toast.success('RENIEC', `${data.nombres} ${data.apellido_paterno} encontrado.`);
+        },
+        error: () => {
+          this.searching.set(false);
+          this.searchError.set('DNI no encontrado en RENIEC.');
+          this.toast.error('Sin resultados', 'DNI no encontrado en RENIEC.');
+        },
+      });
+    }
   }
 
   save() {
@@ -186,7 +219,7 @@ export class CustomerForm {
     if (existing && existing !== 'new') {
       this.clientsSvc.update((existing as Persona).numero_documento, commonFields)
         .subscribe({ next: onSuccess, error: onError });
-    } else if (this.expressResult()) {
+    } else if (this.existsInDb()) {
       this.clientsSvc.update(this.expressResult()!.numero_documento, commonFields)
         .subscribe({ next: onSuccess, error: onError });
     } else {

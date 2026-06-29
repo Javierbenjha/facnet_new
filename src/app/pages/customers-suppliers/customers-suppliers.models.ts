@@ -44,7 +44,7 @@ export function mapClientToPersona(c: ClientSupplier): Persona {
     tipo:             c.tipo_persona === 2 ? 'PROVEEDOR' : 'CLIENTE',
     tipo_documento:   tipoDoc,
     numero_documento: c.numero_documento,
-    nombre:           c.display_name,
+    nombre:           tipoDoc === 'RUC' ? (c.razon_social ?? c.display_name ?? '') : (c.nombre ?? ''),
     apellido_paterno: c.apellido_paterno ?? undefined,
     apellido_materno: c.apellido_materno ?? undefined,
     telefono:         c.telefono ?? '',
