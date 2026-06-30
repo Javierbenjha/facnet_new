@@ -11,6 +11,7 @@ import { RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { Auth } from '../../core/services/auth';
 import { Toaster } from '../../core/services/toast';
+import { SalesPasswordModal } from './sales-password-modal/sales-password-modal';
 import { finalize } from 'rxjs';
 
 interface AccountOption {
@@ -25,7 +26,7 @@ interface AccountOption {
   templateUrl: './user-profile.html',
   styleUrl: './user-profile.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, ButtonModule],
+  imports: [ReactiveFormsModule, RouterLink, ButtonModule, SalesPasswordModal],
 })
 export class UserProfile {
   private readonly fb = inject(FormBuilder);
@@ -33,6 +34,15 @@ export class UserProfile {
   private readonly toast = inject(Toaster);
 
   readonly loading = signal(false);
+  readonly salesPasswordOpen = signal(false);
+
+  // Dispatches the account option buttons by id. Sales-confirmation is wired;
+  // change-password and notification-history are handled in later tasks.
+  onAccountOption(id: string) {
+    if (id === 'sales-confirmation') {
+      this.salesPasswordOpen.set(true);
+    }
+  }
 
   // Photo upload state. Allowed types + size mirror PATCH /auth/profile (auth.md).
   private readonly allowedPhotoTypes = [

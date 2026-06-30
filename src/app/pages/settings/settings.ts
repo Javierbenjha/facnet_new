@@ -6,6 +6,11 @@ import { DocumentsModal } from './documents-modal/documents-modal';
 import { CategoriesModal } from './categories-modal/categories-modal';
 import { BrandsModal } from './brands-modal/brands-modal';
 import { UnitsModal } from './units-modal/units-modal';
+import { TransportCompanyModal } from "./transport-company-modal/transport-company-modal";
+import { CurrenciesModal } from './currencies-modal/currencies-modal';
+import { BanksModal } from './banks-modal/banks-modal';
+import { DriversModal } from './drivers-modal/drivers-modal';
+import { IgvModal } from './igv-modal/igv-modal';
 
 interface SettingAction {
   label: string;
@@ -100,8 +105,8 @@ const SECTIONS: SettingSection[] = [
         description: 'Configurar los bancos con los que trabajás.',
         icon: 'pi pi-building',
         actions: [
-          { label: 'Crear banco',   icon: 'pi pi-plus' },
-          { label: 'Listar bancos', icon: 'pi pi-list' },
+         
+          { label: 'Administrar entidades bancarias', icon: 'pi pi-list' },
         ],
       },
       {
@@ -171,8 +176,8 @@ const SECTIONS: SettingSection[] = [
         description: 'Gestionar los conductores registrados en el sistema.',
         icon: 'pi pi-id-card',
         actions: [
-          { label: 'Crear conductor',   icon: 'pi pi-plus' },
-          { label: 'Listar conductores', icon: 'pi pi-list' },
+          
+          { label: 'Administrar conductores', icon: 'pi pi-list' },
         ],
       },
       {
@@ -181,8 +186,7 @@ const SECTIONS: SettingSection[] = [
         description: 'Gestionar las empresas y personas de transporte.',
         icon: 'pi pi-truck',
         actions: [
-          { label: 'Crear transportista',   icon: 'pi pi-plus' },
-          { label: 'Listar transportistas', icon: 'pi pi-list' },
+          { label: 'Administrar transportistas', icon: 'pi pi-sliders-h' },
         ],
       },
     ],
@@ -245,7 +249,7 @@ const SECTIONS: SettingSection[] = [
   selector: 'app-settings',
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
-  imports: [Button, Card, PageHeader, DocumentsModal, CategoriesModal, BrandsModal, UnitsModal],
+  imports: [Button, Card, PageHeader, DocumentsModal, CategoriesModal, BrandsModal, UnitsModal, TransportCompanyModal, CurrenciesModal, BanksModal, DriversModal, IgvModal],
 })
 export class Settings {
   readonly sections = SECTIONS;
@@ -254,7 +258,11 @@ export class Settings {
   readonly categoriesVisible  = signal(false);
   readonly brandsVisible      = signal(false);
   readonly unitsVisible       = signal(false);
-
+  readonly transportCompanyVisible = signal(false);
+  readonly currenciesVisible  = signal(false);
+  readonly banksVisible       = signal(false);
+  readonly driversVisible     = signal(false);
+  readonly igvVisible         = signal(false);
   readonly currentSection = () =>
     this.sections.find(s => s.id === this.activeSection()) ?? this.sections[0];
 
@@ -263,5 +271,10 @@ export class Settings {
     if (moduleId === 'categoria')  this.categoriesVisible.set(true);
     if (moduleId === 'marca')      this.brandsVisible.set(true);
     if (moduleId === 'unidad')     this.unitsVisible.set(true);
+    if (moduleId === 'transportista') this.transportCompanyVisible.set(true);
+    if (moduleId === 'moneda')     this.currenciesVisible.set(true);
+    if (moduleId === 'banco')      this.banksVisible.set(true);
+    if (moduleId === 'conductor')  this.driversVisible.set(true);
+    if (moduleId === 'igv')        this.igvVisible.set(true);
   }
 }

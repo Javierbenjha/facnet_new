@@ -2,6 +2,10 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
+/* Genera la escala de PrimeNG (surface-0..950, primary-50..950, primary-contrast)
+   mapeada al preset Aura definido en app.config.ts, con dark mode via .dark */
+@plugin "tailwindcss-primeui";
+
 @keyframes marquee {
   from { transform: translateX(0%); }
   to   { transform: translateX(-50%); }

@@ -1,0 +1,36 @@
+<app-modal
+  [(visible)]="visible"
+  title="IGV en venta"
+  icon="pi pi-percentage"
+  iconColor="info"
+  size="sm">
+
+  <div class="flex items-start gap-4 p-4 bg-surface-ground rounded-lg border border-border">
+    <div class="flex-1">
+      <p class="text-sm font-medium text-stone-700 dark:text-stone-200">
+        Aplicar IGV en las ventas
+      </p>
+      <p class="text-xs text-stone-400 mt-1 leading-relaxed">
+        Cuando está activado, los productos en venta incluyen IGV. Si lo desactivás,
+        las ventas se registran sin IGV.
+      </p>
+    </div>
+
+    <div class="flex flex-col items-center gap-1 pt-0.5">
+      @if (loading()) {
+        <i class="pi pi-spin pi-spinner text-stone-400"></i>
+      } @else {
+        <p-toggleswitch
+          [ngModel]="igvActive()"
+          [disabled]="saving()"
+          (ngModelChange)="toggle()" />
+        <span class="text-[11px] font-medium"
+              [class.text-emerald-500]="igvActive()"
+              [class.text-stone-400]="!igvActive()">
+          {{ igvActive() ? 'Activado' : 'Desactivado' }}
+        </span>
+      }
+    </div>
+  </div>
+
+</app-modal>
