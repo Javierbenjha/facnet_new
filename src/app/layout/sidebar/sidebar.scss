@@ -1,11 +1,54 @@
 :host { display: contents; }
 
+/* Active item: filled pill + left accent bar (no border, so the label never shifts) */
 .active-link {
-  background-color: #c5e3f5 !important;
-  color: #0862a1 !important;
+  position: relative;
+  background-color: var(--color-primary-light) !important;
+  color: var(--color-primary) !important;
+  font-weight: 600 !important;
+}
+
+.active-link::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 1.25rem;
+  width: 3px;
+  border-radius: 0 9999px 9999px 0;
+  background-color: var(--color-primary);
+}
+
+/* Collapsed sidebar: hide the accent bar so it doesn't clash with the centered icon */
+.active-link.justify-center::before {
+  display: none;
 }
 
 :host-context(.dark) .active-link {
-  background-color: #0862a1 !important;
+  background-color: var(--color-primary) !important;
   color: #ffffff !important;
+}
+
+:host-context(.dark) .active-link::before {
+  background-color: #ffffff;
+}
+
+/* Thin, discreet scrollbar — only matters when the backend returns many modules */
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 9999px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
 }
