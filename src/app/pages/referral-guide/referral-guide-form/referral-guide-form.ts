@@ -12,7 +12,7 @@ import { AppModal } from '../../../shared/app-modal/app-modal';
 import {
   GuiaRemision, ModalidadTransporte, MOTIVOS_GUIA, TIPOS_DOC_REF,
 } from '../referral-guide.models';
-import { VentaHistorial, VENTAS_MOCK } from '../../sale-list/sale-list.models';
+import { Sale } from '../../../core/models/sale.model';
 import { Persona } from '../../customers-suppliers/customers-suppliers.models';
 
 interface DetalleRow {
@@ -47,12 +47,7 @@ export class ReferralGuideForm {
     { label: 'Privado / Propio',  value: 'PRIVADO' },
   ];
 
-  readonly ventaOpts = VENTAS_MOCK
-    .filter(v => v.estado === 'ACTIVO' && (v.tip_doc === 1 || v.tip_doc === 2))
-    .map(v => ({
-      label: `${v.sigla_documento}${v.serie}-${v.correlativo} · ${v.cliente}`,
-      value: v,
-    }));
+  readonly ventaOpts: { label: string; value: Sale }[] = [];
 
   readonly clienteOpts: { label: string; value: Persona }[] = [];
 
@@ -78,7 +73,7 @@ export class ReferralGuideForm {
   readonly detalles           = signal<DetalleRow[]>([this._emptyRow()]);
 
   // ── Smart selection ────────────────────────────────────────────────────────
-  readonly selectedVenta    = signal<VentaHistorial | null>(null);
+  readonly selectedVenta    = signal<Sale | null>(null);
   readonly selectedCliente  = signal<Persona | null>(null);
 
   readonly clienteAddresses = computed(() => [] as { descripcion: string; es_principal: boolean }[]);
@@ -107,7 +102,7 @@ export class ReferralGuideForm {
   }
 
   // ── Smart selection methods ────────────────────────────────────────────────
-  selectVenta(v: VentaHistorial | null) {
+  selectVenta(v: Sale | null) {
     this.selectedVenta.set(v);
     if (!v) return;
 
@@ -116,16 +111,16 @@ export class ReferralGuideForm {
     this.docRefCorrelativo.set(v.correlativo);
 
     if (!this.selectedCliente()) {
-      this.cliente.set(v.cliente);
-      this.rucCliente.set(v.ruc_dni);
+      this.cliente.set(v.clienteNombre ?? '');
+      this.rucCliente.set(v.cliente_numero_documento ?? '');
     }
 
-    if (v.detalles?.length) {
-      this.detalles.set(v.detalles.map(d => ({
+    if (v.items?.length) {
+      this.detalles.set(v.items.map(d => ({
         _id:         _nextId++,
         codigo:      '',
-        descripcion: d.producto_nombre,
-        cantidad:    d.cantidad,
+        descripcion: d.producto ?? '',
+        cantidad:    parseFloat(d.cantidad),
         peso:        0,
       })));
     }

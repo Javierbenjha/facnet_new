@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { switchMap, catchError, of } from 'rxjs';
+import { switchMap, catchError, of, skip } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import { InputNumber } from 'primeng/inputnumber';
@@ -241,7 +241,7 @@ export class Sale {
           .pipe(catchError(() => of({ paralelo: 0 })));
       }),
       takeUntilDestroyed(),
-    ).subscribe(res => this.tipoCambio.set(res.paralelo ?? 0));
+    ).subscribe(res => this.tipoCambio.set(parseFloat(String(res.paralelo ?? 0))));
 
     toObservable(this.fechaEmision).pipe(
       switchMap(fecha => this.exchangeRateSvc.getIgvByDate(this.fmtDateParam(fecha))
@@ -249,6 +249,21 @@ export class Sale {
       ),
       takeUntilDestroyed(),
     ).subscribe(res => this.igvPorcentaje.set(res.igv?.porcentaje ?? 18));
+
+    // Re-price cart when sale currency changes (skip initial emission)
+    toObservable(this.moneda).pipe(
+      skip(1),
+      takeUntilDestroyed(),
+    ).subscribe(newMoneda => {
+      this.cart.update(items =>
+        items.map(item => ({
+          ...item,
+          precio_venta: (newMoneda === 'USD'
+            ? item.producto.precio_publico_dolar
+            : item.producto.precio_publico_soles) ?? item.producto.precio_publico,
+        }))
+      );
+    });
   }
 
   // ── Product creation ───────────────────────────────────────────────────────
@@ -272,22 +287,34 @@ export class Sale {
   }
 
   private mapToPosProd(p: Product): PosProducto {
+    const tc              = p.tipoCambio ?? this.tipoCambio();
+    const precioSoles     = p.precioPublicoSoles ?? p.precioPublico;
+    const precioMayorSoles = p.precioMayorSoles  ?? p.precioMayor;
+    const precioDolar     = p.precioPublicoDolar  ?? (tc > 0 ? precioSoles / tc : 0);
+    const precioMayorDolar = p.precioMayorDolar   ?? (tc > 0 ? precioMayorSoles / tc : 0);
+    const saleMoneda      = this.moneda() === 'PEN' ? 1 : 2;
     return {
-      id:             p.id,
-      sku:            p.sku,
-      descripcion:    p.descripcion,
-      categoria:      p.categoria ?? 'General',
-      precio_publico: p.precioPublico,
-      precio_costo:   p.costo,
-      precio_min:     p.costo,
-      stock:          p.stock ?? 0,
-      color:          this.colorForCategoria(p.categoria),
-      st_afecto:      (p.stAfecto === 1 ? 1 : 0) as 0 | 1,
+      id:                    p.id,
+      sku:                   p.sku,
+      descripcion:           p.descripcion,
+      categoria:             p.categoria ?? 'General',
+      precio_publico:        saleMoneda === 2 ? precioDolar : precioSoles,
+      precio_publico_soles:  precioSoles,
+      precio_publico_dolar:  precioDolar,
+      precio_mayor_soles:    precioMayorSoles,
+      precio_mayor_dolar:    precioMayorDolar,
+      precio_costo:          p.costoSoles ?? p.costo,
+      precio_min:            p.costoSoles ?? p.costo,
+      stock:                 p.stock ?? 0,
+      color:                 this.colorForCategoria(p.categoria),
+      st_afecto:             (p.stAfecto === 1 ? 1 : 0) as 0 | 1,
+      tipoMoneda:            p.tipoMoneda,
     };
   }
 
   // ── Cart operations ────────────────────────────────────────────────────────
   addToCart(p: PosProducto) {
+    const precioVenta = (this.moneda() === 'USD' ? p.precio_publico_dolar : p.precio_publico_soles) ?? p.precio_publico;
     this.cart.update(items => {
       const idx = items.findIndex(i => i.producto.id === p.id);
       if (idx >= 0) {
@@ -295,7 +322,7 @@ export class Sale {
         updated[idx] = { ...updated[idx], cantidad: updated[idx].cantidad + 1 };
         return updated;
       }
-      return [...items, { producto: p, cantidad: 1, precio_venta: p.precio_publico }];
+      return [...items, { producto: p, cantidad: 1, precio_venta: precioVenta }];
     });
   }
 

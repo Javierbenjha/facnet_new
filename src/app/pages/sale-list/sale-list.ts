@@ -1,22 +1,26 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy, Component, computed, DestroyRef,
+  inject, OnInit, signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { catchError, debounceTime, EMPTY, finalize, Subject, switchMap } from 'rxjs';
 import { Button } from 'primeng/button';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
-import { TableModule } from 'primeng/table';
+import { TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { Tag } from 'primeng/tag';
 import { Menu } from 'primeng/menu';
 import { Drawer } from 'primeng/drawer';
 import { MenuItem } from 'primeng/api';
 import { PageHeader } from '../../shared/page-header/page-header';
 import { KpiCard } from '../../shared/kpi-card/kpi-card';
-import {
-  VentaHistorial, VENTAS_MOCK, TIPO_DOC_OPCIONES,
-  EstadoVenta, EstadoPago, EstadoSunat,
-} from './sale-list.models';
+import { SaleService } from '../../core/services/sale';
+import { Sale, SaleItem, SaleListFilters } from '../../core/models/sale.model';
+import { TIPO_DOC_OPCIONES } from './sale-list.models';
 
 @Component({
   selector: 'app-sale-list',
@@ -31,62 +35,100 @@ import {
     PageHeader, KpiCard,
   ],
 })
-export class SaleList {
+export class SaleList implements OnInit {
+  private readonly saleService = inject(SaleService);
+  private readonly destroyRef  = inject(DestroyRef);
+  private readonly load$       = new Subject<SaleListFilters>();
+
   readonly tipoDocOpciones = TIPO_DOC_OPCIONES;
 
-  // ── Filter state ───────────────────────────────────────────────────────────
+  // ── Filter signals ─────────────────────────────────────────────────────────
   readonly searchText    = signal('');
   readonly startDate     = signal<Date | null>(this.firstOfMonth());
   readonly endDate       = signal<Date | null>(new Date());
   readonly tipoDocFiltro = signal(0);
 
-  // ── Drawer state ──────────────────────────────────────────────────────────
+  // ── Pagination ─────────────────────────────────────────────────────────────
+  readonly first    = signal(0);
+  readonly pageSize = signal(10);
+  private currentPage = 1;
+
+  // ── Data signals ───────────────────────────────────────────────────────────
+  readonly ventas         = signal<Sale[]>([]);
+  readonly loading        = signal(false);
+  readonly totalRegistros = signal(0);
+
+  // ── Drawer ────────────────────────────────────────────────────────────────
   readonly showDetail    = signal(false);
-  readonly selectedVenta = signal<VentaHistorial | null>(null);
+  readonly selectedVenta = signal<Sale | null>(null);
 
-  // ── Computed ───────────────────────────────────────────────────────────────
-  readonly filteredVentas = computed(() => {
-    const q    = this.searchText().toLowerCase().trim();
-    const tipo = this.tipoDocFiltro();
-    const from = this.startDate();
-    const to   = this.endDate();
-
-    return VENTAS_MOCK.filter(v => {
-      if (tipo !== 0 && v.tip_doc !== tipo) return false;
-
-      if (from || to) {
-        const d = new Date(v.fecha_emision + 'T00:00:00');
-        if (from && d < from) return false;
-        if (to) {
-          const toEnd = new Date(to);
-          toEnd.setHours(23, 59, 59, 999);
-          if (d > toEnd) return false;
-        }
-      }
-
-      if (q) {
-        const num = `${v.sigla_documento}${v.serie}-${v.correlativo}`.toLowerCase();
-        return num.includes(q) || v.cliente.toLowerCase().includes(q) || v.ruc_dni.toLowerCase().includes(q);
-      }
-      return true;
-    });
-  });
-
+  // ── KPI (from current page — indicativo) ──────────────────────────────────
   readonly metrics = computed(() => {
-    const ventas  = this.filteredVentas().filter(v => v.estado !== 'ANULADO' && v.tip_doc !== 7);
-    const soles   = ventas.filter(v => v.moneda === 'PEN');
-    const dolares = ventas.filter(v => v.moneda === 'USD');
+    const active  = this.ventas().filter(v => v.estadoDescripcion !== 'CANCELLED' && v.tip_doc !== 7);
+    const soles   = active.filter(v => v.moneda === 1);
+    const dolares = active.filter(v => v.moneda === 2);
+    const sum     = (arr: Sale[]) => arr.reduce((s, v) => s + parseFloat(v.total), 0);
     return {
-      totalVentas:     this.filteredVentas().length,
-      ingresosSoles:   soles.reduce((s, v) => s + v.total, 0),
-      ingresosDolares: dolares.reduce((s, v) => s + v.total, 0),
-      promedioSoles:   soles.length   ? soles.reduce((s, v) => s + v.total, 0)   / soles.length   : 0,
-      promedioDolares: dolares.length ? dolares.reduce((s, v) => s + v.total, 0) / dolares.length : 0,
+      totalVentas:     this.totalRegistros(),
+      ingresosSoles:   sum(soles),
+      ingresosDolares: sum(dolares),
+      promedioSoles:   soles.length   ? sum(soles)   / soles.length   : 0,
+      promedioDolares: dolares.length ? sum(dolares) / dolares.length : 0,
     };
   });
 
-  // ── Methods ────────────────────────────────────────────────────────────────
-  openDetail(v: VentaHistorial) {
+  ngOnInit() {
+    this.load$.pipe(
+      debounceTime(300),
+      switchMap(filters => {
+        this.loading.set(true);
+        return this.saleService.list(filters).pipe(
+          catchError(() => EMPTY),
+          finalize(() => this.loading.set(false)),
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(res => {
+      this.ventas.set(res.data);
+      this.totalRegistros.set(res.meta.total);
+    });
+
+    this.triggerLoad();
+  }
+
+  // ── Load trigger ───────────────────────────────────────────────────────────
+  private triggerLoad() {
+    const q    = this.searchText().trim();
+    const tipo = this.tipoDocFiltro();
+    const from = this.startDate();
+    const to   = this.endDate();
+    this.load$.next({
+      page:  this.currentPage,
+      limit: this.pageSize(),
+      ...(tipo !== 0 ? { tip_doc: tipo }    : {}),
+      ...(q          ? { cliente: q }       : {}),
+      ...(from       ? { fecha_inicio: this.toApiDate(from) } : {}),
+      ...(to         ? { fecha_fin:    this.toApiDate(to)   } : {}),
+    });
+  }
+
+  onLazyLoad(event: TableLazyLoadEvent) {
+    const rows  = event.rows ?? this.pageSize();
+    const first = event.first ?? 0;
+    this.first.set(first);
+    this.pageSize.set(rows);
+    this.currentPage = Math.floor(first / rows) + 1;
+    this.triggerLoad();
+  }
+
+  onFilterChange() {
+    this.currentPage = 1;
+    this.first.set(0);
+    this.triggerLoad();
+  }
+
+  // ── Actions ────────────────────────────────────────────────────────────────
+  openDetail(v: Sale) {
     this.selectedVenta.set(v);
     this.showDetail.set(true);
   }
@@ -95,13 +137,23 @@ export class SaleList {
     this.showDetail.set(false);
   }
 
-  getMenuItems(v: VentaHistorial): MenuItem[] {
-    const anulado  = v.estado === 'ANULADO';
-    const esFiscal = v.tip_doc === 1 || v.tip_doc === 2;
+  clearFilters() {
+    this.searchText.set('');
+    this.startDate.set(this.firstOfMonth());
+    this.endDate.set(new Date());
+    this.tipoDocFiltro.set(0);
+    this.currentPage = 1;
+    this.first.set(0);
+    this.triggerLoad();
+  }
+
+  getMenuItems(v: Sale): MenuItem[] {
+    const anulado    = v.estadoDescripcion === 'CANCELLED';
+    const esFiscal   = v.tip_doc === 1 || v.tip_doc === 2;
+    const tieneSaldo = parseFloat(v.saldo) > 0;
     return [
-      { label: 'Ver detalles',   icon: 'pi pi-eye',     command: () => this.openDetail(v) },
-      { label: 'Editar',         icon: 'pi pi-pencil',  disabled: anulado },
-      ...(v.saldo > 0 && !anulado
+      { label: 'Ver detalles',   icon: 'pi pi-eye',    command: () => this.openDetail(v) },
+      ...(tieneSaldo && !anulado
         ? [{ label: 'Ir a Cobranza', icon: 'pi pi-money-bill' }]
         : []),
       ...(esFiscal
@@ -111,31 +163,35 @@ export class SaleList {
       { label: 'Reimprimir Ticket', icon: 'pi pi-print'    },
       { label: 'Descargar Reporte', icon: 'pi pi-download' },
       ...([1, 2, 7, 8].includes(v.tip_doc)
-        ? [{ label: 'Envío SUNAT', icon: 'pi pi-send', disabled: v.estado_sunat === 'ACEPTADA' }]
+        ? [{ label: 'Envío SUNAT', icon: 'pi pi-send',
+             disabled: v.estado_sunat === 'ACEPTADA' }]
         : []),
       { separator: true },
-      { label: 'Anular', icon: 'pi pi-trash', disabled: anulado, styleClass: 'text-red-500' },
+      { label: 'Anular', icon: 'pi pi-trash', disabled: anulado,
+        styleClass: 'text-red-500', command: () => this.cancel(v) },
     ];
   }
 
-  clearFilters() {
-    this.searchText.set('');
-    this.startDate.set(this.firstOfMonth());
-    this.endDate.set(new Date());
-    this.tipoDocFiltro.set(0);
+  cancel(v: Sale) {
+    this.saleService.cancel(v.tip_doc, v.serie, v.correlativo).subscribe({
+      next: updated => this.ventas.update(
+        list => list.map(s => s.serie === v.serie && s.correlativo === v.correlativo ? updated : s)
+      ),
+    });
   }
 
   // ── Severity helpers ───────────────────────────────────────────────────────
-  estadoSev(e: EstadoVenta): 'success' | 'danger' {
-    return e === 'ACTIVO' ? 'success' : 'danger';
+  estadoSev(v: Sale): 'success' | 'danger' {
+    return v.estadoDescripcion === 'CANCELLED' ? 'danger' : 'success';
   }
 
-  pagoSev(e: EstadoPago): 'success' | 'info' | 'warn' {
-    return e === 'CANCELADO' ? 'success' : e === 'PARCIAL' ? 'info' : 'warn';
+  pagoSev(v: Sale): 'success' | 'info' | 'warn' {
+    const ep = this.estadoPago(v);
+    return ep === 'CANCELADO' ? 'success' : ep === 'PARCIAL' ? 'info' : 'warn';
   }
 
-  sunatSev(e: EstadoSunat): 'success' | 'warn' | 'danger' | 'secondary' {
-    switch (e) {
+  sunatSev(s: string | null): 'success' | 'warn' | 'danger' | 'secondary' {
+    switch (s) {
       case 'ACEPTADA':  return 'success';
       case 'RECHAZADA': return 'danger';
       case 'ERROR':     return 'secondary';
@@ -143,15 +199,53 @@ export class SaleList {
     }
   }
 
+  // ── Field adapters ─────────────────────────────────────────────────────────
+  private readonly DOC_SIGLA: Record<number, string> = {
+    1: 'F', 2: 'B', 7: 'NC', 8: 'ND', 99: 'NV',
+  };
+
+  siglaDoc(v: Sale): string {
+    return this.DOC_SIGLA[v.tip_doc] ?? v.tipDocDescripcion ?? '?';
+  }
+
+  siglaMoneda(v: Sale): 'S/' | '$' {
+    return v.moneda === 2 ? '$' : 'S/';
+  }
+
+  estadoLabel(v: Sale): string {
+    return v.estadoDescripcion === 'CANCELLED' ? 'ANULADO' : 'ACTIVO';
+  }
+
+  estadoPago(v: Sale): 'PENDIENTE' | 'PARCIAL' | 'CANCELADO' {
+    const saldo = parseFloat(v.saldo);
+    const total = parseFloat(v.total);
+    if (saldo <= 0)       return 'CANCELADO';
+    if (saldo < total)    return 'PARCIAL';
+    return 'PENDIENTE';
+  }
+
   // ── Format helpers ─────────────────────────────────────────────────────────
-  fmtNum(n: number): string { return n.toFixed(2); }
-  signedAmt(v: VentaHistorial, n: number): number { return v.tip_doc === 7 ? -n : n; }
-  fmtDate(s: string): string {
+  fmtNum(n: number | string): string {
+    return parseFloat(String(n)).toFixed(2);
+  }
+
+  signedAmt(v: Sale, n: number | string): number {
+    const val = typeof n === 'string' ? parseFloat(n) : n;
+    return v.tip_doc === 7 ? -val : val;
+  }
+
+  fmtDate(s: string | null): string {
+    if (!s) return '—';
     const d = new Date(s + 'T00:00:00');
     return d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
-  itemTotal(d: { cantidad: number; precio_venta: number }): number {
-    return d.cantidad * d.precio_venta;
+
+  itemTotal(d: SaleItem): number {
+    return parseFloat(d.cantidad) * parseFloat(d.precio_venta);
+  }
+
+  private toApiDate(d: Date): string {
+    return d.toISOString().split('T')[0];
   }
 
   private firstOfMonth(): Date {

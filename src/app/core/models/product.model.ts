@@ -6,7 +6,16 @@ export interface Product {
   precioMayor: number;
   costo: number;
   peso: number | null;
-  tipoMoneda: number;
+  tipoMoneda: number;             // 1 = PEN, 2 = USD
+  moneda: string | null;          // e.g. "SOLES"
+  sigla: string | null;           // e.g. "S/"
+  tipoCambio?: number;            // exchange rate used to compute dollar variants
+  precioPublicoSoles?: number;
+  precioMayorSoles?: number;
+  costoSoles?: number;
+  precioPublicoDolar?: number;
+  precioMayorDolar?: number;
+  costoDolar?: number;
   stAfecto: number;
   stDesc: number;
   marcaId: string | null;
@@ -16,7 +25,7 @@ export interface Product {
   unidadId: string | null;
   unidad: string | null;
   imagenUrl: string | null;
-  estado: number;           // 1 = activo, 2 = inactivo
+  estado: number;                 // 1 = activo, 2 = inactivo
   fechaAdi: string;
   fechaMod: string | null;
   stock?: number;

@@ -41,7 +41,7 @@
           {{ p.descripcion }}
         </p>
         <p class="text-[13px] font-semibold tabular-nums text-stone-900 dark:text-stone-100">
-          {{ sigla() }} {{ p.precio_publico.toFixed(2) }}
+          {{ sigla() }} {{ precioDisplay(p).toFixed(2) }}
         </p>
         <p class="text-[10.5px] text-stone-400 mt-0.5">Stock: {{ p.stock }}</p>
       </div>

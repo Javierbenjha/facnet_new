@@ -28,14 +28,14 @@
         <p-inputicon><i class="pi pi-search"></i></p-inputicon>
         <input pInputText pSize="small" type="text"
           [ngModel]="searchText()"
-          (ngModelChange)="searchText.set($event)"
+          (ngModelChange)="searchText.set($event); onFilterChange()"
           placeholder="Nº doc, cliente, RUC..."
           class="w-56" />
       </p-iconfield>
 
       <p-datepicker
         [ngModel]="startDate()"
-        (ngModelChange)="startDate.set($event)"
+        (ngModelChange)="startDate.set($event); onFilterChange()"
         dateFormat="dd/mm/yy"
         placeholder="Desde"
         appendTo="body"
@@ -44,7 +44,7 @@
 
       <p-datepicker
         [ngModel]="endDate()"
-        (ngModelChange)="endDate.set($event)"
+        (ngModelChange)="endDate.set($event); onFilterChange()"
         dateFormat="dd/mm/yy"
         placeholder="Hasta"
         appendTo="body"
@@ -54,14 +54,14 @@
       <p-select
         [options]="tipoDocOpciones"
         [ngModel]="tipoDocFiltro()"
-        (ngModelChange)="tipoDocFiltro.set($event)"
+        (ngModelChange)="tipoDocFiltro.set($event); onFilterChange()"
         optionLabel="label"
         optionValue="value"
         size="small"
         appendTo="body"
         styleClass="w-44" />
 
-      <span class="ml-auto text-xs text-stone-400">{{ filteredVentas().length }} resultados</span>
+      <span class="ml-auto text-xs text-stone-400">{{ totalRegistros() }} resultados</span>
 
       <p-button icon="pi pi-refresh" [text]="true" severity="secondary" size="small"
         pTooltip="Limpiar filtros" (onClick)="clearFilters()" />
@@ -69,24 +69,29 @@
 
     <!-- Tabla -->
     <p-table
-      [value]="filteredVentas()"
+      [value]="ventas()"
+      [loading]="loading()"
+      [lazy]="true"
+      [totalRecords]="totalRegistros()"
+      [first]="first()"
       [paginator]="true"
-      [rows]="10"
+      [rows]="pageSize()"
       [rowsPerPageOptions]="[10, 25, 50]"
       [rowHover]="true"
       styleClass="p-datatable-sm"
       paginatorStyleClass="!text-sm"
-      [scrollable]="true">
+      [scrollable]="true"
+      (onLazyLoad)="onLazyLoad($event)">
 
       <ng-template pTemplate="header">
         <tr class="text-sm">
-          <th pSortableColumn="sigla_documento">Comprobante <p-sortIcon field="sigla_documento" /></th>
-          <th pSortableColumn="fecha_emision">Fecha <p-sortIcon field="fecha_emision" /></th>
+          <th>Comprobante</th>
+          <th>Fecha</th>
           <th>Cliente</th>
           <th>F. Pago</th>
-          <th pSortableColumn="subtotal" class="text-right">Subtotal <p-sortIcon field="subtotal" /></th>
+          <th class="text-right">Subtotal</th>
           <th class="text-right">IGV</th>
-          <th pSortableColumn="total" class="text-right">Total <p-sortIcon field="total" /></th>
+          <th class="text-right">Total</th>
           <th class="text-right">Saldo</th>
           <th class="text-center">Estado</th>
           <th class="text-center">Pago</th>
@@ -95,17 +100,17 @@
       </ng-template>
 
       <ng-template pTemplate="body" let-v>
-        <tr [class.opacity-50]="v.estado === 'ANULADO'">
+        <tr [class.opacity-50]="v.estadoDescripcion === 'CANCELLED'">
 
           <td class="whitespace-nowrap">
             <p class="text-sm font-semibold text-stone-800 dark:text-stone-100">
-              {{ v.sigla_documento }} {{ v.serie }}-{{ v.correlativo }}
+              {{ siglaDoc(v) }} {{ v.serie }}-{{ v.correlativo }}
             </p>
-            <p class="text-[11px] text-stone-400">{{ v.moneda }}</p>
+            <p class="text-[11px] text-stone-400">{{ v.monedaDescripcion ?? (v.moneda === 1 ? 'PEN' : 'USD') }}</p>
             @if (v.tip_doc === 1 || v.tip_doc === 2) {
               <div class="flex items-center gap-1 mt-1">
                 <span class="text-[10px] text-stone-400 font-medium">SUNAT:</span>
-                <p-tag [value]="v.estado_sunat" [severity]="sunatSev(v.estado_sunat)" styleClass="!text-[10px] px-1.5 py-0.5" />
+                <p-tag [value]="v.estado_sunat ?? 'PENDIENTE'" [severity]="sunatSev(v.estado_sunat)" styleClass="!text-[10px] px-1.5 py-0.5" />
               </div>
             }
           </td>
@@ -115,44 +120,44 @@
           </td>
 
           <td>
-            <p class="text-sm font-medium text-stone-800 dark:text-stone-100 max-w-[160px] truncate">{{ v.cliente }}</p>
-            <p class="text-[11px] text-stone-400">{{ v.ruc_dni || '—' }}</p>
+            <p class="text-sm font-medium text-stone-800 dark:text-stone-100 max-w-[160px] truncate">{{ v.clienteNombre ?? '—' }}</p>
+            <p class="text-[11px] text-stone-400">{{ v.cliente_numero_documento || '—' }}</p>
           </td>
 
           <td>
-            <p-tag [value]="v.forma_pago" severity="secondary" styleClass="!text-xs" />
+            <p-tag [value]="v.formaPagoDescripcion ?? '—'" severity="secondary" styleClass="!text-xs" />
           </td>
 
           <td class="text-right text-sm tabular-nums whitespace-nowrap"
             [class.text-red-500]="v.tip_doc === 7"
             [class.text-stone-500]="v.tip_doc !== 7">
-            {{ v.sigla }} {{ fmtNum(signedAmt(v, v.subtotal)) }}
+            {{ siglaMoneda(v) }} {{ fmtNum(signedAmt(v, v.subtotal)) }}
           </td>
 
           <td class="text-right text-sm tabular-nums whitespace-nowrap"
             [class.text-red-500]="v.tip_doc === 7"
             [class.text-stone-400]="v.tip_doc !== 7">
-            {{ v.sigla }} {{ fmtNum(signedAmt(v, v.igv)) }}
+            {{ siglaMoneda(v) }} {{ fmtNum(signedAmt(v, v.igv)) }}
           </td>
 
           <td class="text-right text-sm font-semibold tabular-nums whitespace-nowrap"
             [class.text-red-500]="v.tip_doc === 7"
             [class.text-stone-900]="v.tip_doc !== 7">
-            {{ v.sigla }} {{ fmtNum(signedAmt(v, v.total)) }}
+            {{ siglaMoneda(v) }} {{ fmtNum(signedAmt(v, v.total)) }}
           </td>
 
           <td class="text-right text-sm tabular-nums whitespace-nowrap"
-            [class.text-amber-600]="v.saldo > 0"
-            [class.text-stone-400]="v.saldo === 0">
-            {{ v.sigla }} {{ fmtNum(v.saldo) }}
+            [class.text-amber-600]="+v.saldo > 0"
+            [class.text-stone-400]="+v.saldo === 0">
+            {{ siglaMoneda(v) }} {{ fmtNum(v.saldo) }}
           </td>
 
           <td class="text-center">
-            <p-tag [value]="v.estado" [severity]="estadoSev(v.estado)" styleClass="!text-xs" />
+            <p-tag [value]="estadoLabel(v)" [severity]="estadoSev(v)" styleClass="!text-xs" />
           </td>
 
           <td class="text-center">
-            <p-tag [value]="v.estado_pago" [severity]="pagoSev(v.estado_pago)" styleClass="!text-xs" />
+            <p-tag [value]="estadoPago(v)" [severity]="pagoSev(v)" styleClass="!text-xs" />
           </td>
 
           <td (click)="$event.stopPropagation()">
@@ -191,7 +196,7 @@
       <div>
         <h3 class="text-base font-semibold text-stone-900 dark:text-stone-100">Detalles de la Venta</h3>
         <p class="text-xs text-stone-400 mt-0.5">
-          {{ v.sigla_documento }} {{ v.serie }}-{{ v.correlativo }} · {{ fmtDate(v.fecha_emision) }}
+          {{ siglaDoc(v) }} {{ v.serie }}-{{ v.correlativo }} · {{ fmtDate(v.fecha_emision) }}
         </p>
       </div>
     }
@@ -215,7 +220,7 @@
         <div class="grid grid-cols-2 gap-3 text-sm">
           <div>
             <p class="text-stone-400 text-xs">Comprobante</p>
-            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ v.sigla_documento }} {{ v.serie }}-{{ v.correlativo }}</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ siglaDoc(v) }} {{ v.serie }}-{{ v.correlativo }}</p>
           </div>
           <div>
             <p class="text-stone-400 text-xs">Fecha Emisión</p>
@@ -227,25 +232,25 @@
           </div>
           <div>
             <p class="text-stone-400 text-xs">Forma de Pago</p>
-            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ v.forma_pago }}</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ v.formaPagoDescripcion ?? '—' }}</p>
           </div>
           <div class="col-span-2">
             <p class="text-stone-400 text-xs">Cliente</p>
-            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ v.cliente }}</p>
-            @if (v.ruc_dni) {
-              <p class="text-xs text-stone-400">{{ v.ruc_dni }}</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ v.clienteNombre ?? '—' }}</p>
+            @if (v.cliente_numero_documento) {
+              <p class="text-xs text-stone-400">{{ v.cliente_numero_documento }}</p>
             }
           </div>
           <div>
             <p class="text-stone-400 text-xs">Moneda</p>
-            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ v.moneda }}</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ v.monedaDescripcion ?? (v.moneda === 1 ? 'PEN' : 'USD') }}</p>
           </div>
           <div>
             <p class="text-stone-400 text-xs">Saldo pendiente</p>
             <p class="mt-0.5 font-medium"
-              [class.text-amber-600]="v.saldo > 0"
-              [class.text-emerald-600]="v.saldo === 0">
-              {{ v.sigla }} {{ fmtNum(v.saldo) }}
+              [class.text-amber-600]="+v.saldo > 0"
+              [class.text-emerald-600]="+v.saldo === 0">
+              {{ siglaMoneda(v) }} {{ fmtNum(v.saldo) }}
             </p>
           </div>
         </div>
@@ -253,7 +258,7 @@
 
       <section>
         <h4 class="text-xs font-semibold text-stone-400 uppercase tracking-wide mb-3">Productos</h4>
-        @if (v.detalles && v.detalles.length > 0) {
+        @if (v.items && v.items.length > 0) {
           <div class="border border-border rounded-xl overflow-hidden">
             <table class="w-full text-sm">
               <thead class="bg-border">
@@ -265,12 +270,12 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-border">
-                @for (d of v.detalles; track $index) {
+                @for (d of v.items; track d.id) {
                   <tr class="hover:bg-stone-50 dark:hover:bg-stone-800/50">
-                    <td class="px-4 py-2.5 text-stone-700 dark:text-stone-300">{{ d.producto_nombre }}</td>
-                    <td class="px-4 py-2.5 text-right tabular-nums text-stone-500">{{ d.cantidad }}</td>
-                    <td class="px-4 py-2.5 text-right tabular-nums text-stone-500">{{ v.sigla }}{{ fmtNum(d.precio_venta) }}</td>
-                    <td class="px-4 py-2.5 text-right tabular-nums font-medium text-stone-800 dark:text-stone-100">{{ v.sigla }}{{ fmtNum(itemTotal(d)) }}</td>
+                    <td class="px-4 py-2.5 text-stone-700 dark:text-stone-300">{{ d.producto }}</td>
+                    <td class="px-4 py-2.5 text-right tabular-nums text-stone-500">{{ fmtNum(d.cantidad) }}</td>
+                    <td class="px-4 py-2.5 text-right tabular-nums text-stone-500">{{ siglaMoneda(v) }}{{ fmtNum(d.precio_venta) }}</td>
+                    <td class="px-4 py-2.5 text-right tabular-nums font-medium text-stone-800 dark:text-stone-100">{{ siglaMoneda(v) }}{{ fmtNum(itemTotal(d)) }}</td>
                   </tr>
                 }
               </tbody>
@@ -285,35 +290,30 @@
       </section>
 
       <section class="bg-border rounded-xl px-5 py-4 flex flex-col gap-2">
-        @if (v.subtotal > 0) {
+        @if (+v.subtotal > 0) {
           <div class="flex justify-between text-sm text-stone-500">
-            <span>Op. Gravadas</span><span class="tabular-nums">{{ v.sigla }} {{ fmtNum(v.subtotal) }}</span>
+            <span>Op. Gravadas</span><span class="tabular-nums">{{ siglaMoneda(v) }} {{ fmtNum(v.subtotal) }}</span>
           </div>
         }
-        @if (v.total_inafecto > 0) {
+        @if (+v.total_inafecto > 0) {
           <div class="flex justify-between text-sm text-stone-500">
-            <span>Op. Inafectas</span><span class="tabular-nums">{{ v.sigla }} {{ fmtNum(v.total_inafecto) }}</span>
+            <span>Op. Inafectas</span><span class="tabular-nums">{{ siglaMoneda(v) }} {{ fmtNum(v.total_inafecto) }}</span>
           </div>
         }
-        @if (v.descuento > 0) {
+        @if (+v.descuento > 0) {
           <div class="flex justify-between text-sm text-red-500">
-            <span>Descuento</span><span class="tabular-nums">-{{ v.sigla }} {{ fmtNum(v.descuento) }}</span>
+            <span>Descuento</span><span class="tabular-nums">-{{ siglaMoneda(v) }} {{ fmtNum(v.descuento) }}</span>
           </div>
         }
-        @if (v.igv > 0) {
+        @if (+v.igv > 0) {
           <div class="flex justify-between text-sm text-stone-500">
-            <span>IGV 18%</span><span class="tabular-nums">{{ v.sigla }} {{ fmtNum(v.igv) }}</span>
-          </div>
-        }
-        @if (v.total_gratuito > 0) {
-          <div class="flex justify-between text-sm text-violet-500">
-            <span>Gratuito</span><span class="tabular-nums">{{ v.sigla }} {{ fmtNum(v.total_gratuito) }}</span>
+            <span>IGV 18%</span><span class="tabular-nums">{{ siglaMoneda(v) }} {{ fmtNum(v.igv) }}</span>
           </div>
         }
         <div class="border-t border-border pt-2 flex justify-between font-bold text-stone-900 dark:text-stone-100">
           <span>Total</span>
           <span class="text-base tabular-nums" [class.text-red-500]="v.tip_doc === 7">
-            {{ v.sigla }} {{ fmtNum(signedAmt(v, v.total)) }}
+            {{ siglaMoneda(v) }} {{ fmtNum(signedAmt(v, v.total)) }}
           </span>
         </div>
       </section>

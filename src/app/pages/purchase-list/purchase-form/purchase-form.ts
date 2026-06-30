@@ -11,7 +11,7 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
 import { AppModal } from '../../../shared/app-modal/app-modal';
 import { ProductForm } from '../../products/product-form/product-form';
 import { Product } from '../../../core/models/product.model';
-import { POS_PRODUCTOS, PosProducto } from '../../sale/sale.models';
+import { ProductsService } from '../../../core/services/products';
 import {
   CompraHistorial, PurchaseItem, TIPOS_DOC_COMPRA, TipoDocCompraOption,
 } from '../purchase-list.models';
@@ -48,7 +48,8 @@ const FORMA_PAGO_OPTS = [
   ],
 })
 export class PurchaseForm {
-  private readonly fb = inject(FormBuilder);
+  private readonly fb             = inject(FormBuilder);
+  private readonly productsService = inject(ProductsService);
 
   readonly editing = input<CompraHistorial | 'new' | null>(null);
   readonly closed  = output<void>();
@@ -80,9 +81,9 @@ export class PurchaseForm {
   readonly proveedores         = signal([...PROVEEDORES_MOCK]);
   readonly proveedorFilterText = signal('');
   readonly showProductForm     = signal(false);
-  readonly productoSuggestions = signal<PosProducto[]>([]);
+  readonly productoSuggestions = signal<Product[]>([]);
   readonly items               = signal<PurchaseItem[]>([]);
-  selectedProducto: PosProducto | null = null;
+  selectedProducto: Product | null = null;
 
   // ── Computed ───────────────────────────────────────────────────────────────
   readonly visible = computed(() => this.editing() !== null);
@@ -187,16 +188,12 @@ export class PurchaseForm {
 
   // ── Productos ──────────────────────────────────────────────────────────────
   onProductSearch(event: { query: string }) {
-    const q = event.query.toLowerCase().trim();
-    const results = q
-      ? POS_PRODUCTOS.filter(p =>
-          p.descripcion.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)
-        ).slice(0, 8)
-      : POS_PRODUCTOS.slice(0, 8);
-    this.productoSuggestions.set(results);
+    this.productsService.getAll({ search: event.query.trim(), limit: 8 }).subscribe(res => {
+      this.productoSuggestions.set(res.data);
+    });
   }
 
-  onProductSelect(p: PosProducto) {
+  onProductSelect(p: Product) {
     this.items.update(list => {
       const idx = list.findIndex(i => i.id === p.id);
       if (idx >= 0) {
@@ -206,7 +203,7 @@ export class PurchaseForm {
       }
       return [...list, {
         id: p.id, nombre: p.descripcion, sku: p.sku,
-        unidad: 'und', cantidad: 1, precio: p.precio_costo,
+        unidad: p.unidad ?? 'und', cantidad: 1, precio: p.costo,
       }];
     });
     setTimeout(() => { this.selectedProducto = null; });

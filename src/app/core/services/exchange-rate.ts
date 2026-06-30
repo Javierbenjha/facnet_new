@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface ExchangeRateResponse {
-  paralelo: number;
+  paralelo: number | string;
 }
 
 export interface IgvRateResponse {
@@ -16,7 +16,7 @@ export class ExchangeRate {
   private readonly http = inject(HttpClient);
 
   getByDate(fecha: string): Observable<ExchangeRateResponse> {
-    return this.http.get<ExchangeRateResponse>(`${environment.apiUrl}/exchange-type/${fecha}`);
+    return this.http.get<ExchangeRateResponse>(`${environment.apiUrl}/exchange-rate/${fecha}`);
   }
 
   getIgvByDate(fecha: string): Observable<IgvRateResponse> {

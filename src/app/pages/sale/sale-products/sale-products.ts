@@ -18,10 +18,17 @@ export class SaleProducts {
   readonly categorias = input.required<string[]>();
   readonly productos  = input.required<PosProducto[]>();
   readonly sigla      = input.required<string>();
+  readonly moneda     = input.required<string>();
   readonly loading    = input(false);
 
   readonly queryChange     = output<string>();
   readonly catActivaChange = output<string>();
   readonly productClick    = output<PosProducto>();
   readonly createProduct   = output<void>();
+
+  precioDisplay(p: PosProducto): number {
+    return this.moneda() === 'USD'
+      ? (p.precio_publico_dolar ?? p.precio_publico)
+      : (p.precio_publico_soles ?? p.precio_publico);
+  }
 }
