@@ -66,8 +66,11 @@
           <form [formGroup]="form" (ngSubmit)="onSubmit()" class="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div class="space-y-2">
               <label class="text-sm font-medium text-stone-600 dark:text-stone-300">Nombre Completo</label>
-              <input type="text" formControlName="nombre"
-                class="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800/40 border border-border rounded-xl text-sm text-stone-700 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all" />
+              <div class="relative">
+                <i class="pi pi-user absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"></i>
+                <input type="text" formControlName="nombre"
+                  class="w-full pl-11 pr-4 py-3 bg-stone-50 dark:bg-stone-800/40 border border-border rounded-xl text-sm text-stone-700 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all" />
+              </div>
               @if (form.controls.nombre.invalid && form.controls.nombre.touched) {
                 <small class="text-red-500">El nombre es obligatorio (máx. 100 caracteres).</small>
               }
@@ -75,8 +78,11 @@
 
             <div class="space-y-2">
               <label class="text-sm font-medium text-stone-600 dark:text-stone-300">Apellido Paterno</label>
-              <input type="text" formControlName="apellido_paterno"
-                class="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800/40 border border-border rounded-xl text-sm text-stone-700 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all" />
+              <div class="relative">
+                <i class="pi pi-user absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"></i>
+                <input type="text" formControlName="apellido_paterno"
+                  class="w-full pl-11 pr-4 py-3 bg-stone-50 dark:bg-stone-800/40 border border-border rounded-xl text-sm text-stone-700 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all" />
+              </div>
               @if (form.controls.apellido_paterno.invalid && form.controls.apellido_paterno.touched) {
                 <small class="text-red-500">Máximo 150 caracteres.</small>
               }
@@ -84,8 +90,11 @@
 
             <div class="space-y-2">
               <label class="text-sm font-medium text-stone-600 dark:text-stone-300">Apellido Materno</label>
-              <input type="text" formControlName="apellido_materno"
-                class="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800/40 border border-border rounded-xl text-sm text-stone-700 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all" />
+              <div class="relative">
+                <i class="pi pi-user absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"></i>
+                <input type="text" formControlName="apellido_materno"
+                  class="w-full pl-11 pr-4 py-3 bg-stone-50 dark:bg-stone-800/40 border border-border rounded-xl text-sm text-stone-700 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all" />
+              </div>
               @if (form.controls.apellido_materno.invalid && form.controls.apellido_materno.touched) {
                 <small class="text-red-500">Máximo 150 caracteres.</small>
               }
@@ -93,8 +102,11 @@
 
             <div class="space-y-2">
               <label class="text-sm font-medium text-stone-600 dark:text-stone-300">Correo Electrónico</label>
-              <input type="email" formControlName="email"
-                class="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800/40 border border-border rounded-xl text-sm text-stone-700 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all" />
+              <div class="relative">
+                <i class="pi pi-envelope absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"></i>
+                <input type="email" formControlName="email"
+                  class="w-full pl-11 pr-4 py-3 bg-stone-50 dark:bg-stone-800/40 border border-border rounded-xl text-sm text-stone-700 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all" />
+              </div>
               @if (form.controls.email.invalid && form.controls.email.touched) {
                 <small class="text-red-500">Ingresa un correo electrónico válido.</small>
               }
@@ -102,8 +114,11 @@
 
             <div class="sm:col-span-2 space-y-2">
               <label class="text-sm font-medium text-stone-600 dark:text-stone-300">Teléfono</label>
-              <input type="tel" formControlName="telefono"
-                class="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800/40 border border-border rounded-xl text-sm text-stone-700 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all" />
+              <div class="relative">
+                <i class="pi pi-phone absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none"></i>
+                <input type="tel" formControlName="telefono"
+                  class="w-full pl-11 pr-4 py-3 bg-stone-50 dark:bg-stone-800/40 border border-border rounded-xl text-sm text-stone-700 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all" />
+              </div>
               @if (form.controls.telefono.invalid && form.controls.telefono.touched) {
                 <small class="text-red-500">El teléfono debe tener exactamente 9 dígitos.</small>
               }
