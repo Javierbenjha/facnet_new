@@ -1,0 +1,56 @@
+<app-modal
+  [(visible)]="visible"
+  title="Documentos de Emisión"
+  icon="pi pi-receipt"
+  iconColor="info"
+  size="md">
+
+  <p-table
+    [value]="docs()"
+    [loading]="loading()"
+    dataKey="id"
+    styleClass="p-datatable-sm">
+
+    <ng-template pTemplate="header">
+      <tr class="text-sm">
+        <th class="w-10">#</th>
+        <th>Descripción</th>
+        <th class="w-20 text-center">Sigla</th>
+        <th class="w-24 text-center">Ventas</th>
+        <th class="w-24 text-center">Compras</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-doc let-i="rowIndex">
+      <tr>
+        <td class="text-stone-400 text-xs">{{ i + 1 }}</td>
+        <td class="font-medium text-sm">{{ doc.descripcion }}</td>
+        <td class="text-center">
+          <p-tag [value]="doc.sigla" severity="secondary" />
+        </td>
+        <td class="text-center">
+          <p-toggleswitch
+            [ngModel]="doc.st_venta === 1"
+            [disabled]="toggling() === 'v-' + doc.id"
+            (ngModelChange)="toggleVentas(doc)" />
+        </td>
+        <td class="text-center">
+          <p-toggleswitch
+            [ngModel]="doc.st_compra === 1"
+            [disabled]="toggling() === 'c-' + doc.id"
+            (ngModelChange)="toggleCompras(doc)" />
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="5" class="text-center py-8 text-stone-400 text-sm">
+          No hay documentos configurados
+        </td>
+      </tr>
+    </ng-template>
+
+  </p-table>
+
+</app-modal>

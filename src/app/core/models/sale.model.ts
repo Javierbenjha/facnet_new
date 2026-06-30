@@ -106,15 +106,8 @@ export interface CreateSaleItemPayload {
 }
 
 export interface CreateSaleCollectionPayload {
-  fecha: string;
-  id_pago: number;
-  moneda: number;
-  importe: number;
-  tipo_cambio?: number;
-  vuelto?: number;
-  nroperacion?: string;
-  banco_id_banco?: number;
-  billetera_id?: number;
+  forma_pago_id: number;
+  monto: number;
 }
 
 export interface CreateSaleCuotaPayload {

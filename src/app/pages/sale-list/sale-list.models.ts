@@ -6,8 +6,8 @@ export interface TipoDocFiltroOption {
 export const TIPO_DOC_OPCIONES: TipoDocFiltroOption[] = [
   { value: 0,  label: 'Todos' },
   { value: 1,  label: 'Factura' },
-  { value: 2,  label: 'Boleta' },
+  { value: 3,  label: 'Boleta' },
   { value: 7,  label: 'Nota de Crédito' },
   { value: 8,  label: 'Nota de Débito' },
-  { value: 99, label: 'Doc. Interno' },
+  { value: 41, label: 'Doc. Interno' },
 ];

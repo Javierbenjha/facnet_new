@@ -107,7 +107,7 @@
               {{ siglaDoc(v) }} {{ v.serie }}-{{ v.correlativo }}
             </p>
             <p class="text-[11px] text-stone-400">{{ v.monedaDescripcion ?? (v.moneda === 1 ? 'PEN' : 'USD') }}</p>
-            @if (v.tip_doc === 1 || v.tip_doc === 2) {
+            @if ([1, 3, 7, 8].includes(v.tip_doc)) {
               <div class="flex items-center gap-1 mt-1">
                 <span class="text-[10px] text-stone-400 font-medium">SUNAT:</span>
                 <p-tag [value]="v.estado_sunat ?? 'PENDIENTE'" [severity]="sunatSev(v.estado_sunat)" styleClass="!text-[10px] px-1.5 py-0.5" />
@@ -120,7 +120,7 @@
           </td>
 
           <td>
-            <p class="text-sm font-medium text-stone-800 dark:text-stone-100 max-w-[160px] truncate">{{ v.clienteNombre ?? '—' }}</p>
+            <p class="text-sm font-medium text-stone-800 dark:text-stone-100 max-w-[160px] truncate">{{ v.clienteNombre ?? 'CLIENTES OTROS' }}</p>
             <p class="text-[11px] text-stone-400">{{ v.cliente_numero_documento || '—' }}</p>
           </td>
 
@@ -236,7 +236,7 @@
           </div>
           <div class="col-span-2">
             <p class="text-stone-400 text-xs">Cliente</p>
-            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ v.clienteNombre ?? '—' }}</p>
+            <p class="font-medium text-stone-800 dark:text-stone-100 mt-0.5">{{ v.clienteNombre ?? 'CLIENTES OTROS' }}</p>
             @if (v.cliente_numero_documento) {
               <p class="text-xs text-stone-400">{{ v.cliente_numero_documento }}</p>
             }

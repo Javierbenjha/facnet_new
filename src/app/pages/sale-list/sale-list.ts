@@ -149,7 +149,7 @@ export class SaleList implements OnInit {
 
   getMenuItems(v: Sale): MenuItem[] {
     const anulado    = v.estadoDescripcion === 'CANCELLED';
-    const esFiscal   = v.tip_doc === 1 || v.tip_doc === 2;
+    const esFiscal   = [1, 3, 7, 8].includes(v.tip_doc);
     const tieneSaldo = parseFloat(v.saldo) > 0;
     return [
       { label: 'Ver detalles',   icon: 'pi pi-eye',    command: () => this.openDetail(v) },
@@ -162,7 +162,7 @@ export class SaleList implements OnInit {
       { separator: true },
       { label: 'Reimprimir Ticket', icon: 'pi pi-print'    },
       { label: 'Descargar Reporte', icon: 'pi pi-download' },
-      ...([1, 2, 7, 8].includes(v.tip_doc)
+      ...([1, 3, 7, 8].includes(v.tip_doc)
         ? [{ label: 'Envío SUNAT', icon: 'pi pi-send',
              disabled: v.estado_sunat === 'ACEPTADA' }]
         : []),
@@ -201,7 +201,7 @@ export class SaleList implements OnInit {
 
   // ── Field adapters ─────────────────────────────────────────────────────────
   private readonly DOC_SIGLA: Record<number, string> = {
-    1: 'F', 2: 'B', 7: 'NC', 8: 'ND', 99: 'NV',
+    1: 'FAC', 3: 'BOL', 7: 'N/C', 8: 'N/D', 41: 'DCI',
   };
 
   siglaDoc(v: Sale): string {
@@ -236,7 +236,7 @@ export class SaleList implements OnInit {
 
   fmtDate(s: string | null): string {
     if (!s) return '—';
-    const d = new Date(s + 'T00:00:00');
+    const d = new Date(s.slice(0, 10) + 'T12:00:00');
     return d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 

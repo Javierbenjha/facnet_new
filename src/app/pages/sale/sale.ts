@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { switchMap, catchError, of, skip } from 'rxjs';
+import { switchMap, catchError, of, skip, Subject, debounceTime, EMPTY } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import { InputNumber } from 'primeng/inputnumber';
@@ -13,6 +13,9 @@ import { SaleProducts } from './sale-products/sale-products';
 import { SaleCart } from './sale-cart/sale-cart';
 import { NcForm } from './nc-form/nc-form';
 import { NdForm } from './nd-form/nd-form';
+import { CustomerForm } from '../customers-suppliers/customer-form/customer-form';
+import { ClientSupplier } from '../../core/models/client.model';
+import { ClientsService } from '../../core/services/clients';
 import {
   CartItem, CartTotals, DetraccionConcepto, DETRACCION_CONCEPTOS, FormaPago,
   METODOS_PAGO, MetodoPago, Moneda, PosProducto,
@@ -20,10 +23,13 @@ import {
 } from './sale.models';
 import { SaleCalculadoraService } from './sale-calculadora.service';
 import { ProductsService } from '../../core/services/products';
+import { SaleService } from '../../core/services/sale';
 import { Company } from '../../core/services/company';
 import { Cia } from '../../core/models/company.model';
 import { ExchangeRate } from '../../core/services/exchange-rate';
 import { Auth } from '../../core/services/auth';
+import { Toaster } from '../../core/services/toast';
+import { CreateSalePayload, SalePaymentMethod } from '../../core/models/sale.model';
 
 const COLOR_PALETTE = [
   'bg-red-100', 'bg-blue-100', 'bg-emerald-100', 'bg-amber-100',
@@ -36,14 +42,17 @@ const COLOR_PALETTE = [
   templateUrl: './sale.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { 'class': 'w-full h-full flex overflow-hidden' },
-  imports: [Button, InputNumber, AppModal, FormsModule, ProductForm, SaleHeader, SaleInfo, SaleProducts, SaleCart, NcForm, NdForm],
+  imports: [Button, InputNumber, AppModal, FormsModule, ProductForm, SaleHeader, SaleInfo, SaleProducts, SaleCart, NcForm, NdForm, CustomerForm],
 })
 export class Sale {
   private readonly calculadora     = inject(SaleCalculadoraService);
   private readonly productsService = inject(ProductsService);
+  private readonly clientsService  = inject(ClientsService);
+  private readonly saleService     = inject(SaleService);
   private readonly companySvc      = inject(Company);
   private readonly exchangeRateSvc = inject(ExchangeRate);
   private readonly auth            = inject(Auth);
+  private readonly toaster         = inject(Toaster);
 
   readonly metodosPago          = METODOS_PAGO;
   readonly tiposDoc             = TIPOS_DOC;
@@ -55,6 +64,12 @@ export class Sale {
 
   // ── Product form modal ─────────────────────────────────────────────────────
   readonly showProductForm = signal(false);
+
+  // ── Client search ─────────────────────────────────────────────────────────
+  readonly showClientForm      = signal(false);
+  readonly clienteNumeroDoc    = signal<string | null>(null);
+  readonly clienteSuggestions  = signal<ClientSupplier[]>([]);
+  private readonly clienteQuery$ = new Subject<string>();
 
   // ── NC / ND modals ────────────────────────────────────────────────────────
   readonly showNcForm = signal(false);
@@ -105,7 +120,15 @@ export class Sale {
   readonly showTicket = signal(false);
   readonly metodoPago = signal<MetodoPago>('efectivo');
   readonly efectivo   = signal(0);
+  readonly saving     = signal(false);
   readonly lastSale   = signal<{ subtotal: number; inafecto: number; gratuito: number; descuento: number; igv: number; total: number } | null>(null);
+
+  // ── Payment methods ────────────────────────────────────────────────────────
+  private readonly paymentMethods = signal<SalePaymentMethod[]>([]);
+
+  private readonly TIP_DOC_MAP: Record<TipoDoc, number> = {
+    boleta: 3, factura: 1, nota_venta: 41,
+  };
 
   // ── Computed ───────────────────────────────────────────────────────────────
   readonly categorias = computed(() => [
@@ -172,6 +195,11 @@ export class Sale {
   readonly detracMonto    = computed(() => this.total() * ((this.detracConcepto()?.porcentaje ?? 0) / 100));
   readonly retencionMonto = computed(() => this.total() * (this.retencionPct() / 100));
 
+  readonly clienteDisplay = computed(() =>
+    this.cliente() ||
+    ((this.tipoDoc() === 'boleta' || this.tipoDoc() === 'nota_venta') ? 'CLIENTES OTROS' : '')
+  );
+
   readonly saleInfoSummary = computed((): SaleInfoSummary => ({
     tipoDocLabel:   TIPOS_DOC.find(t => t.value === this.tipoDoc())?.label ?? '',
     serie:          this.serie(),
@@ -203,6 +231,24 @@ export class Sale {
   }));
 
   constructor() {
+    // Medios de pago para mapear al id_pago del payload
+    this.saleService.getPaymentMethods()
+      .pipe(takeUntilDestroyed())
+      .subscribe(methods => this.paymentMethods.set(methods));
+
+    // Búsqueda de clientes con debounce — usa sale-search para filtrar por tipo de comprobante
+    this.clienteQuery$.pipe(
+      debounceTime(300),
+      switchMap(q => {
+        if (q.trim().length < 2) { this.clienteSuggestions.set([]); return EMPTY; }
+        const tipDoc = this.tipoDoc() === 'factura' ? 1 : 2;
+        return this.clientsService.searchForSale(tipDoc, q.trim()).pipe(
+          catchError(() => of([] as ClientSupplier[])),
+        );
+      }),
+      takeUntilDestroyed(),
+    ).subscribe(res => this.clienteSuggestions.set(res));
+
     // Productos desde API
     this.productsService.getAll({ limit: 200 })
       .pipe(takeUntilDestroyed())
@@ -394,6 +440,14 @@ export class Sale {
 
   clearCart() { this.cart.set([]); }
 
+  onClienteQuery(q: string) { this.clienteQuery$.next(q); }
+
+  onClienteSelected(c: ClientSupplier) {
+    this.cliente.set(c.display_name);
+    this.clienteNumeroDoc.set(c.numero_documento);
+    this.clienteSuggestions.set([]);
+  }
+
   setDetraccion(concepto: DetraccionConcepto | null) {
     this.detracConcepto.set(concepto);
     if (concepto) this.aplicaRetencion.set(false);
@@ -412,22 +466,82 @@ export class Sale {
   }
 
   confirmarPago() {
-    this.lastSale.set({
-      subtotal:  this.subtotal(),
-      inafecto:  this.inafecto(),
-      gratuito:  this.gratuito(),
-      descuento: this.descuentoMonto(),
-      igv:       this.igv(),
-      total:     this.total(),
+    if (this.saving()) return;
+    this.saving.set(true);
+
+    this.saleService.create(this.buildPayload()).subscribe({
+      next: () => {
+        this.lastSale.set({
+          subtotal:  this.subtotal(),
+          inafecto:  this.inafecto(),
+          gratuito:  this.gratuito(),
+          descuento: this.descuentoMonto(),
+          igv:       this.igv(),
+          total:     this.total(),
+        });
+        this.ticketNum.update(n => n + 1);
+        this.cart.set([]);
+        this.cliente.set('');
+        this.clienteNumeroDoc.set(null);
+        this.clienteSuggestions.set([]);
+        this.descuento.set(0);
+        this.efectivo.set(0);
+        this.metodoPago.set('efectivo');
+        this.saving.set(false);
+        this.showPago.set(false);
+        this.showTicket.set(true);
+        this.toaster.success('¡Venta registrada!', 'La venta se guardó correctamente.');
+      },
+      error: (err) => {
+        const msg = err?.error?.message ?? 'Ocurrió un error al registrar la venta.';
+        this.toaster.error('Error al registrar', Array.isArray(msg) ? msg[0] : msg);
+        this.saving.set(false);
+      },
     });
-    this.ticketNum.update(n => n + 1);
-    this.cart.set([]);
-    this.cliente.set('');
-    this.descuento.set(0);
-    this.efectivo.set(0);
-    this.metodoPago.set('efectivo');
-    this.showPago.set(false);
-    this.showTicket.set(true);
+  }
+
+  private buildPayload(): CreateSalePayload {
+    const fecha     = this.fmtDateParam(this.fechaEmision());
+    const fechaVenc = this.fechaVencimiento() ? this.fmtDateParam(this.fechaVencimiento()!) : fecha;
+    const detrac    = this.detracConcepto();
+
+    return {
+      header: {
+        tip_doc:                  this.TIP_DOC_MAP[this.tipoDoc()],
+        fecha_emision:            fecha,
+        fecha_vencimiento:        fechaVenc,
+        moneda:                   this.moneda() === 'PEN' ? 1 : 2,
+        forma_pago:               0,
+        tipo_cambio:              this.tipoCambio() || 1,
+        cliente_numero_documento: this.clienteNumeroDoc() ?? undefined,
+        v_igv:                    this.igvPorcentaje(),
+        st_stock:                 1,
+        coddetrac:                detrac ? parseInt(detrac.codigo) : undefined,
+        pordetrac:                detrac?.porcentaje ?? undefined,
+      },
+      items: this.cart().map(i => ({
+        producto_id:  +i.producto.id,
+        cantidad:     i.cantidad,
+        precio_lista: (this.moneda() === 'USD' ? i.producto.precio_publico_dolar : i.producto.precio_publico_soles) ?? i.producto.precio_publico,
+        precio_venta: i.precio_venta,
+        descuento:    0,
+      })),
+      collections: this.formaPago() === 'contado' ? [{
+        forma_pago_id: this.resolvePaymentMethodId(this.metodoPago()),
+        monto:         this.total(),
+      }] : [],
+      cuotas: [],
+    };
+  }
+
+  private resolvePaymentMethodId(metodo: MetodoPago): number {
+    const methods = this.paymentMethods();
+    const kw = metodo.toUpperCase();
+    const found = methods.find(m =>
+      m.descripcion?.toUpperCase().includes(kw) ||
+      m.sigla_pago?.toUpperCase().includes(kw.slice(0, 3))
+    );
+    return found ? +found.id : (methods[0] ? +methods[0].id : 1);
   }
 
   cerrarTicket() { this.showTicket.set(false); }

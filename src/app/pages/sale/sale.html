@@ -6,17 +6,20 @@
     <app-sale-header [saleInfo]="saleInfoSummary()"
       (crearProducto)="showProductForm.set(true)"
       (nc)="showNcForm.set(true)"
-      (nd)="showNdForm.set(true)" />
+      (nd)="showNdForm.set(true)"
+      (nuevoCliente)="showClientForm.set(true)" />
 
     <app-sale-info
       [cliente]="cliente()"             (clienteChange)="cliente.set($event)"
+      [clienteSuggestions]="clienteSuggestions()"
+      (clienteQuery)="onClienteQuery($event)"
+      (clienteSelect)="onClienteSelected($event)"
       [tipoDoc]="tipoDoc()"             (tipoDocChange)="tipoDoc.set($event)"
       [serie]="serie()"
       [fechaEmision]="fechaEmision()"   (fechaEmisionChange)="fechaEmision.set($event)"
       [moneda]="moneda()"               (monedaChange)="moneda.set($event)"
       [formaPago]="formaPago()"         (formaPagoChange)="formaPago.set($event)"
       [fechaVencimiento]="fechaVencimiento()"  (fechaVencimientoChange)="fechaVencimiento.set($event)"
-      [igvIncluido]="igvIncluido()"     (igvIncluidoChange)="igvIncluido.set($event)"
       [descuento]="descuento()"         (descuentoChange)="descuento.set($event)"
       [descuentoMonto]="descuentoMonto()"
       [descuentoPct]="descuentoPct()"
@@ -113,8 +116,8 @@
     <div class="text-center py-2">
       <p class="text-xs text-stone-400 uppercase tracking-wide">Total a cobrar</p>
       <p class="text-4xl font-bold tabular-nums text-stone-900 dark:text-stone-100 mt-1">{{ fmt(total()) }}</p>
-      @if (cliente()) {
-        <p class="text-xs text-stone-500 mt-1"><i class="pi pi-user text-[10px] mr-1"></i>{{ cliente() }}</p>
+      @if (clienteDisplay()) {
+        <p class="text-xs text-stone-500 mt-1"><i class="pi pi-user text-[10px] mr-1"></i>{{ clienteDisplay() }}</p>
       }
     </div>
     <div>
@@ -147,6 +150,7 @@
   <div modal-footer>
     <p-button label="Confirmar cobro" icon="pi pi-check"
       styleClass="w-full justify-center font-semibold"
+      [loading]="saving()"
       (onClick)="confirmarPago()" />
   </div>
 </app-modal>
@@ -201,4 +205,11 @@
 
 <app-nc-form [visible]="showNcForm()" (visibleChange)="showNcForm.set($event)" />
 <app-nd-form [visible]="showNdForm()" (visibleChange)="showNdForm.set($event)" />
+
+<app-customer-form
+  [editing]="showClientForm() ? 'new' : null"
+  [pickerMode]="true"
+  (clientePicked)="onClienteSelected($event)"
+  (saved)="showClientForm.set(false)"
+  (closed)="showClientForm.set(false)" />
 

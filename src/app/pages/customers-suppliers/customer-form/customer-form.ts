@@ -24,8 +24,10 @@ import { ClientSupplier, DocumentType } from '../../../core/models/client.model'
 export class CustomerForm {
   readonly editing     = input<Persona | 'new' | null>(null);
   readonly tipoPersona = input<TipoPersona>('CLIENTE');
-  readonly closed      = output<void>();
-  readonly saved       = output<void>();
+  readonly pickerMode  = input(false);
+  readonly closed         = output<void>();
+  readonly saved          = output<void>();
+  readonly clientePicked  = output<ClientSupplier>();
 
   private readonly clientsSvc = inject(ClientsService);
   private readonly reniecSvc  = inject(Reniec);
@@ -37,6 +39,7 @@ export class CustomerForm {
   readonly modalTitle = computed(() => {
     const e = this.editing();
     if (!e) return '';
+    if (this.pickerMode()) return 'Buscar cliente';
     const tipo = this.tipoPersona() === 'CLIENTE' ? 'cliente' : 'proveedor';
     return e === 'new' ? `Nuevo ${tipo}` : `Editar ${tipo}`;
   });
@@ -230,8 +233,19 @@ export class CustomerForm {
         documento_id_documento: docId,
         tipo_persona:           this.tipoPersona() === 'CLIENTE' ? 1 : 2,
         ...commonFields,
-      }).subscribe({ next: onSuccess, error: onError });
+      }).subscribe({
+        next: created => {
+          onSuccess();
+          if (this.pickerMode()) this.clientePicked.emit(created);
+        },
+        error: onError,
+      });
     }
+  }
+
+  selectExisting() {
+    const c = this.expressResult();
+    if (c) { this.clientePicked.emit(c); this.close(); }
   }
 
   private fillFromClient(c: ClientSupplier) {

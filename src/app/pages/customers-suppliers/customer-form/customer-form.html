@@ -129,7 +129,11 @@
 
   <div modal-footer class="flex gap-2 justify-end">
     <p-button label="Cancelar" severity="secondary" [outlined]="true" size="small" (onClick)="close()" />
-    <p-button label="Guardar" icon="pi pi-check" size="small" [loading]="saving()" (onClick)="save()" />
+    @if (pickerMode() && existsInDb()) {
+      <p-button label="Seleccionar" icon="pi pi-check" size="small" (onClick)="selectExisting()" />
+    } @else {
+      <p-button label="Guardar" icon="pi pi-check" size="small" [loading]="saving()" (onClick)="save()" />
+    }
   </div>
 
 </app-modal>
