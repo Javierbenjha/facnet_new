@@ -31,6 +31,10 @@
   *, *::before, *::after { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
 
+  /* Sin preflight, el navegador deja sus márgenes por defecto en elementos
+     tipográficos. Los reseteamos acá para no tener que poner m-0 caso por caso. */
+  h1, h2, h3, h4, h5, h6, p, figure, blockquote, dl, dd { margin: 0; }
+
   /* Dark mode global — negro */
   html.dark {
     --color-surface:      #000000;
